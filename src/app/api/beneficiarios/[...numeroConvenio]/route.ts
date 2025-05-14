@@ -1,13 +1,11 @@
+// app/api/beneficiarios/[...numeroConvenio]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import sql from 'mssql';
 
 export async function GET(request: NextRequest, context: { params: Promise<{ numeroConvenio: string[] }> }) {
-  // Esperamos a que se resuelvan los params
   const params = await context.params;
-  // Unimos los segmentos del numeroConvenio en un solo string
   const numeroConvenio = params.numeroConvenio.join('/');
 
-  // Verificamos las variables de entorno
   const variablesRequeridas = {
     DB_USER: process.env.DB_USER,
     DB_PASSWORD: process.env.DB_PASSWORD,
@@ -25,7 +23,6 @@ export async function GET(request: NextRequest, context: { params: Promise<{ num
     );
   }
 
-  // Configuración de la conexión a la base de datos
   const configuracion = {
     user: variablesRequeridas.DB_USER as string,
     password: variablesRequeridas.DB_PASSWORD as string,

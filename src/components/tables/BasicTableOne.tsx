@@ -1,3 +1,7 @@
+// app/components/tables/BasicTableOne.tsx
+'use client';
+
+import { useRouter } from 'next/navigation';
 import {
   Table,
   TableBody,
@@ -14,7 +18,13 @@ interface Beneficiario {
   Ubigeo: string;
 }
 
-export default function BasicTableOne({ data, onSelectConvenio }: { data: Beneficiario[]; onSelectConvenio: (convenio: string) => void }) {
+export default function BasicTableOne({ data }: { data: Beneficiario[] }) {
+  const router = useRouter();
+
+  const handleSelectConvenio = (convenio: string) => {
+    router.push(`/beneficiarios/${convenio}`);
+  };
+
   return (
     <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
       <div className="max-w-full overflow-x-auto">
@@ -59,7 +69,7 @@ export default function BasicTableOne({ data, onSelectConvenio }: { data: Benefi
                 <TableRow key={index}>
                   <TableCell className="px-5 py-4 sm:px-6 text-start text-gray-500 text-theme-sm dark:text-gray-400">
                     <button
-                      onClick={() => onSelectConvenio(beneficiario['Número de Convenio'])}
+                      onClick={() => handleSelectConvenio(beneficiario['Número de Convenio'])}
                       className="text-blue-600 hover:underline"
                     >
                       {beneficiario['Número de Convenio']}

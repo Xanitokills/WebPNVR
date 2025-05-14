@@ -1,3 +1,4 @@
+// app/components/tables/BeneficiariosTable.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -40,7 +41,7 @@ export default function BeneficiariosTable({ numeroConvenio }: { numeroConvenio:
           throw new Error(`Error al obtener los datos: ${response.statusText}`);
         }
         const result = await response.json();
-        console.log('Datos recibidos:', result); // Para depuración
+        console.log('Datos recibidos:', result);
         setData(result as BeneficiarioDetails[]);
       } catch (err: unknown) {
         const errorMessage = err instanceof Error ? err.message : 'Error desconocido';

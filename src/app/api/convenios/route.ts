@@ -34,7 +34,7 @@ export async function GET() {
     const pool = await sql.connect(configuracion);
     const resultado = await pool.request().query(`
       SELECT DISTINCT [Número de Convenio], Departamento, Provincia, [Año Intervención], Ubigeo 
-      FROM BD_Beneficiario
+      FROM BD_Beneficiario where [Número de Convenio] IS not null
     `);
     return NextResponse.json(resultado.recordset);
   } catch (error) {
