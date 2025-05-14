@@ -1,4 +1,3 @@
-// app/components/tables/BasicTableOne.tsx
 'use client';
 
 import { useRouter } from 'next/navigation';

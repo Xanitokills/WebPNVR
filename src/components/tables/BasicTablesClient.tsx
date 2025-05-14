@@ -14,13 +14,10 @@ interface Convenio {
 }
 
 export default function BasicTablesClient({ initialData }: { initialData: Convenio[] }) {
-  // Estado para el término de búsqueda
   const [searchTerm, setSearchTerm] = useState<string>('');
-  // Estado para la paginación
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const itemsPerPage = 10; // Número de elementos por página
+  const itemsPerPage = 10;
 
-  // Filtrar los datos según el término de búsqueda
   const filteredData = useMemo(() => {
     if (!searchTerm) return initialData;
 
@@ -32,13 +29,11 @@ export default function BasicTablesClient({ initialData }: { initialData: Conven
     );
   }, [initialData, searchTerm]);
 
-  // Calcular los datos paginados
   const totalItems = filteredData.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedData = filteredData.slice(startIndex, startIndex + itemsPerPage);
 
-  // Manejar el cambio de página
   const handlePreviousPage = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
@@ -56,7 +51,6 @@ export default function BasicTablesClient({ initialData }: { initialData: Conven
       <PageBreadcrumb pageTitle="Basic Table" />
       <div className="space-y-6">
         <ComponentCard title="Basic Table 1">
-          {/* Cuadro de búsqueda */}
           <div className="mb-4">
             <input
               type="text"
@@ -64,18 +58,16 @@ export default function BasicTablesClient({ initialData }: { initialData: Conven
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
-                setCurrentPage(1); // Reiniciar a la primera página al buscar
+                setCurrentPage(1);
               }}
               className="w-full max-w-md p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
             />
           </div>
 
-          {/* Tabla */}
           <Suspense fallback={<div>Cargando tabla inicial...</div>}>
             <BasicTableOne data={paginatedData} />
           </Suspense>
 
-          {/* Controles de paginación */}
           <div className="mt-4 flex justify-between items-center">
             <button
               onClick={handlePreviousPage}
