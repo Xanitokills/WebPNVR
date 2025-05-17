@@ -23,7 +23,7 @@ export async function GET() {
     user: variablesRequeridas.DB_USER as string,
     password: variablesRequeridas.DB_PASSWORD as string,
     server: variablesRequeridas.DB_SERVER as string,
-    database: 'DB-PNVR',
+    database: 'PNVR',
     options: {
       encrypt: false,
       trustServerCertificate: true,
@@ -33,8 +33,7 @@ export async function GET() {
   try {
     const pool = await sql.connect(configuracion);
     const resultado = await pool.request().query(`
-      SELECT DISTINCT [Número de Convenio], Departamento, Provincia, [Año Intervención], Ubigeo 
-      FROM BD_Beneficiario where [Número de Convenio] IS not null
+    select * from convenios
     `);
     return NextResponse.json(resultado.recordset);
   } catch (error) {
