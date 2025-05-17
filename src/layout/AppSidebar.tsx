@@ -23,17 +23,25 @@ const navItems: NavItem[] = [
   {
     name: "Administrar Parámetros",
     icon: <TableIcon />,
+    path: "parametros",
+  },
+  {
+    name: "Convocatorias",
+    icon: <TableIcon />,
     subItems: [
-      { name: "Grupo", path: "/admin/grupo", pro: false },
-      { name: "Tipos Meta", path: "/admin/tiposmeta", pro: false },
-      { name: "Tipo Intervención", path: "/admin/tipointervencion", pro: false },
-      { name: "Tipo Material", path: "/admin/tipomaterial", pro: false },
-      { name: "Tipo Fenómeno", path: "/admin/tipofenomeno", pro: false },
+      { name: "Crear Convocatorias", path: "crear-convocatoria", pro: false },
+      { name: "Ver Convocatorias", path: "ver-convocatoria", pro: false },
     ],
   },
 ];
 
-const othersItems: NavItem[] = [];
+const othersItems: NavItem[] = [
+  {
+    name: "Reportes",
+    icon: <TableIcon />,
+    path: "reportes",
+  },
+];
 
 const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();

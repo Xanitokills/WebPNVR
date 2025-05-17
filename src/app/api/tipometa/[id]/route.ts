@@ -4,6 +4,11 @@ import sql from "mssql";
 export async function PUT(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   const params = await context.params;
   const id = parseInt(params.id);
+
+  if (isNaN(id)) {
+    return NextResponse.json({ error: "ID inválido" }, { status: 400 });
+  }
+
   const body = await request.json();
 
   const variablesRequeridas = {
@@ -50,8 +55,9 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
     return NextResponse.json(updatedTipoMeta);
   } catch (error) {
     console.error("Error en la consulta PUT:", error);
+    const errorMessage = error instanceof Error ? error.message : "Error desconocido";
     return NextResponse.json(
-      { error: "No se pudo actualizar el tipo de meta", details: error.message },
+      { error: "No se pudo actualizar el tipo de meta", details: errorMessage },
       { status: 500 }
     );
   }
@@ -60,6 +66,10 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
 export async function DELETE(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   const params = await context.params;
   const id = parseInt(params.id);
+
+  if (isNaN(id)) {
+    return NextResponse.json({ error: "ID inválido" }, { status: 400 });
+  }
 
   const variablesRequeridas = {
     DB_USER: process.env.DB_USER,
@@ -101,8 +111,9 @@ export async function DELETE(request: NextRequest, context: { params: Promise<{ 
     return NextResponse.json({ message: "Tipo de meta eliminado" });
   } catch (error) {
     console.error("Error en la consulta DELETE:", error);
+    const errorMessage = error instanceof Error ? error.message : "Error desconocido";
     return NextResponse.json(
-      { error: "No se pudo eliminar el tipo de meta", details: error.message },
+      { error: "No se pudo eliminar el tipo de meta", details: errorMessage },
       { status: 500 }
     );
   }
