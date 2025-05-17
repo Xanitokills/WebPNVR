@@ -84,7 +84,7 @@ export default function BeneficiariosTable({ numeroConvenio }: { numeroConvenio:
     async function fetchBeneficiarios() {
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3002'}/api/beneficiarios/${numeroConvenio}`,
+          `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3003'}/api/beneficiarios/${numeroConvenio}`,
           {
             cache: 'no-store',
           }
@@ -160,7 +160,7 @@ export default function BeneficiariosTable({ numeroConvenio }: { numeroConvenio:
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3002'}/api/beneficiarios/${numeroConvenio}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3003'}/api/beneficiarios/${numeroConvenio}`,
         {
           method: 'PUT',
           headers: {

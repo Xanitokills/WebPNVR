@@ -15,7 +15,7 @@ export async function GET() {
   if (variablesFaltantes.length > 0) {
     return NextResponse.json(
       { error: `Faltan las siguientes variables de entorno: ${variablesFaltantes.join(", ")}` },
-      { status: 500 }
+      { status: 400 }
     );
   }
 
@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
   if (variablesFaltantes.length > 0) {
     return NextResponse.json(
       { error: `Faltan las siguientes variables de entorno: ${variablesFaltantes.join(", ")}` },
-      { status: 500 }
+      { status: 400 }
     );
   }
 
@@ -75,6 +75,14 @@ export async function POST(request: NextRequest) {
       trustServerCertificate: true,
     },
   };
+
+  // Validar que los campos requeridos estén presentes y no vacíos
+  if (!body.descripcion || typeof body.descripcion !== "string" || body.descripcion.trim() === "") {
+    return NextResponse.json(
+      { error: "La descripción es requerida y no puede estar vacía." },
+      { status: 400 }
+    );
+  }
 
   try {
     const pool = await sql.connect(configuracion);

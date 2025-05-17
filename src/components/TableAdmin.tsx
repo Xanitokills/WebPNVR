@@ -2,15 +2,15 @@
 import React, { useState, useEffect } from "react";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "../components/ui/table";
 
-interface TableAdminProps<T> {
+interface TableAdminProps<T extends { [key: string]: number | string | null }> {
   apiUrl: string;
   entityName: string;
   fields: { key: keyof T; label: string; type?: "text" | "select"; options?: { value: string; label: string }[] }[];
   keyField: keyof T;
-  displayFields: { key: keyof T; label: string; transform?: (value: any) => string }[];
+  displayFields: { key: keyof T; label: string; transform?: (value: number | string | null) => string }[];
 }
 
-const TableAdmin = <T extends { [key: string]: any }>({
+const TableAdmin = <T extends { [key: string]: number | string | null }>({
   apiUrl,
   entityName,
   fields,
@@ -28,18 +28,38 @@ const TableAdmin = <T extends { [key: string]: any }>({
   const [toast, setToast] = useState<{ message: string; visible: boolean }>({ message: "", visible: false });
 
   useEffect(() => {
+    setFormData({}); // Limpiar formData al cambiar de pestaña
     fetchItems();
-  }, []);
+  }, [apiUrl]);
 
   const fetchItems = async () => {
     try {
+      setLoading(true); // Asegurar que se muestre "Cargando" al recargar
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3002"}/api/${apiUrl}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3003"}/api/${apiUrl}`,
         { cache: "no-store" }
       );
       if (!response.ok) throw new Error(`Error al obtener los ${entityName.toLowerCase()}: ${response.statusText}`);
       const result: T[] = await response.json();
-      setItems(result);
+      console.log("Respuesta API cruda:", result);
+
+      // Filtrar elementos sin keyField válido y asignar un identificador único si es necesario
+      const sanitizedItems = result
+        .filter((item) => item[keyField] != null) // Excluir elementos con keyField nulo o indefinido
+        .map((item, index) => ({
+          ...item,
+          [keyField]: item[keyField] ?? `temp-${index}`, // Asegurar que keyField siempre tenga un valor
+        }));
+
+      if (sanitizedItems.length !== result.length) {
+        console.warn(
+          `Se filtraron ${result.length - sanitizedItems.length} elementos debido a valores nulos o indefinidos en ${String(
+            keyField
+          )}`
+        );
+      }
+
+      setItems(sanitizedItems);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Error desconocido");
     } finally {
@@ -78,9 +98,16 @@ const TableAdmin = <T extends { [key: string]: any }>({
   };
 
   const handleAdd = async () => {
+    const requiredFields = fields.filter((field) => field.key !== "estado");
+    const isValid = requiredFields.every((field) => formData[field.key]?.toString().trim());
+    if (!isValid) {
+      showToast("Por favor, complete todos los campos requeridos.");
+      return;
+    }
+
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3002"}/api/${apiUrl}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3003"}/api/${apiUrl}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -100,7 +127,7 @@ const TableAdmin = <T extends { [key: string]: any }>({
     if (!selectedItem) return;
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3002"}/api/${apiUrl}/${selectedItem[keyField]}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3003"}/api/${apiUrl}/${selectedItem[keyField]}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -119,7 +146,7 @@ const TableAdmin = <T extends { [key: string]: any }>({
   const handleDelete = async (id: number) => {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3002"}/api/${apiUrl}/${id}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3003"}/api/${apiUrl}/${id}`,
         { method: "DELETE" }
       );
       if (!response.ok) {
@@ -134,9 +161,9 @@ const TableAdmin = <T extends { [key: string]: any }>({
     }
   };
 
-  if (loading) return <div>Cargando {entityName.toLowerCase()}...</div>;
-  if (error) return <div>Error: {error}</div>;
-  if (!items || items.length === 0) return <div>No se encontraron {entityName.toLowerCase()}.</div>;
+  if (loading) return <div className="p-4">Cargando {entityName.toLowerCase()}...</div>;
+  if (error) return <div className="p-4 text-red-500">Error: {error}</div>;
+  if (!items || items.length === 0) return <div className="p-4">No se encontraron {entityName.toLowerCase()}.</div>;
 
   return (
     <div className="p-4">
@@ -153,7 +180,7 @@ const TableAdmin = <T extends { [key: string]: any }>({
           field.type === "select" ? (
             <select
               key={String(field.key)}
-              value={formData[field.key] ?? ""}
+              value={formData[field.key] as string ?? ""}
               onChange={(e) => handleInputChange(e, field.key)}
               className="border p-2 rounded"
             >
@@ -167,7 +194,7 @@ const TableAdmin = <T extends { [key: string]: any }>({
             <input
               key={String(field.key)}
               type="text"
-              value={formData[field.key] ?? ""}
+              value={formData[field.key] as string ?? ""}
               onChange={(e) => handleInputChange(e, field.key)}
               placeholder={field.label}
               className="border p-2 rounded"
@@ -177,7 +204,10 @@ const TableAdmin = <T extends { [key: string]: any }>({
         <button
           onClick={handleAdd}
           className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition"
-          disabled={fields.some((field) => field.key !== "estado" && !formData[field.key]?.toString().trim())}
+          disabled={fields.some((field) => 
+            field.key !== "estado" && 
+            (!formData[field.key] || formData[field.key]?.toString().trim() === "")
+          )}
         >
           Agregar
         </button>
@@ -207,49 +237,49 @@ const TableAdmin = <T extends { [key: string]: any }>({
                 </TableRow>
               </TableHeader>
               <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-                {items.map((item) => (
-                  <TableRow key={item[keyField]}>
-                    {displayFields.map((field) => (
-                      <TableCell
-                        key={String(field.key)}
-                        className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400"
-                      >
-                        {field.transform ? field.transform(item[field.key]) : item[field.key]}
-                      </TableCell>
-                    ))}
-                    <TableCell className="px-4 py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                      <button
-                        onClick={() => openModal(item, "view")}
-                        className="mr-2 text-blue-600 hover:underline"
-                        title="Ver"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                      </button>
-                      <button
-                        onClick={() => openModal(item, "edit")}
-                        className="text-green-600 hover:underline"
-                        title="Editar"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.536L16.732 3.732z" />
-                        </svg>
-                      </button>
-                      <button
-                        onClick={() => handleDelete(item[keyField])}
-                        className="ml-2 text-red-600 hover:underline"
-                        title="Eliminar"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
+  {items.map((item, index) => (
+    <TableRow key={`${String(item[keyField]) || `temp-${index}`}-${index}`}>
+      {displayFields.map((field) => (
+        <TableCell
+          key={String(field.key)}
+          className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400"
+        >
+          {field.transform ? field.transform(item[field.key]) : item[field.key] ?? "N/A"}
+        </TableCell>
+      ))}
+      <TableCell className="px-4 py-3 text-gray-500 text-theme-sm dark:text-gray-400">
+        <button
+          onClick={() => openModal(item, "view")}
+          className="mr-2 text-blue-600 hover:underline"
+          title="Ver"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+        </button>
+        <button
+          onClick={() => openModal(item, "edit")}
+          className="text-green-600 hover:underline"
+          title="Editar"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.536L16.732 3.732z" />
+          </svg>
+        </button>
+        <button
+          onClick={() => handleDelete(Number(item[keyField]) || 0)}
+          className="ml-2 text-red-600 hover:underline"
+          title="Eliminar"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </TableCell>
+    </TableRow>
+  ))}
+</TableBody>
             </Table>
           </div>
         </div>
@@ -258,7 +288,7 @@ const TableAdmin = <T extends { [key: string]: any }>({
       {isModalOpen && selectedItem && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-md overflow-y-auto max-h-[80vh]">
-            <h2 className="text-xl font-bold mb-4">{selectedItem[fields[0].key]}</h2>
+            <h2 className="text-xl font-bold mb-4">{modalMode === "view" ? "Ver" : "Editar"} {entityName}</h2>
             <button
               onClick={closeModal}
               className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
@@ -281,7 +311,7 @@ const TableAdmin = <T extends { [key: string]: any }>({
                     <label className="font-medium text-gray-700 dark:text-gray-300">{field.label}:</label>
                     {field.type === "select" ? (
                       <select
-                        value={editFormData[field.key] ?? selectedItem[field.key] ?? ""}
+                        value={editFormData[field.key] as string ?? (selectedItem[field.key] as string ?? "")}
                         onChange={(e) => handleInputChange(e, field.key)}
                         className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                       >
@@ -294,7 +324,7 @@ const TableAdmin = <T extends { [key: string]: any }>({
                     ) : (
                       <input
                         type="text"
-                        value={editFormData[field.key] ?? selectedItem[field.key] ?? ""}
+                        value={editFormData[field.key] as string ?? (selectedItem[field.key] as string ?? "")}
                         onChange={(e) => handleInputChange(e, field.key)}
                         className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                         disabled={field.key === keyField}

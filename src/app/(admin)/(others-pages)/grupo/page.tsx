@@ -33,7 +33,7 @@ export default function GrupoAdmin() {
   const fetchGrupos = async () => {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3002"}/api/grupo`,
+        `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3003"}/api/grupo`,
         { cache: "no-store" }
       );
       if (!response.ok) {
@@ -92,7 +92,7 @@ export default function GrupoAdmin() {
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3002"}/api/grupo/${selectedGrupo.id_grupo}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3003"}/api/grupo/${selectedGrupo.id_grupo}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -125,7 +125,7 @@ export default function GrupoAdmin() {
     try {
       const newEstado = estado === "1" || estado === "0" ? parseInt(estado) : null;
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3002"}/api/grupo`,
+        `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3003"}/api/grupo`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -152,7 +152,7 @@ export default function GrupoAdmin() {
   const handleDelete = async (id: number) => {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3002"}/api/grupo/${id}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3003"}/api/grupo/${id}`,
         { method: "DELETE" }
       );
 

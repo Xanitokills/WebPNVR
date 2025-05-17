@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 };
 
 export default async function BasicTables() {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3002'}/api/convenios`, {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3003'}/api/convenios`, {
     cache: 'no-store',
   });
   const data = await response.json();

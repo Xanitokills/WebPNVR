@@ -9,8 +9,9 @@ interface Grupo {
 }
 
 interface Tipometa {
-  id_Tipo_Meta: number;
+  id_tipo_meta: number;
   descripcion: string;
+  estado: number | null;
 }
 
 interface TipoIntervencion {
@@ -48,7 +49,7 @@ const AdminDashboard = () => {
         displayFields={[
           { key: "id_grupo", label: "ID Grupo" },
           { key: "nombre", label: "Nombre" },
-          { key: "estado", label: "Estado", transform: (value) => value === 1 ? "Activo" : value === 0 ? "Inactivo" : "N/A" },
+          { key: "estado", label: "Estado", transform: (value: number | null) => value === 1 ? "Activo" : value === 0 ? "Inactivo" : "No definido" },
         ]}
       />
     )},
@@ -56,11 +57,23 @@ const AdminDashboard = () => {
       <TableAdmin<Tipometa>
         apiUrl="tipometa"
         entityName="TipoMeta"
-        fields={[{ key: "descripcion", label: "Descripción del tipo de meta" }]}
-        keyField="id_Tipo_Meta"
+        fields={[
+          { key: "descripcion", label: "Descripción del tipo de meta" },
+          { key: "estado", label: "Estado", type: "select", options: [
+            { value: "", label: "Seleccione estado" },
+            { value: "1", label: "Activo" },
+            { value: "0", label: "Inactivo" },
+          ]},
+        ]}
+        keyField="id_tipo_meta"
         displayFields={[
-          { key: "id_Tipo_Meta", label: "ID" },
+          { key: "id_tipo_meta", label: "ID" },
           { key: "descripcion", label: "Descripción" },
+          { 
+            key: "estado", 
+            label: "Estado", 
+            transform: (value: number | null) => value === 1 ? "Activo" : value === 0 ? "Inactivo" : "No definido" 
+          },
         ]}
       />
     )},
