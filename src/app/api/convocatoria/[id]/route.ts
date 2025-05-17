@@ -40,29 +40,43 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
 
   try {
     const pool = await sql.connect(configuracion);
-    const result = await pool
-      .request()
-      .input("id", sql.Int, id)
-      .input("titulo", sql.NVarChar(255), body.titulo)
-      .input("descripcion", sql.NVarChar(1000), body.descripcion)
-      .input("fecha_inicio", sql.Date, body.fecha_inicio)
-      .input("fecha_fin", sql.Date, body.fecha_fin)
-      .input("vigencia", sql.Int, body.vigencia)
-      .query(
-        "UPDATE [PNVR].[dbo].[Convocatorias] SET titulo = @titulo, descripcion = @descripcion, fecha_inicio = @fecha_inicio, fecha_fin = @fecha_fin, vigencia = @vigencia WHERE id_convocatoria = @id"
-      );
-    if (result.rowsAffected[0] === 0) {
+    const request = pool.request();
+
+    // Campos que se pueden actualizar
+    request.input("id", sql.Int, id);
+    if (body.titulo !== undefined) request.input("titulo", sql.NVarChar(255), body.titulo);
+    if (body.descripcion !== undefined) request.input("descripcion", sql.NVarChar(1000), body.descripcion);
+    if (body.fecha_inicio !== undefined) request.input("fecha_inicio", sql.Date, body.fecha_inicio);
+    if (body.fecha_fin !== undefined) request.input("fecha_fin", sql.Date, body.fecha_fin);
+    if (body.vigencia !== undefined) request.input("vigencia", sql.Int, body.vigencia);
+    if (body.id_Estado_Convocatoria !== undefined) request.input("id_Estado_Convocatoria", sql.Int, body.id_Estado_Convocatoria);
+
+    // Construir la consulta dinámicamente según los campos enviados
+    const updates = [];
+    if (body.titulo !== undefined) updates.push("titulo = @titulo");
+    if (body.descripcion !== undefined) updates.push("descripcion = @descripcion");
+    if (body.fecha_inicio !== undefined) updates.push("fecha_inicio = @fecha_inicio");
+    if (body.fecha_fin !== undefined) updates.push("fecha_fin = @fecha_fin");
+    if (body.vigencia !== undefined) updates.push("vigencia = @vigencia");
+    if (body.id_Estado_Convocatoria !== undefined) updates.push("id_Estado_Convocatoria = @id_Estado_Convocatoria");
+
+    if (updates.length === 0) {
+      return NextResponse.json({ error: "No se proporcionaron campos para actualizar" }, { status: 400 });
+    }
+
+    const query = `
+      UPDATE [PNVR].[dbo].[Convocatorias] 
+      SET ${updates.join(", ")} 
+      OUTPUT INSERTED.* 
+      WHERE id_convocatoria = @id
+    `;
+    const result = await request.query(query);
+
+    if (result.recordset.length === 0) {
       return NextResponse.json({ error: "Convocatoria no encontrada" }, { status: 404 });
     }
-    const updatedConvocatoria = {
-      id_convocatoria: id,
-      titulo: body.titulo,
-      descripcion: body.descripcion,
-      fecha_inicio: body.fecha_inicio,
-      fecha_fin: body.fecha_fin,
-      vigencia: body.vigencia,
-    };
-    return NextResponse.json(updatedConvocatoria);
+
+    return NextResponse.json(result.recordset[0]);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Error desconocido";
     return NextResponse.json(

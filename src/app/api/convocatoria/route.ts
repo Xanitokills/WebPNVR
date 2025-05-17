@@ -134,10 +134,11 @@ export async function POST(request: NextRequest) {
       .input("fecha_fin", sql.Date, fecha_fin)
       .input("vigencia", sql.Int, vigencia)
       .input("pdf_file_path", sql.NVarChar(500), pdfFilePath)
-      .input("word_file_path", sql.NVarChar(500), wordFilePath);
+      .input("word_file_path", sql.NVarChar(500), wordFilePath)
+      .input("id_Estado_Convocatoria", sql.Int, 1); // Estado inicial: PENDIENTE-APROBACION (ID 1)
 
     const result = await request.query(
-      "INSERT INTO [PNVR].[dbo].[Convocatorias] (titulo, descripcion, fecha_inicio, fecha_fin, vigencia, pdf_file_path, word_file_path) OUTPUT INSERTED.* VALUES (@titulo, @descripcion, @fecha_inicio, @fecha_fin, @vigencia, @pdf_file_path, @word_file_path)"
+      "INSERT INTO [PNVR].[dbo].[Convocatorias] (titulo, descripcion, fecha_inicio, fecha_fin, vigencia, pdf_file_path, word_file_path, id_Estado_Convocatoria) OUTPUT INSERTED.* VALUES (@titulo, @descripcion, @fecha_inicio, @fecha_fin, @vigencia, @pdf_file_path, @word_file_path, @id_Estado_Convocatoria)"
     );
 
     return NextResponse.json(result.recordset[0]);

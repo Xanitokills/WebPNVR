@@ -1,7 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { FiEdit, FiTrash2 } from "react-icons/fi";
-import { FaFilePdf, FaFileWord } from "react-icons/fa"; // Importar íconos para PDF y Word
+import { FaFilePdf, FaFileWord, FaCheck, FaEllipsisV, FaEye, FaBan } from "react-icons/fa"; // Añadimos FaEye y FaBan
 
 interface Convocatoria {
   id_convocatoria: number;
@@ -13,22 +12,15 @@ interface Convocatoria {
   pdf_file_path: string | null;
   word_file_path: string | null;
   estado_convocatoria: string | null;
+  id_Estado_Convocatoria: number;
 }
 
 const VerConvocatorias = () => {
   const [filtervigencia, setFiltervigencia] = useState<string>("");
   const [convocatorias, setConvocatorias] = useState<Convocatoria[]>([]);
   const [filteredConvocatorias, setFilteredConvocatorias] = useState<Convocatoria[]>([]);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [selectedConvocatoria, setSelectedConvocatoria] = useState<Convocatoria | null>(null);
-  const [formData, setFormData] = useState<{
-    titulo?: string;
-    descripcion?: string;
-    fecha_inicio?: string;
-    fecha_fin?: string;
-    vigencia?: string;
-  }>({});
   const [error, setError] = useState<string | null>(null);
+  const [dropdownOpen, setDropdownOpen] = useState<number | null>(null);
 
   // Definición de colores para cada estado
   const estadoColores: { [key: string]: { bg: string; text: string } } = {
@@ -36,10 +28,47 @@ const VerConvocatorias = () => {
     "APROBADO-SUPERVISOR": { bg: "bg-blue-100 dark:bg-blue-900", text: "text-blue-800 dark:text-blue-200" },
     "APROBADO-MONITOR": { bg: "bg-indigo-100 dark:bg-indigo-900", text: "text-indigo-800 dark:text-indigo-200" },
     "APROBADO-REPRESENTANTE": { bg: "bg-purple-100 dark:bg-purple-900", text: "text-purple-800 dark:text-purple-200" },
-    "OBSERVADO": { bg: "bg-orange-100 dark:bg-orange-900", text: "text-orange-800 dark:text-orange-200" },
-    "ANULADO": { bg: "bg-red-100 dark:bg-red-900", text: "text-red-800 dark:text-red-200" },
+    "Observado": { bg: "bg-orange-100 dark:bg-orange-900", text: "text-orange-800 dark:text-orange-200" },
+    "Anulado": { bg: "bg-red-100 dark:bg-red-900", text: "text-red-800 dark:text-red-200" },
     "FINALIZADO": { bg: "bg-gray-100 dark:bg-gray-700", text: "text-gray-800 dark:text-gray-200" },
     "PRUEBA": { bg: "bg-green-100 dark:bg-green-900", text: "text-green-800 dark:text-green-200" },
+  };
+
+  // Mapeo de ID de estado a descripción (valores reales en la base)
+  const estadoIds: { [key: string]: number } = {
+    "PENDIENTE-APROBACION": 1,
+    "APROBADO-SUPERVISOR": 2,
+    "APROBADO-MONITOR": 3,
+    "APROBADO-REPRESENTANTE": 4,
+    "Observado": 5,
+    "Anulado": 6,
+    "FINALIZADO": 7,
+    "PRUEBA": 8,
+  };
+
+  // Mapeo de acciones de interfaz a estados reales
+  const actionToState: { [key: string]: string } = {
+    "Observar": "Observado",
+    "Anular": "Anulado",
+  };
+
+  // Flujo de estados principal
+  const estadoFlujoPrincipal: { [key: string]: string } = {
+    "PENDIENTE-APROBACION": "APROBADO-SUPERVISOR",
+    "APROBADO-SUPERVISOR": "APROBADO-MONITOR",
+    "APROBADO-MONITOR": "APROBADO-REPRESENTANTE",
+    "APROBADO-REPRESENTANTE": "FINALIZADO",
+  };
+
+  // Acciones secundarias (interfaz)
+  const estadoAccionesSecundarias: { [key: string]: string[] } = {
+    "PENDIENTE-APROBACION": ["Observar", "Anular"],
+    "APROBADO-SUPERVISOR": ["Observar", "Anular"],
+    "APROBADO-MONITOR": ["Observar", "Anular"],
+    "APROBADO-REPRESENTANTE": ["Observar", "Anular"],
+    "Observado": ["PENDIENTE-APROBACION", "Anular"],
+    "FINALIZADO": [],
+    "Anulado": [],
   };
 
   // Fetch convocatorias with error handling
@@ -72,86 +101,54 @@ const VerConvocatorias = () => {
     setFilteredConvocatorias(filtered);
   }, [filtervigencia, convocatorias]);
 
-  // Handle edit
-  const handleEdit = (convocatoria: Convocatoria) => {
-    setSelectedConvocatoria(convocatoria);
-    setFormData({
-      titulo: convocatoria.titulo,
-      descripcion: convocatoria.descripcion,
-      fecha_inicio: convocatoria.fecha_inicio.split("T")[0],
-      fecha_fin: convocatoria.fecha_fin.split("T")[0],
-      vigencia: convocatoria.vigencia !== null ? String(convocatoria.vigencia) : "",
-    });
-    setModalOpen(true);
-  };
+  // Handle state change
+  const handleStateChange = async (id: number, action: string) => {
+    const convocatoria = convocatorias.find((c) => c.id_convocatoria === id);
+    if (!convocatoria) return;
 
-  // Handle input changes
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+    const currentState = convocatoria.estado_convocatoria || "";
+    let newState = "";
 
-  // Save changes
-  const handleSave = async () => {
-    if (!selectedConvocatoria) return;
+    if (action === "Aprobar" && estadoFlujoPrincipal[currentState]) {
+      newState = estadoFlujoPrincipal[currentState];
+    } else if (actionToState[action]) {
+      newState = actionToState[action];
+    } else {
+      alert(`No se puede cambiar de ${currentState} a ${action}.`);
+      return;
+    }
 
     try {
-      // Validate form data
-      if (!formData.titulo || !formData.descripcion || !formData.fecha_inicio || !formData.fecha_fin) {
-        throw new Error("Por favor, completa todos los campos requeridos");
-      }
-
-      // Convert vigencia to number | null for the API
-      const vigenciaValue = formData.vigencia === "" ? null : Number(formData.vigencia);
-
-      const response = await fetch(`/api/convocatoria/${selectedConvocatoria.id_convocatoria}`, {
+      const response = await fetch(`/api/convocatoria/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          titulo: formData.titulo,
-          descripcion: formData.descripcion,
-          fecha_inicio: formData.fecha_inicio,
-          fecha_fin: formData.fecha_fin,
-          vigencia: vigenciaValue,
+          id_Estado_Convocatoria: estadoIds[newState],
         }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Error al actualizar la convocatoria");
+        throw new Error(errorData.error || "Error al cambiar el estado");
       }
 
-      const updatedConvocatoria = await response.json();
-
-      setConvocatorias((prev) =>
-        prev.map((item) =>
-          item.id_convocatoria === updatedConvocatoria.id_convocatoria ? updatedConvocatoria : item
-        )
+      // Actualizar automáticamente la lista de convocatorias
+      const updatedConvocatorias = convocatorias.map((item) =>
+        item.id_convocatoria === id ? { ...item, estado_convocatoria: newState, id_Estado_Convocatoria: estadoIds[newState] } : item
       );
-      setModalOpen(false);
-      setSelectedConvocatoria(null);
+      setConvocatorias(updatedConvocatorias);
+      setFilteredConvocatorias(updatedConvocatorias);
       setError(null);
+      setDropdownOpen(null); // Cerrar el dropdown después de la acción
     } catch (error) {
-      console.error("Error actualizando la convocatoria:", error);
-      setError(error instanceof Error ? error.message : "Error al actualizar la convocatoria");
+      console.error("Error cambiando el estado:", error);
+      setError(error instanceof Error ? error.message : "Error al cambiar el estado");
     }
   };
 
-  // Delete convocatoria
-  const handleDelete = async (id: number) => {
-    if (!confirm("¿Estás seguro de eliminar esta convocatoria?")) return;
-
-    try {
-      const response = await fetch(`/api/convocatoria/${id}`, { method: "DELETE" });
-      if (!response.ok) throw new Error("Error al eliminar la convocatoria");
-      setConvocatorias((prev) => prev.filter((item) => item.id_convocatoria !== id));
-      setError(null);
-    } catch (error) {
-      console.error("Error eliminando la convocatoria:", error);
-      setError(error instanceof Error ? error.message : "Error al eliminar la convocatoria");
-    }
+  // Toggle dropdown for secondary actions
+  const toggleDropdown = (id: number) => {
+    setDropdownOpen(dropdownOpen === id ? null : id);
   };
 
   return (
@@ -196,7 +193,7 @@ const VerConvocatorias = () => {
                   "Archivo PDF",
                   "Archivo Word",
                   "Estado Convocatoria",
-                  "Acciones",
+                  "Acción",
                 ].map((header) => (
                   <th
                     key={header}
@@ -215,6 +212,8 @@ const VerConvocatorias = () => {
                     bg: "bg-gray-100 dark:bg-gray-700",
                     text: "text-gray-800 dark:text-gray-200",
                   };
+                  const nextMainState = estadoFlujoPrincipal[estado];
+                  const secondaryActions = estadoAccionesSecundarias[estado] || [];
 
                   return (
                     <tr
@@ -290,21 +289,49 @@ const VerConvocatorias = () => {
                           {estado}
                         </span>
                       </td>
-                      <td className="py-4 px-6 flex space-x-2">
-                        <button
-                          onClick={() => handleEdit(convocatoria)}
-                          className="text-blue-500 hover:text-blue-600 transition-colors"
-                          title="Editar"
-                        >
-                          <FiEdit size={20} />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(convocatoria.id_convocatoria)}
-                          className="text-red-500 hover:text-red-600 transition-colors"
-                          title="Eliminar"
-                        >
-                          <FiTrash2 size={20} />
-                        </button>
+                      <td className="py-4 px-6 flex space-x-2 relative">
+                        {/* Botón de check para el flujo principal */}
+                        {nextMainState && (
+                          <button
+                            onClick={() => handleStateChange(convocatoria.id_convocatoria, "Aprobar")}
+                            className="text-green-500 hover:text-green-600 transition-colors"
+                            title={`Aprobar (${nextMainState})`}
+                          >
+                            <FaCheck size={20} />
+                          </button>
+                        )}
+                        {/* Menú desplegable para acciones secundarias */}
+                        {secondaryActions.length > 0 && (
+                          <div className="relative">
+                            <button
+                              onClick={() => toggleDropdown(convocatoria.id_convocatoria)}
+                              className="text-gray-500 hover:text-gray-600 transition-colors"
+                              title="Más acciones"
+                            >
+                              <FaEllipsisV size={20} />
+                            </button>
+                            {dropdownOpen === convocatoria.id_convocatoria && (
+                              <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg z-10">
+                                {secondaryActions.map((action) => {
+                                  const realState = actionToState[action] || action;
+                                  const Icon = action === "Observar" ? FaEye : FaBan;
+                                  return (
+                                    <button
+                                      key={action}
+                                      onClick={() => {
+                                        handleStateChange(convocatoria.id_convocatoria, action);
+                                      }}
+                                      className="flex items-center w-full text-left px-4 py-2 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                                    >
+                                      <Icon className="mr-2" size={16} />
+                                      {action}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </td>
                     </tr>
                   );
@@ -323,102 +350,6 @@ const VerConvocatorias = () => {
           </table>
         </div>
       </div>
-
-      {modalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl max-w-md w-full">
-            <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">
-              Editar Convocatoria
-            </h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
-                  Título
-                </label>
-                <input
-                  type="text"
-                  name="titulo"
-                  value={formData.titulo || ""}
-                  onChange={handleInputChange}
-                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
-                  Descripción
-                </label>
-                <textarea
-                  name="descripcion"
-                  value={formData.descripcion || ""}
-                  onChange={handleInputChange}
-                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                  rows={4}
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
-                  Fecha de Inicio
-                </label>
-                <input
-                  type="date"
-                  name="fecha_inicio"
-                  value={formData.fecha_inicio || ""}
-                  onChange={handleInputChange}
-                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
-                  Fecha de Fin
-                </label>
-                <input
-                  type="date"
-                  name="fecha_fin"
-                  value={formData.fecha_fin || ""}
-                  onChange={handleInputChange}
-                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
-                  Vigencia
-                </label>
-                <select
-                  name="vigencia"
-                  value={formData.vigencia || ""}
-                  onChange={handleInputChange}
-                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">Seleccione vigencia</option>
-                  <option value="1">Activo</option>
-                  <option value="0">Inactivo</option>
-                </select>
-              </div>
-            </div>
-            <div className="mt-6 flex justify-end space-x-2">
-              <button
-                onClick={handleSave}
-                className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
-              >
-                Guardar
-              </button>
-              <button
-                onClick={() => {
-                  setModalOpen(false);
-                  setError(null);
-                }}
-                className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors"
-              >
-                Cancelar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
