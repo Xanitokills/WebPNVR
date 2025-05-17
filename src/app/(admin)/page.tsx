@@ -8,7 +8,7 @@ interface Grupo {
   estado: number | null;
 }
 
-interface TiposMeta {
+interface Tipometa {
   id_Tipo_Meta: number;
   descripcion: string;
 }
@@ -52,10 +52,10 @@ const AdminDashboard = () => {
         ]}
       />
     )},
-    { id: "tiposmeta", label: "Tipos Meta", apiUrl: "tiposmeta", component: (
-      <TableAdmin<TiposMeta>
-        apiUrl="tipo-meta"
-        entityName="Tipo Meta"
+    { id: "tipometa", label: "Tipos Meta", apiUrl: "tipometa", component: (
+      <TableAdmin<Tipometa>
+        apiUrl="tipometa"
+        entityName="TipoMeta"
         fields={[{ key: "descripcion", label: "Descripción del tipo de meta" }]}
         keyField="id_Tipo_Meta"
         displayFields={[
