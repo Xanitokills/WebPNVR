@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { FaFilePdf, FaFileWord, FaCheck, FaEllipsisV, FaEye, FaBan } from "react-icons/fa"; // Añadimos FaEye y FaBan
+import { FaFilePdf, FaFileWord, FaCheck, FaEllipsisV, FaEye, FaBan } from "react-icons/fa";
+import { FiEdit, FiTrash2 } from "react-icons/fi";
 
 interface Convocatoria {
   id_convocatoria: number;
@@ -15,14 +16,31 @@ interface Convocatoria {
   id_Estado_Convocatoria: number;
 }
 
+interface FormData {
+  titulo: string;
+  descripcion: string;
+  fecha_inicio: string;
+  fecha_fin: string;
+  vigencia: string;
+}
+
 const VerConvocatorias = () => {
   const [filtervigencia, setFiltervigencia] = useState<string>("");
   const [convocatorias, setConvocatorias] = useState<Convocatoria[]>([]);
   const [filteredConvocatorias, setFilteredConvocatorias] = useState<Convocatoria[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState<number | null>(null);
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
+  const [editModalOpen, setEditModalOpen] = useState<boolean>(false);
+  const [selectedConvocatoriaId, setSelectedConvocatoriaId] = useState<number | null>(null);
+  const [formData, setFormData] = useState<FormData>({
+    titulo: "",
+    descripcion: "",
+    fecha_inicio: "",
+    fecha_fin: "",
+    vigencia: "",
+  });
 
-  // Definición de colores para cada estado
   const estadoColores: { [key: string]: { bg: string; text: string } } = {
     "PENDIENTE-APROBACION": { bg: "bg-yellow-100 dark:bg-yellow-900", text: "text-yellow-800 dark:text-yellow-200" },
     "APROBADO-SUPERVISOR": { bg: "bg-blue-100 dark:bg-blue-900", text: "text-blue-800 dark:text-blue-200" },
@@ -34,7 +52,6 @@ const VerConvocatorias = () => {
     "PRUEBA": { bg: "bg-green-100 dark:bg-green-900", text: "text-green-800 dark:text-green-200" },
   };
 
-  // Mapeo de ID de estado a descripción (valores reales en la base)
   const estadoIds: { [key: string]: number } = {
     "PENDIENTE-APROBACION": 1,
     "APROBADO-SUPERVISOR": 2,
@@ -46,13 +63,11 @@ const VerConvocatorias = () => {
     "PRUEBA": 8,
   };
 
-  // Mapeo de acciones de interfaz a estados reales
   const actionToState: { [key: string]: string } = {
     "Observar": "Observado",
     "Anular": "Anulado",
   };
 
-  // Flujo de estados principal
   const estadoFlujoPrincipal: { [key: string]: string } = {
     "PENDIENTE-APROBACION": "APROBADO-SUPERVISOR",
     "APROBADO-SUPERVISOR": "APROBADO-MONITOR",
@@ -60,7 +75,6 @@ const VerConvocatorias = () => {
     "APROBADO-REPRESENTANTE": "FINALIZADO",
   };
 
-  // Acciones secundarias (interfaz)
   const estadoAccionesSecundarias: { [key: string]: string[] } = {
     "PENDIENTE-APROBACION": ["Observar", "Anular"],
     "APROBADO-SUPERVISOR": ["Observar", "Anular"],
@@ -71,7 +85,6 @@ const VerConvocatorias = () => {
     "Anulado": [],
   };
 
-  // Fetch convocatorias with error handling
   useEffect(() => {
     const fetchConvocatorias = async () => {
       try {
@@ -93,7 +106,6 @@ const VerConvocatorias = () => {
     fetchConvocatorias();
   }, []);
 
-  // Filter convocatorias
   useEffect(() => {
     const filtered = filtervigencia
       ? convocatorias.filter((c) => String(c.vigencia) === filtervigencia)
@@ -101,8 +113,15 @@ const VerConvocatorias = () => {
     setFilteredConvocatorias(filtered);
   }, [filtervigencia, convocatorias]);
 
-  // Handle state change
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => setError(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
   const handleStateChange = async (id: number, action: string) => {
+    setError(null);
     const convocatoria = convocatorias.find((c) => c.id_convocatoria === id);
     if (!convocatoria) return;
 
@@ -110,11 +129,21 @@ const VerConvocatorias = () => {
     let newState = "";
 
     if (action === "Aprobar" && estadoFlujoPrincipal[currentState]) {
+      if (currentState === "APROBADO-REPRESENTANTE") {
+        setSelectedConvocatoriaId(id);
+        setModalOpen(true);
+        return;
+      }
       newState = estadoFlujoPrincipal[currentState];
     } else if (actionToState[action]) {
       newState = actionToState[action];
     } else {
-      alert(`No se puede cambiar de ${currentState} a ${action}.`);
+      setError(`No se puede cambiar de ${currentState} a ${action}.`);
+      return;
+    }
+
+    if (!newState) {
+      setError("No se pudo determinar el nuevo estado.");
       return;
     }
 
@@ -132,21 +161,166 @@ const VerConvocatorias = () => {
         throw new Error(errorData.error || "Error al cambiar el estado");
       }
 
-      // Actualizar automáticamente la lista de convocatorias
       const updatedConvocatorias = convocatorias.map((item) =>
         item.id_convocatoria === id ? { ...item, estado_convocatoria: newState, id_Estado_Convocatoria: estadoIds[newState] } : item
       );
       setConvocatorias(updatedConvocatorias);
-      setFilteredConvocatorias(updatedConvocatorias);
-      setError(null);
-      setDropdownOpen(null); // Cerrar el dropdown después de la acción
+      setFilteredConvocatorias(
+        filtervigencia
+          ? updatedConvocatorias.filter((c) => String(c.vigencia) === filtervigencia)
+          : updatedConvocatorias
+      );
     } catch (error) {
       console.error("Error cambiando el estado:", error);
       setError(error instanceof Error ? error.message : "Error al cambiar el estado");
+    } finally {
+      setDropdownOpen(null);
     }
   };
 
-  // Toggle dropdown for secondary actions
+  const handleConfirmFinalize = async () => {
+    if (selectedConvocatoriaId === null) return;
+
+    const newState = "FINALIZADO";
+    try {
+      const response = await fetch(`/api/convocatoria/${selectedConvocatoriaId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id_Estado_Convocatoria: estadoIds[newState],
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Error al finalizar la convocatoria");
+      }
+
+      const updatedConvocatorias = convocatorias.map((item) =>
+        item.id_convocatoria === selectedConvocatoriaId ? { ...item, estado_convocatoria: newState, id_Estado_Convocatoria: estadoIds[newState] } : item
+      );
+      setConvocatorias(updatedConvocatorias);
+      setFilteredConvocatorias(
+        filtervigencia
+          ? updatedConvocatorias.filter((c) => String(c.vigencia) === filtervigencia)
+          : updatedConvocatorias
+      );
+      setError(null);
+    } catch (error) {
+      console.error("Error finalizando la convocatoria:", error);
+      setError(error instanceof Error ? error.message : "Error al finalizar la convocatoria");
+    } finally {
+      setModalOpen(false);
+      setSelectedConvocatoriaId(null);
+    }
+  };
+
+  const handleEdit = (convocatoria: Convocatoria) => {
+    if (convocatoria.estado_convocatoria === "FINALIZADO") {
+      setError("No se puede editar una convocatoria finalizada.");
+      return;
+    }
+    setSelectedConvocatoriaId(convocatoria.id_convocatoria);
+    setFormData({
+      titulo: convocatoria.titulo,
+      descripcion: convocatoria.descripcion,
+      fecha_inicio: convocatoria.fecha_inicio.split("T")[0],
+      fecha_fin: convocatoria.fecha_fin.split("T")[0],
+      vigencia: convocatoria.vigencia !== null ? String(convocatoria.vigencia) : "",
+    });
+    setEditModalOpen(true);
+  };
+
+  const handleSave = async () => {
+    if (selectedConvocatoriaId === null) return;
+
+    if (!formData.titulo || !formData.descripcion || !formData.fecha_inicio || !formData.fecha_fin) {
+      setError("Por favor, completa todos los campos requeridos.");
+      return;
+    }
+
+    const convocatoriaOriginal = convocatorias.find((c) => c.id_convocatoria === selectedConvocatoriaId);
+    if (!convocatoriaOriginal) {
+      setError("Convocatoria no encontrada.");
+      return;
+    }
+
+    const vigenciaValue = formData.vigencia === "" ? null : Number(formData.vigencia);
+
+    try {
+      const response = await fetch(`/api/convocatoria/${selectedConvocatoriaId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          titulo: formData.titulo,
+          descripcion: formData.descripcion,
+          fecha_inicio: formData.fecha_inicio,
+          fecha_fin: formData.fecha_fin,
+          vigencia: vigenciaValue,
+          estado_convocatoria: convocatoriaOriginal.estado_convocatoria,
+          id_Estado_Convocatoria: convocatoriaOriginal.id_Estado_Convocatoria,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Error al actualizar la convocatoria");
+      }
+
+      // Preservar el estado original si el backend no lo devuelve
+      const updatedConvocatoria = await response.json();
+      const finalConvocatoria = {
+        ...updatedConvocatoria,
+        estado_convocatoria: updatedConvocatoria.estado_convocatoria || convocatoriaOriginal.estado_convocatoria,
+        id_Estado_Convocatoria: updatedConvocatoria.id_Estado_Convocatoria || convocatoriaOriginal.id_Estado_Convocatoria,
+      };
+
+      const updatedConvocatorias = convocatorias.map((item) =>
+        item.id_convocatoria === finalConvocatoria.id_convocatoria ? finalConvocatoria : item
+      );
+      setConvocatorias(updatedConvocatorias);
+      setFilteredConvocatorias(
+        filtervigencia
+          ? updatedConvocatorias.filter((c) => String(c.vigencia) === filtervigencia)
+          : updatedConvocatorias
+      );
+      setError(null);
+    } catch (error) {
+      console.error("Error actualizando la convocatoria:", error);
+      setError(error instanceof Error ? error.message : "Error al actualizar la convocatoria");
+    } finally {
+      setEditModalOpen(false);
+      setSelectedConvocatoriaId(null);
+      setFormData({ titulo: "", descripcion: "", fecha_inicio: "", fecha_fin: "", vigencia: "" });
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    const convocatoria = convocatorias.find((c) => c.id_convocatoria === id);
+    if (!convocatoria || convocatoria.estado_convocatoria === "FINALIZADO") {
+      setError("No se puede eliminar una convocatoria finalizada.");
+      return;
+    }
+
+    if (!confirm("¿Estás seguro de eliminar esta convocatoria?")) return;
+
+    try {
+      const response = await fetch(`/api/convocatoria/${id}`, { method: "DELETE" });
+      if (!response.ok) throw new Error("Error al eliminar la convocatoria");
+      const updatedConvocatorias = convocatorias.filter((item) => item.id_convocatoria !== id);
+      setConvocatorias(updatedConvocatorias);
+      setFilteredConvocatorias(
+        filtervigencia
+          ? updatedConvocatorias.filter((c) => String(c.vigencia) === filtervigencia)
+          : updatedConvocatorias
+      );
+      setError(null);
+    } catch (error) {
+      console.error("Error eliminando la convocatoria:", error);
+      setError(error instanceof Error ? error.message : "Error al eliminar la convocatoria");
+    }
+  };
+
   const toggleDropdown = (id: number) => {
     setDropdownOpen(dropdownOpen === id ? null : id);
   };
@@ -214,6 +388,7 @@ const VerConvocatorias = () => {
                   };
                   const nextMainState = estadoFlujoPrincipal[estado];
                   const secondaryActions = estadoAccionesSecundarias[estado] || [];
+                  const isFinalizado = estado === "FINALIZADO";
 
                   return (
                     <tr
@@ -290,7 +465,6 @@ const VerConvocatorias = () => {
                         </span>
                       </td>
                       <td className="py-4 px-6 flex space-x-2 relative">
-                        {/* Botón de check para el flujo principal */}
                         {nextMainState && (
                           <button
                             onClick={() => handleStateChange(convocatoria.id_convocatoria, "Aprobar")}
@@ -300,7 +474,6 @@ const VerConvocatorias = () => {
                             <FaCheck size={20} />
                           </button>
                         )}
-                        {/* Menú desplegable para acciones secundarias */}
                         {secondaryActions.length > 0 && (
                           <div className="relative">
                             <button
@@ -332,6 +505,26 @@ const VerConvocatorias = () => {
                             )}
                           </div>
                         )}
+                        <button
+                          onClick={() => handleEdit(convocatoria)}
+                          className={`${
+                            isFinalizado ? "opacity-50 cursor-not-allowed" : "text-blue-500 hover:text-blue-600"
+                          } transition-colors`}
+                          title="Editar"
+                          disabled={isFinalizado}
+                        >
+                          <FiEdit size={20} />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(convocatoria.id_convocatoria)}
+                          className={`${
+                            isFinalizado ? "opacity-50 cursor-not-allowed" : "text-red-500 hover:text-red-600"
+                          } transition-colors`}
+                          title="Eliminar"
+                          disabled={isFinalizado}
+                        >
+                          <FiTrash2 size={20} />
+                        </button>
                       </td>
                     </tr>
                   );
@@ -350,6 +543,129 @@ const VerConvocatorias = () => {
           </table>
         </div>
       </div>
+
+      {modalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl max-w-md w-full">
+            <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">
+              Confirmar Finalización
+            </h2>
+            <p className="mb-6 text-gray-700 dark:text-gray-300">
+              ¿Desea finalizar la revisión? No se podrá editar ni cambiar los ítems después de esto.
+            </p>
+            <div className="flex justify-end space-x-4">
+              <button
+                onClick={() => {
+                  setModalOpen(false);
+                  setSelectedConvocatoriaId(null);
+                }}
+                className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleConfirmFinalize}
+                className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors"
+              >
+                Finalizar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {editModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl max-w-md w-full">
+            <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">
+              Editar Convocatoria
+            </h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                  Título
+                </label>
+                <input
+                  type="text"
+                  value={formData.titulo}
+                  onChange={(e) => setFormData({ ...formData, titulo: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                  Descripción
+                </label>
+                <textarea
+                  value={formData.descripcion}
+                  onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  rows={4}
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                  Fecha de Inicio
+                </label>
+                <input
+                  type="date"
+                  value={formData.fecha_inicio}
+                  onChange={(e) => setFormData({ ...formData, fecha_inicio: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                  Fecha de Fin
+                </label>
+                <input
+                  type="date"
+                  value={formData.fecha_fin}
+                  onChange={(e) => setFormData({ ...formData, fecha_fin: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                  Vigencia
+                </label>
+                <select
+                  value={formData.vigencia}
+                  onChange={(e) => setFormData({ ...formData, vigencia: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Seleccione vigencia</option>
+                  <option value="1">Activo</option>
+                  <option value="0">Inactivo</option>
+                </select>
+              </div>
+            </div>
+            <div className="mt-6 flex justify-end space-x-2">
+              <button
+                onClick={() => {
+                  setEditModalOpen(false);
+                  setSelectedConvocatoriaId(null);
+                  setFormData({ titulo: "", descripcion: "", fecha_inicio: "", fecha_fin: "", vigencia: "" });
+                  setError(null);
+                }}
+                className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleSave}
+                className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+              >
+                Guardar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
