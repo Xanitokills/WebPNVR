@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
+import { FaFilePdf, FaFileWord } from "react-icons/fa"; // Importar íconos para PDF y Word
 
 interface Convocatoria {
   id_convocatoria: number;
@@ -11,7 +12,7 @@ interface Convocatoria {
   vigencia: number | null;
   pdf_file_path: string | null;
   word_file_path: string | null;
-  estado_convocatoria: string | null; // Este campo ahora viene de ec.descripcion
+  estado_convocatoria: string | null;
 }
 
 const VerConvocatorias = () => {
@@ -258,9 +259,10 @@ const VerConvocatorias = () => {
                             href={`/${convocatoria.pdf_file_path}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-blue-500 hover:text-blue-600 underline"
+                            className="text-red-500 hover:text-red-600 transition-colors"
+                            title="Ver PDF"
                           >
-                            Ver PDF
+                            <FaFilePdf size={20} />
                           </a>
                         ) : (
                           "No disponible"
@@ -272,9 +274,10 @@ const VerConvocatorias = () => {
                             href={`/${convocatoria.word_file_path}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-blue-500 hover:text-blue-600 underline"
+                            className="text-blue-500 hover:text-blue-600 transition-colors"
+                            title="Ver Word"
                           >
-                            Ver Word
+                            <FaFileWord size={20} />
                           </a>
                         ) : (
                           "No disponible"
