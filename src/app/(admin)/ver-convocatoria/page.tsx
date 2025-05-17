@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { FiEdit, FiTrash2 } from "react-icons/fi"; // Modern, sleek icons from react-icons
+import { FiEdit, FiTrash2 } from "react-icons/fi";
 
 interface Convocatoria {
   id_convocatoria: number;
@@ -17,8 +17,14 @@ const VerConvocatorias = () => {
   const [filteredConvocatorias, setFilteredConvocatorias] = useState<Convocatoria[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedConvocatoria, setSelectedConvocatoria] = useState<Convocatoria | null>(null);
-  const [formData, setFormData] = useState<Partial<Convocatoria>>({});
-  const [error, setError] = useState<string | null>(null); // Added error state
+  const [formData, setFormData] = useState<{
+    titulo?: string;
+    descripcion?: string;
+    fecha_inicio?: string;
+    fecha_fin?: string;
+    estado?: string;
+  }>({});
+  const [error, setError] = useState<string | null>(null);
 
   // Fetch convocatorias with error handling
   useEffect(() => {
@@ -56,9 +62,9 @@ const VerConvocatorias = () => {
     setFormData({
       titulo: convocatoria.titulo,
       descripcion: convocatoria.descripcion,
-      fecha_inicio: convocatoria.fecha_inicio.split("T")[0], // Format date for input
-      fecha_fin: convocatoria.fecha_fin.split("T")[0], // Format date for input
-      estado: convocatoria.estado,
+      fecha_inicio: convocatoria.fecha_inicio.split("T")[0],
+      fecha_fin: convocatoria.fecha_fin.split("T")[0],
+      estado: convocatoria.estado !== null ? String(convocatoria.estado) : "",
     });
     setModalOpen(true);
   };
@@ -81,12 +87,18 @@ const VerConvocatorias = () => {
         throw new Error("Por favor, completa todos los campos requeridos");
       }
 
+      // Convert estado to number | null for the API
+      const estadoValue = formData.estado === "" ? null : Number(formData.estado);
+
       const response = await fetch(`/api/convocatoria/${selectedConvocatoria.id_convocatoria}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...formData,
-          estado: formData.estado === "" ? null : Number(formData.estado),
+          titulo: formData.titulo,
+          descripcion: formData.descripcion,
+          fecha_inicio: formData.fecha_inicio,
+          fecha_fin: formData.fecha_fin,
+          estado: estadoValue,
         }),
       });
 
@@ -132,7 +144,7 @@ const VerConvocatorias = () => {
         <h1 className="text-3xl font-bold mb-6 text-gray-900 dark:text-white">
           Convocatorias
         </h1>
-        
+
         {error && (
           <div className="mb-4 p-4 bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-200 rounded-lg">
             {error}
@@ -305,7 +317,7 @@ const VerConvocatorias = () => {
                 </label>
                 <select
                   name="estado"
-                  value={formData.estado !== null ? String(formData.estado) : ""}
+                  value={formData.estado || ""}
                   onChange={handleInputChange}
                   className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
                 >
