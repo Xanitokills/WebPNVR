@@ -47,9 +47,9 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
       .input("descripcion", sql.NVarChar(1000), body.descripcion)
       .input("fecha_inicio", sql.Date, body.fecha_inicio)
       .input("fecha_fin", sql.Date, body.fecha_fin)
-      .input("estado", sql.Int, body.estado)
+      .input("vigencia", sql.Int, body.vigencia)
       .query(
-        "UPDATE [PNVR].[dbo].[Convocatorias] SET titulo = @titulo, descripcion = @descripcion, fecha_inicio = @fecha_inicio, fecha_fin = @fecha_fin, estado = @estado WHERE id_convocatoria = @id"
+        "UPDATE [PNVR].[dbo].[Convocatorias] SET titulo = @titulo, descripcion = @descripcion, fecha_inicio = @fecha_inicio, fecha_fin = @fecha_fin, vigencia = @vigencia WHERE id_convocatoria = @id"
       );
     if (result.rowsAffected[0] === 0) {
       return NextResponse.json({ error: "Convocatoria no encontrada" }, { status: 404 });
@@ -60,7 +60,7 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
       descripcion: body.descripcion,
       fecha_inicio: body.fecha_inicio,
       fecha_fin: body.fecha_fin,
-      estado: body.estado,
+      vigencia: body.vigencia,
     };
     return NextResponse.json(updatedConvocatoria);
   } catch (error) {

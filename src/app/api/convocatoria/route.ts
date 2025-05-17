@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import sql from "mssql";
+import fs from "fs/promises";
+import path from "path";
 
 export async function GET() {
   const variablesRequeridas = {
@@ -32,9 +34,23 @@ export async function GET() {
 
   try {
     const pool = await sql.connect(configuracion);
-    const result = await pool
-      .request()
-      .query("SELECT * FROM [PNVR].[dbo].[Convocatorias]");
+    const result = await pool.request().query(`
+      SELECT c.id_convocatoria
+            ,c.titulo
+            ,c.descripcion
+            ,c.fecha_inicio
+            ,c.fecha_fin
+            ,c.vigencia
+            ,c.word_file_path
+            ,c.pdf_file_path
+            ,c.pdfFile
+            ,c.wordFile
+            ,c.id_Estado_Convocatoria
+            ,ec.descripcion AS estado_convocatoria
+        FROM PNVR.dbo.Convocatorias c 
+        INNER JOIN Estado_Convocatoria ec 
+        ON c.id_Estado_Convocatoria = ec.id_estado_convocatoria
+    `);
     return NextResponse.json(result.recordset);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Error desconocido";
@@ -46,7 +62,7 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  const body = await request.json();
+  const formData = await request.formData();
 
   const variablesRequeridas = {
     DB_USER: process.env.DB_USER,
@@ -78,16 +94,52 @@ export async function POST(request: NextRequest) {
 
   try {
     const pool = await sql.connect(configuracion);
-    const result = await pool
-      .request()
-      .input("titulo", sql.NVarChar(255), body.titulo)
-      .input("descripcion", sql.NVarChar(1000), body.descripcion)
-      .input("fecha_inicio", sql.Date, body.fecha_inicio)
-      .input("fecha_fin", sql.Date, body.fecha_fin)
-      .input("estado", sql.Int, body.estado)
-      .query(
-        "INSERT INTO [PNVR].[dbo].[Convocatorias] (titulo, descripcion, fecha_inicio, fecha_fin, estado) OUTPUT INSERTED.* VALUES (@titulo, @descripcion, @fecha_inicio, @fecha_fin, @estado)"
-      );
+
+    const titulo = formData.get("titulo") as string;
+    const descripcion = formData.get("descripcion") as string;
+    const fecha_inicio = formData.get("fecha_inicio") as string;
+    const fecha_fin = formData.get("fecha_fin") as string;
+    const vigencia = formData.get("vigencia") ? parseInt(formData.get("vigencia") as string) : 1;
+    const pdfFile = formData.get("pdfFile") as File | null;
+    const wordFile = formData.get("wordFile") as File | null;
+
+    // Directorio para guardar los archivos
+    const uploadDir = path.join(process.cwd(), "public", "uploads");
+    await fs.mkdir(uploadDir, { recursive: true });
+
+    let pdfFilePath = null;
+    let wordFilePath = null;
+
+    // Guardar PDF si existe
+    if (pdfFile) {
+      const pdfFileName = `${Date.now()}_${pdfFile.name}`;
+      pdfFilePath = path.join("uploads", pdfFileName);
+      const pdfBuffer = Buffer.from(await pdfFile.arrayBuffer());
+      await fs.writeFile(path.join(uploadDir, pdfFileName), pdfBuffer);
+    }
+
+    // Guardar Word si existe
+    if (wordFile) {
+      const wordFileName = `${Date.now()}_${wordFile.name}`;
+      wordFilePath = path.join("uploads", wordFileName);
+      const wordBuffer = Buffer.from(await wordFile.arrayBuffer());
+      await fs.writeFile(path.join(uploadDir, wordFileName), wordBuffer);
+    }
+
+    const request = pool.request();
+    request
+      .input("titulo", sql.NVarChar(255), titulo)
+      .input("descripcion", sql.NVarChar(1000), descripcion)
+      .input("fecha_inicio", sql.Date, fecha_inicio)
+      .input("fecha_fin", sql.Date, fecha_fin)
+      .input("vigencia", sql.Int, vigencia)
+      .input("pdf_file_path", sql.NVarChar(500), pdfFilePath)
+      .input("word_file_path", sql.NVarChar(500), wordFilePath);
+
+    const result = await request.query(
+      "INSERT INTO [PNVR].[dbo].[Convocatorias] (titulo, descripcion, fecha_inicio, fecha_fin, vigencia, pdf_file_path, word_file_path) OUTPUT INSERTED.* VALUES (@titulo, @descripcion, @fecha_inicio, @fecha_fin, @vigencia, @pdf_file_path, @word_file_path)"
+    );
+
     return NextResponse.json(result.recordset[0]);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Error desconocido";
