@@ -25,8 +25,9 @@ interface TipoMaterial {
 }
 
 interface TipoFenomeno {
-  id_Tipo_Fenomeno: number;
+  id_tipo_fenomeno: number;
   descripcion: string;
+  estado: number | null;
 }
 
 const AdminDashboard = () => {
@@ -86,6 +87,7 @@ const AdminDashboard = () => {
         displayFields={[
           { key: "id_Tipo_Intervencion", label: "ID" },
           { key: "descripcion", label: "Descripción" },
+          
         ]}
       />
     )},
@@ -103,13 +105,27 @@ const AdminDashboard = () => {
     )},
     { id: "tipofenomeno", label: "Tipos Fenómeno", apiUrl: "tipofenomeno", component: (
       <TableAdmin<TipoFenomeno>
-        apiUrl="tipo-fenomeno"
-        entityName="Tipo Fenómeno"
-        fields={[{ key: "descripcion", label: "Descripción del tipo de fenómeno" }]}
-        keyField="id_Tipo_Fenomeno"
+        apiUrl="tipofenomeno"
+        entityName="TipoFenomeno"
+        fields={[
+          { key: "descripcion", label: "Descripción del tipo de fenómeno" },
+          { key: "estado", label: "Estado", type: "select", options: [
+            { value: "", label: "Seleccione estado" },
+            { value: "1", label: "Activo" },
+            { value: "0", label: "Inactivo" },
+          ]},
+        
+        ]}
+          
+        keyField="id_tipo_fenomeno"
         displayFields={[
-          { key: "id_Tipo_Fenomeno", label: "ID" },
+          { key: "id_tipo_fenomeno", label: "ID" },
           { key: "descripcion", label: "Descripción" },
+          { 
+            key: "estado", 
+            label: "Estado", 
+            transform: (value: number | null) => value === 1 ? "Activo" : value === 0 ? "Inactivo" : "No definido" 
+          },
         ]}
       />
     )},

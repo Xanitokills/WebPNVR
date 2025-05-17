@@ -18,7 +18,10 @@ const navItems: NavItem[] = [
   {
     name: "Convenios",
     icon: <TableIcon />,
-    subItems: [{ name: "Tablas Básicas", path: "/basic-tables", pro: false }],
+    subItems: [
+      { name: "Tablas Básicas", path: "/basic-tables", pro: false },
+      { name: "Personal", path: "/personal", pro: false }, // Added Personal subitem
+    ],
   },
   {
     name: "Administrar Parámetros",
