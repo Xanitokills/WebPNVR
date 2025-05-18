@@ -17,11 +17,13 @@ interface Tipometa {
 interface TipoIntervencion {
   id_Tipo_Intervencion: number;
   descripcion: string;
+  estado: number | null;
 }
 
 interface TipoMaterial {
   id_Tipo_Material: number;
   descripcion: string;
+  estado: number | null;
 }
 
 interface TipoFenomeno {
@@ -48,7 +50,7 @@ const AdminDashboard = () => {
         ]}
         keyField="id_grupo"
         displayFields={[
-          { key: "id_grupo", label: "ID Grupo" },
+          { key: "id_grupo", label: "ID" },
           { key: "nombre", label: "Nombre" },
           { key: "estado", label: "Estado", transform: (value: number | null) => value === 1 ? "Activo" : value === 0 ? "Inactivo" : "No definido" },
         ]}
@@ -80,26 +82,48 @@ const AdminDashboard = () => {
     )},
     { id: "tipointervencion", label: "Tipos Intervención", apiUrl: "tipointervencion", component: (
       <TableAdmin<TipoIntervencion>
-        apiUrl="tipo-intervencion"
+        apiUrl="tipointervencion"
         entityName="Tipo Intervención"
-        fields={[{ key: "descripcion", label: "Descripción del tipo de intervención" }]}
-        keyField="id_Tipo_Intervencion"
+        fields={[
+          { key: "descripcion", label: "Descripción del tipo de intervención" },
+          { key: "estado", label: "Estado", type: "select", options: [
+            { value: "", label: "Seleccione estado" },
+            { value: "1", label: "Activo" },
+            { value: "0", label: "Inactivo" },
+          ]},      
+        ]}
+        keyField="id_tipo_intervencion"
         displayFields={[
-          { key: "id_Tipo_Intervencion", label: "ID" },
+          { key: "id_tipo_intervencion", label: "ID" },
           { key: "descripcion", label: "Descripción" },
-          
+          { 
+            key: "estado", 
+            label: "Estado", 
+            transform: (value: number | null) => value === 1 ? "Activo" : value === 0 ? "Inactivo" : "No definido" 
+          },
         ]}
       />
     )},
     { id: "tipomaterial", label: "Tipos Material", apiUrl: "tipomaterial", component: (
       <TableAdmin<TipoMaterial>
-        apiUrl="tipo-material"
+        apiUrl="tipomaterial"
         entityName="Tipo Material"
-        fields={[{ key: "descripcion", label: "Descripción del tipo de material" }]}
-        keyField="id_Tipo_Material"
+        fields={[{ key: "descripcion", label: "Descripción del tipo de material" },
+          { key: "estado", label: "Estado", type: "select", options: [
+            { value: "", label: "Seleccione estado" },
+            { value: "1", label: "Activo" },
+            { value: "0", label: "Inactivo" },
+          ]},      
+        ]}
+        keyField="id_tipo_material"
         displayFields={[
-          { key: "id_Tipo_Material", label: "ID" },
+          { key: "id_tipo_material", label: "ID" },
           { key: "descripcion", label: "Descripción" },
+          { 
+            key: "estado", 
+            label: "Estado", 
+            transform: (value: number | null) => value === 1 ? "Activo" : value === 0 ? "Inactivo" : "No definido" 
+          },
         ]}
       />
     )},
