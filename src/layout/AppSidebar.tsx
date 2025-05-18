@@ -21,6 +21,7 @@ const navItems: NavItem[] = [
     subItems: [
       { name: "Tablas Básicas", path: "/basic-tables", pro: false },
       { name: "Personal", path: "/personal", pro: false }, // Added Personal subitem
+      { name: "Ver Convenios", path: "/convenios", pro: false },
     ],
   },
   {
