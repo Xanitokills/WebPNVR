@@ -1,10 +1,9 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { FaEllipsisV, FaEye, FaBan } from "react-icons/fa";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
 
 interface Convenio {
-  id_convenio: string; // Cambiado a string porque es varchar(50)
+  id_convenio: string;
   cod_ugt: string;
   nombre_proyecto: string;
   id_grupo: number | null;
@@ -47,9 +46,8 @@ const VerConvenios = () => {
   const [convenios, setConvenios] = useState<Convenio[]>([]);
   const [filteredConvenios, setFilteredConvenios] = useState<Convenio[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [dropdownOpen, setDropdownOpen] = useState<string | null>(null); // Cambiado a string
   const [editModalOpen, setEditModalOpen] = useState<boolean>(false);
-  const [selectedConvenioId, setSelectedConvenioId] = useState<string | null>(null); // Cambiado a string
+  const [selectedConvenioId, setSelectedConvenioId] = useState<string | null>(null);
   const [formData, setFormData] = useState<FormData>({
     cod_ugt: "",
     nombre_proyecto: "",
@@ -72,19 +70,6 @@ const VerConvenios = () => {
     FINALIZADO: 3,
     OBSERVADO: 4,
     ANULADO: 5,
-  };
-
-  const actionToState: { [key: string]: string } = {
-    Observar: "OBSERVADO",
-    Anular: "ANULADO",
-  };
-
-  const estadoAccionesSecundarias: { [key: string]: string[] } = {
-    PENDIENTE: ["Observar", "Anular"],
-    EN_PROGRESO: ["Observar", "Anular"],
-    OBSERVADO: ["PENDIENTE", "Anular"],
-    FINALIZADO: [],
-    ANULADO: [],
   };
 
   useEffect(() => {
@@ -131,49 +116,6 @@ const VerConvenios = () => {
       return () => clearTimeout(timer);
     }
   }, [error]);
-
-  const handleStateChange = async (id: string, action: string) => {
-    setError(null);
-    const convenio = convenios.find((c) => c.id_convenio === id);
-    if (!convenio) return;
-
-    const newState = actionToState[action] || action;
-    if (!estadoIds[newState]) {
-      setError(`Invalid state: ${action}`);
-      return;
-    }
-
-    try {
-      console.log("Changing state for id:", id, "to:", newState);
-      const response = await fetch(`/api/convenios/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id_estado: estadoIds[newState] }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Error changing state");
-      }
-
-      const updatedConvenios = convenios.map((item) =>
-        item.id_convenio === id
-          ? { ...item, estado_convenio: newState, id_estado: estadoIds[newState] }
-          : item
-      );
-      setConvenios(updatedConvenios);
-      setFilteredConvenios(
-        filterAnio
-          ? updatedConvenios.filter((c) => String(c.anio_intervencion) === filterAnio)
-          : updatedConvenios
-      );
-    } catch (error) {
-      console.error("Error changing state:", error);
-      setError(error instanceof Error ? error.message : "Error changing state");
-    } finally {
-      setDropdownOpen(null);
-    }
-  };
 
   const handleEdit = (convenio: Convenio) => {
     if (convenio.estado_convenio === "FINALIZADO") {
@@ -304,10 +246,37 @@ const VerConvenios = () => {
     }
   };
 
-  const toggleDropdown = (id: string) => {
-    console.log("Toggling dropdown for id:", id);
-    setDropdownOpen(dropdownOpen === id ? null : id);
-  };
+  const tableHeaders = [
+    "ID Convenio",
+    "Código UGT",
+    "Nombre Proyecto",
+    "ID Grupo",
+    "ID Tipo Intervención",
+    "ID Programa Presupuestal",
+    "ID Tipo Fenómeno",
+    "ID Tipo Material",
+    "ID Estado",
+    "ID Sub Estado",
+    "ID Priorización",
+    "ID Tipo Meta",
+    "ID Ubicación",
+    "Fecha Convenio",
+    "Fecha Transferencia",
+    "Fecha Límite Inicio",
+    "Fecha Inicio",
+    "Plazo Ejecución",
+    "Días Paralizados",
+    "Días Ampliación",
+    "Fecha Término",
+    "Fecha Acta Término",
+    "Motivo Atraso",
+    "Acción Mitigación",
+    "Fecha Inicio Estimada",
+    "Fecha Término Estimada",
+    "Año Intervención",
+    "Estado Convenio",
+    "Acción",
+  ];
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -324,13 +293,13 @@ const VerConvenios = () => {
 
         <div className="mb-6">
           <label className="mr-2 text-gray-700 dark:text-gray-300 font-medium">
-            Filter by Año Intervención:
+            Filtrar por Año Intervención:
           </label>
           <input
             type="number"
             value={filterAnio}
             onChange={(e) => setFilterAnio(e.target.value)}
-            placeholder="Enter year"
+            placeholder="Ingresa el año"
             className="p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
           />
         </div>
@@ -339,19 +308,14 @@ const VerConvenios = () => {
           <table className="min-w-full bg-white dark:bg-gray-800">
             <thead className="bg-gray-50 dark:bg-gray-700">
               <tr>
-                {[
-                  "ID",
-                  "Código UGT",
-                  "Nombre Proyecto",
-                  "Fecha Inicio",
-                  "Fecha Término",
-                  "Año Intervención",
-                  "Estado",
-                  "Acción",
-                ].map((header) => (
+                {tableHeaders.map((header, index) => (
                   <th
                     key={header}
-                    className="py-3 px-6 text-left text-sm font-semibold text-gray-900 dark:text-white"
+                    className={`py-3 px-4 text-left text-sm font-semibold text-gray-900 dark:text-white whitespace-nowrap ${
+                      index === tableHeaders.length - 1
+                        ? "sticky right-0 bg-gray-50 dark:bg-gray-700 z-10"
+                        : ""
+                    }`}
                   >
                     {header}
                   </th>
@@ -366,7 +330,6 @@ const VerConvenios = () => {
                     bg: "bg-gray-100 dark:bg-gray-700",
                     text: "text-gray-800 dark:text-gray-200",
                   };
-                  const secondaryActions = estadoAccionesSecundarias[estado] || [];
                   const isFinalizado = estado === "FINALIZADO";
 
                   return (
@@ -374,67 +337,57 @@ const VerConvenios = () => {
                       key={convenio.id_convenio}
                       className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                     >
-                      <td className="py-4 px-6 text-gray-900 dark:text-white">
-                        {convenio.id_convenio}
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.id_convenio}</td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.cod_ugt}</td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.nombre_proyecto}</td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.id_grupo ?? "N/A"}</td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.id_tipo_intervencion ?? "N/A"}</td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.id_programa_presupuestal ?? "N/A"}</td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.id_tipo_fenomeno ?? "N/A"}</td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.id_tipo_material ?? "N/A"}</td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.id_estado ?? "N/A"}</td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.id_sub_estado ?? "N/A"}</td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.id_priorizacion ?? "N/A"}</td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.id_tipo_meta ?? "N/A"}</td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.id_ubicacion ?? "N/A"}</td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">
+                        {convenio.fecha_convenio ? new Date(convenio.fecha_convenio).toLocaleDateString() : "N/A"}
                       </td>
-                      <td className="py-4 px-6 text-gray-900 dark:text-white">
-                        {convenio.cod_ugt}
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">
+                        {convenio.fecha_transferencia ? new Date(convenio.fecha_transferencia).toLocaleDateString() : "N/A"}
                       </td>
-                      <td className="py-4 px-6 text-gray-900 dark:text-white">
-                        {convenio.nombre_proyecto}
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">
+                        {convenio.fecha_limite_inicio ? new Date(convenio.fecha_limite_inicio).toLocaleDateString() : "N/A"}
                       </td>
-                      <td className="py-4 px-6 text-gray-900 dark:text-white">
-                        {convenio.fecha_inicio
-                          ? new Date(convenio.fecha_inicio).toLocaleDateString()
-                          : "N/A"}
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">
+                        {convenio.fecha_inicio ? new Date(convenio.fecha_inicio).toLocaleDateString() : "N/A"}
                       </td>
-                      <td className="py-4 px-6 text-gray-900 dark:text-white">
-                        {convenio.fecha_termino
-                          ? new Date(convenio.fecha_termino).toLocaleDateString()
-                          : "N/A"}
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.plazo_ejecucion ?? "N/A"}</td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.dias_paralizados ?? "N/A"}</td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.dias_ampliacion ?? "N/A"}</td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">
+                        {convenio.fecha_termino ? new Date(convenio.fecha_termino).toLocaleDateString() : "N/A"}
                       </td>
-                      <td className="py-4 px-6 text-gray-900 dark:text-white">
-                        {convenio.anio_intervencion || "N/A"}
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">
+                        {convenio.fecha_acta_termino ? new Date(convenio.fecha_acta_termino).toLocaleDateString() : "N/A"}
                       </td>
-                      <td className="py-4 px-6">
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.motivo_atraso ?? "N/A"}</td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.accion_mitigacion ?? "N/A"}</td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">
+                        {convenio.fecha_inicio_estimada ? new Date(convenio.fecha_inicio_estimada).toLocaleDateString() : "N/A"}
+                      </td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">
+                        {convenio.fecha_termino_estimada ? new Date(convenio.fecha_termino_estimada).toLocaleDateString() : "N/A"}
+                      </td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.anio_intervencion ?? "N/A"}</td>
+                      <td className="py-4 px-4">
                         <span
                           className={`px-2 py-1 rounded-full text-xs font-medium ${colores.bg} ${colores.text}`}
                         >
                           {estado}
                         </span>
                       </td>
-                      <td className="py-4 px-6 flex space-x-2 relative">
-                        {secondaryActions.length > 0 && (
-                          <div className="relative">
-                            <button
-                              onClick={() => toggleDropdown(convenio.id_convenio)}
-                              className="text-gray-500 hover:text-gray-600 transition-colors"
-                              title="More actions"
-                            >
-                              <FaEllipsisV size={20} />
-                            </button>
-                            {dropdownOpen === convenio.id_convenio && (
-                              <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg z-10">
-                                {secondaryActions.map((action) => {
-                                  const realState = actionToState[action] || action;
-                                  const Icon = action === "Observar" ? FaEye : FaBan;
-                                  return (
-                                    <button
-                                      key={action}
-                                      onClick={() => {
-                                        handleStateChange(convenio.id_convenio, action);
-                                      }}
-                                      className="flex items-center w-full text-left px-4 py-2 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-                                    >
-                                      <Icon className="mr-2" size={16} />
-                                      {action}
-                                    </button>
-                                  );
-                                })}
-                              </div>
-                            )}
-                          </div>
-                        )}
+                      <td className="py-4 px-4 flex space-x-2 sticky right-0 bg-white dark:bg-gray-800 z-10">
                         <button
                           onClick={() => handleEdit(convenio)}
                           className={`${
@@ -442,7 +395,7 @@ const VerConvenios = () => {
                               ? "opacity-50 cursor-not-allowed"
                               : "text-blue-500 hover:text-blue-600"
                           } transition-colors`}
-                          title="Edit"
+                          title="Editar"
                           disabled={isFinalizado}
                         >
                           <FiEdit size={20} />
@@ -454,7 +407,7 @@ const VerConvenios = () => {
                               ? "opacity-50 cursor-not-allowed"
                               : "text-red-500 hover:text-red-600"
                           } transition-colors`}
-                          title="Delete"
+                          title="Eliminar"
                           disabled={isFinalizado}
                         >
                           <FiTrash2 size={20} />
@@ -466,10 +419,10 @@ const VerConvenios = () => {
               ) : (
                 <tr>
                   <td
-                    colSpan={8}
-                    className="py-4 px-6 text-center text-gray-500 dark:text-gray-400"
+                    colSpan={tableHeaders.length}
+                    className="py-4 px-4 text-center text-gray-500 dark:text-gray-400"
                   >
-                    No convenios found
+                    No se encontraron convenios
                   </td>
                 </tr>
               )}
@@ -480,9 +433,9 @@ const VerConvenios = () => {
 
       {editModalOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2iscos max-w-md w-full">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl max-w-md w-full">
             <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">
-              Edit Convenio
+              Editar Convenio
             </h2>
             <div className="space-y-4">
               <div>
@@ -561,13 +514,13 @@ const VerConvenios = () => {
                 }}
                 className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors"
               >
-                Cancel
+                Cancelar
               </button>
               <button
                 onClick={handleSave}
                 className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
               >
-                Save
+                Guardar
               </button>
             </div>
           </div>

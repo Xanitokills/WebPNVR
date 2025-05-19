@@ -19,22 +19,19 @@ const navItems: NavItem[] = [
     name: "Convenios",
     icon: <TableIcon />,
     subItems: [
-      { name: "Tablas Básicas", path: "/basic-tables", pro: false },
-      { name: "Personal", path: "/personal", pro: false }, // Added Personal subitem
+      { name: "Personal", path: "/personal", pro: false },
       { name: "Ver Convenios", path: "/convenios", pro: false },
+      { name: "Administrar Parámetros",  path: "/parametros", pro: false },
     ],
   },
-  {
-    name: "Administrar Parámetros",
-    icon: <TableIcon />,
-    path: "parametros",
-  },
+
   {
     name: "Convocatorias",
     icon: <TableIcon />,
     subItems: [
-      { name: "Crear Convocatorias", path: "crear-convocatoria", pro: false },
-      { name: "Ver Convocatorias", path: "ver-convocatoria", pro: false },
+      { name: "Crear Convocatorias", path: "/crear-convocatoria", pro: false },
+      { name: "Ver Convocatorias", path: "/ver-convocatoria", pro: false },
+      { name: "Administrar Parámetros", path: "/administrar-parametros", pro: false },
     ],
   },
 ];
@@ -43,7 +40,7 @@ const othersItems: NavItem[] = [
   {
     name: "Reportes",
     icon: <TableIcon />,
-    path: "reportes",
+    path: "/reportes",
   },
 ];
 
