@@ -51,6 +51,7 @@ const BudgetModule: React.FC = () => {
   const [loadingBudget, setLoadingBudget] = useState<boolean>(false);
   const [errorBudget, setErrorBudget] = useState<string>("");
   const [isTableExpanded, setIsTableExpanded] = useState<boolean>(true);
+  const [expandedGroups, setExpandedGroups] = useState<{ [key: string]: boolean }>({}); // Track expanded state by Descripción
 
   const fetchConvenios = useCallback(async () => {
     try {
@@ -77,6 +78,14 @@ const BudgetModule: React.FC = () => {
       const data = await response.json();
       if (response.ok) {
         setBudgetData(data);
+        // Initialize all groups as expanded
+        const initialExpanded = data.items.reduce((acc, item) => {
+          if (item.Level < 2) { // Level 0 or 1 (groups)
+            acc[item.Descripción] = true;
+          }
+          return acc;
+        }, {} as { [key: string]: boolean });
+        setExpandedGroups(initialExpanded);
         setErrorBudget("");
       } else {
         setErrorBudget(data.error || "Error al cargar los datos del presupuesto.");
@@ -113,6 +122,34 @@ const BudgetModule: React.FC = () => {
     { name: 'Direct Cost', value: directCost },
     { name: 'Indirect Cost', value: indirectCost }
   ];
+
+  // Toggle the expanded state of a group
+  const toggleGroup = (groupDesc: string) => {
+    setExpandedGroups(prev => ({
+      ...prev,
+      [groupDesc]: !prev[groupDesc],
+    }));
+  };
+
+  // Check if an item should be visible based on its parent's expanded state
+  const isItemVisible = (item: BudgetItem, index: number): boolean => {
+    if (item.Level === 0) return true; // Top-level groups are always visible
+    if (item.Level === 1) {
+      // Find the parent (Level 0) and check if it's expanded
+      const parentDesc = item.Parent;
+      return parentDesc ? expandedGroups[parentDesc] !== false : true;
+    }
+    if (item.Level === 2) {
+      // Find the immediate parent (Level 1) and its parent (Level 0)
+      const parentDesc = item.Parent;
+      if (!parentDesc) return true;
+      const parentItem = budgetData.items.find(i => i.Descripción === parentDesc);
+      if (!parentItem) return true;
+      const grandParentDesc = parentItem.Parent;
+      return expandedGroups[parentDesc] !== false && (!grandParentDesc || expandedGroups[grandParentDesc] !== false);
+    }
+    return true;
+  };
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
@@ -174,6 +211,7 @@ const BudgetModule: React.FC = () => {
                       <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                         <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                           <tr>
+                            <th className="px-6 py-3"></th> {/* Column for toggle button */}
                             <th className="px-6 py-3">Código</th>
                             <th className="px-6 py-3">Descripción</th>
                             <th className="px-6 py-3">Unidad</th>
@@ -185,19 +223,36 @@ const BudgetModule: React.FC = () => {
                         </thead>
                         <tbody>
                           {budgetData.items.map((item, index) => {
-                            const isGroup = item.Level < 2; // Level 0 (top-level group) or Level 1 (subgroup)
-                            const indent = item.Level * 20; // Indent based on level (px)
+                            if (!('Level' in item)) {
+                              console.error('Invalid item structure at index', index, item);
+                              return null;
+                            }
+                            const isGroup = item.Level < 2;
+                            const indent = item.Level * 20;
                             const rowStyle = isGroup
                               ? item.Level === 0
-                                ? 'bg-gray-200 dark:bg-gray-700 font-bold' // Top-level group
-                                : 'bg-gray-100 dark:bg-gray-600 font-semibold' // Subgroup
-                              : 'bg-white dark:bg-gray-800'; // Item
+                                ? 'bg-gray-200 dark:bg-gray-700 font-bold'
+                                : 'bg-gray-100 dark:bg-gray-600 font-semibold'
+                              : 'bg-white dark:bg-gray-800';
+                            const isVisible = isItemVisible(item, index);
+
+                            if (!isVisible) return null;
 
                             return (
                               <tr
                                 key={index}
                                 className={`border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 ${rowStyle}`}
                               >
+                                <td className="px-2 py-4">
+                                  {isGroup && (
+                                    <button
+                                      onClick={() => toggleGroup(item.Descripción)}
+                                      className="text-gray-500 hover:text-gray-700"
+                                    >
+                                      {expandedGroups[item.Descripción] ? "▼" : "▶"}
+                                    </button>
+                                  )}
+                                </td>
                                 <td className="px-6 py-4" style={{ paddingLeft: `${indent}px` }}>{item.Codigo}</td>
                                 <td className="px-6 py-4" style={{ paddingLeft: `${indent + 10}px` }}>{item.Descripción}</td>
                                 <td className="px-6 py-4">{isGroup ? '' : item.Unidad}</td>
