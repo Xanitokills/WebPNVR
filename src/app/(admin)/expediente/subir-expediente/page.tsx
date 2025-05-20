@@ -35,16 +35,18 @@ const SubirExpediente: React.FC = () => {
   const [expandedCategories, setExpandedCategories] = useState<{ [key: string]: boolean }>({});
   const [uploadStatusByCategory, setUploadStatusByCategory] = useState<{ [key: string]: string }>({});
   const [errorsByCategory, setErrorsByCategory] = useState<{ [key: string]: string[] }>({});
+  const [completedCategories, setCompletedCategories] = useState<{ [key: string]: boolean }>({});
   const [convenios, setConvenios] = useState<Convenio[]>([]);
   const [selectedConvenioId, setSelectedConvenioId] = useState<number | null>(null);
   const [loadingConvenios, setLoadingConvenios] = useState<boolean>(true);
   const [errorConvenios, setErrorConvenios] = useState<string>("");
+  const [dragOverCategory, setDragOverCategory] = useState<string | null>(null);
   const router = useRouter();
 
-  // Maximum allowed size: 10 MB (matches the server limit)
+  // Maximum allowed size: 10 MB
   const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB in bytes
 
-  // List of categories based on the directory structure
+  // List of categories
   const categories = [
     "1. MEMORIA DESCRIPTIVA",
     "2. MEMORIA DE CALCULO",
@@ -58,6 +60,11 @@ const SubirExpediente: React.FC = () => {
     "10. ANEXOS",
   ];
 
+  // Check if all categories are completed
+  const allCategoriesCompleted = categories.every(
+    (category) => completedCategories[category]
+  );
+
   // Fetch convenios from the API
   const fetchConvenios = useCallback(async () => {
     try {
@@ -67,7 +74,6 @@ const SubirExpediente: React.FC = () => {
       if (response.ok) {
         setConvenios(data);
         setErrorConvenios("");
-        // Set the first convenio as default if available
         if (data.length > 0) setSelectedConvenioId(data[0].convenioID);
       } else {
         setErrorConvenios(data.error || "Error al cargar los convenios.");
@@ -92,39 +98,81 @@ const SubirExpediente: React.FC = () => {
   };
 
   // Handle file selection for a category with size validation
-  const handleFileChange = (category: string, event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files) {
-      const selectedFiles = Array.from(event.target.files);
+  const handleFileChange = (category: string, files: File[]) => {
+    const totalSize = files.reduce((sum, file) => sum + file.size, 0);
 
-      // Calculate total size of selected files
-      const totalSize = selectedFiles.reduce((sum, file) => sum + file.size, 0);
-
-      if (totalSize > MAX_FILE_SIZE) {
-        setErrorsByCategory((prev) => ({
-          ...prev,
-          [category]: [
-            `El tamaño total de los archivos (${(totalSize / (1024 * 1024)).toFixed(2)} MB) excede el límite de 10 MB.`,
-          ],
-        }));
-        setFilesByCategory((prev) => ({
-          ...prev,
-          [category]: [],
-        }));
-        return;
-      }
-
-      setFilesByCategory((prev) => ({
-        ...prev,
-        [category]: selectedFiles,
-      }));
-      setUploadStatusByCategory((prev) => ({
-        ...prev,
-        [category]: "",
-      }));
+    if (totalSize > MAX_FILE_SIZE) {
       setErrorsByCategory((prev) => ({
+        ...prev,
+        [category]: [
+          `El tamaño total de los archivos (${(totalSize / (1024 * 1024)).toFixed(2)} MB) excede el límite de 10 MB.`,
+        ],
+      }));
+      setFilesByCategory((prev) => ({
         ...prev,
         [category]: [],
       }));
+      return;
+    }
+
+    setFilesByCategory((prev) => ({
+      ...prev,
+      [category]: files,
+    }));
+    setUploadStatusByCategory((prev) => ({
+      ...prev,
+      [category]: "",
+    }));
+    setErrorsByCategory((prev) => ({
+      ...prev,
+      [category]: [],
+    }));
+  };
+
+  // Handle file input change
+  const handleInputChange = (category: string, event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      handleFileChange(category, Array.from(event.target.files));
+    }
+  };
+
+  // Handle drag-and-drop events
+  const handleDragOver = (category: string, event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    if (!completedCategories[category]) {
+      setDragOverCategory(category);
+    }
+  };
+
+  const handleDragEnter = (category: string, event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    if (!completedCategories[category]) {
+      setDragOverCategory(category);
+    }
+  };
+
+  const handleDragLeave = (category: string, event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    if (dragOverCategory === category) {
+      setDragOverCategory(null);
+    }
+  };
+
+  const handleDrop = (category: string, event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setDragOverCategory(null);
+    if (!completedCategories[category] && event.dataTransfer.files) {
+      const droppedFiles = Array.from(event.dataTransfer.files).filter((file) =>
+        [".xlsx", ".xls", ".pdf", ".doc", ".docx"].some((ext) => file.name.toLowerCase().endsWith(ext))
+      );
+      if (droppedFiles.length > 0) {
+        handleFileChange(category, droppedFiles);
+      } else {
+        setErrorsByCategory((prev) => ({
+          ...prev,
+          [category]: ["Solo se permiten archivos .xlsx, .xls, .pdf, .doc, .docx."],
+        }));
+      }
     }
   };
 
@@ -175,13 +223,14 @@ const SubirExpediente: React.FC = () => {
             ...prev,
             [category]: [],
           }));
-          // Clear files after successful upload
+          setCompletedCategories((prev) => ({
+            ...prev,
+            [category]: true,
+          }));
           setFilesByCategory((prev) => ({
             ...prev,
             [category]: [],
           }));
-          // Redirect after 2 seconds if all uploads are successful (optional)
-          setTimeout(() => router.push("/expediente/ver-expediente"), 2000);
         } else {
           setUploadStatusByCategory((prev) => ({
             ...prev,
@@ -203,8 +252,13 @@ const SubirExpediente: React.FC = () => {
         }));
       }
     },
-    [filesByCategory, selectedConvenioId, router]
+    [filesByCategory, selectedConvenioId]
   );
+
+  // Handle navigation to ver-expediente
+  const handleNavigate = () => {
+    router.push("/expediente/ver-expediente");
+  };
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
@@ -235,16 +289,43 @@ const SubirExpediente: React.FC = () => {
         )}
       </div>
 
+      {/* Completion Status */}
+      <div className="mb-6">
+        <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          Progreso: {Object.values(completedCategories).filter(Boolean).length} de {categories.length} categorías completadas
+        </p>
+        {allCategoriesCompleted && (
+          <button
+            onClick={handleNavigate}
+            className="mt-2 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+          >
+            Ver Expediente
+          </button>
+        )}
+      </div>
+
       <div className="space-y-4">
         {categories.map((category) => (
           <div
             key={category}
-            className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden"
+            className={`rounded-lg shadow-md overflow-hidden ${
+              completedCategories[category]
+                ? "bg-green-50 dark:bg-green-900"
+                : filesByCategory[category]?.length > 0
+                ? "bg-gray-50 dark:bg-gray-800"
+                : "bg-red-50 dark:bg-red-900"
+            }`}
           >
             {/* Category Header */}
             <button
               onClick={() => toggleCategory(category)}
-              className="w-full p-4 flex justify-between items-center text-left text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600"
+              className={`w-full p-4 flex justify-between items-center text-left text-sm font-medium text-gray-700 dark:text-gray-300 ${
+                completedCategories[category]
+                  ? "bg-green-100 dark:bg-green-800 hover:bg-green-200 dark:hover:bg-green-700"
+                  : filesByCategory[category]?.length > 0
+                  ? "bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600"
+                  : "bg-red-100 dark:bg-red-800 hover:bg-red-200 dark:hover:bg-red-700"
+              }`}
             >
               <span>{category}</span>
               <span>{expandedCategories[category] ? "▼" : "▶"}</span>
@@ -252,7 +333,22 @@ const SubirExpediente: React.FC = () => {
 
             {/* Category Content (Expandable) */}
             {expandedCategories[category] && (
-              <div className="p-4">
+              <div
+                className={`p-4 border-2 border-dashed ${
+                  dragOverCategory === category
+                    ? "border-brand-500 bg-brand-50 dark:bg-brand-900"
+                    : "border-gray-300 dark:border-gray-600"
+                } transition-colors duration-200`}
+                onDragOver={(e) => handleDragOver(category, e)}
+                onDragEnter={(e) => handleDragEnter(category, e)}
+                onDragLeave={(e) => handleDragLeave(category, e)}
+                onDrop={(e) => handleDrop(category, e)}
+              >
+                {/* Drag-and-Drop Instructions */}
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+                  Arrastra y suelta archivos aquí o usa el botón para seleccionar
+                </p>
+
                 {/* File Input */}
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -262,8 +358,9 @@ const SubirExpediente: React.FC = () => {
                     type="file"
                     accept=".xlsx, .xls, .pdf, .doc, .docx"
                     multiple
-                    onChange={(e) => handleFileChange(category, e)}
+                    onChange={(e) => handleInputChange(category, e)}
                     className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100"
+                    disabled={completedCategories[category]}
                   />
                 </div>
 
@@ -289,7 +386,8 @@ const SubirExpediente: React.FC = () => {
                   disabled={
                     !filesByCategory[category]?.length ||
                     uploadStatusByCategory[category] === "Cargando..." ||
-                    !selectedConvenioId
+                    !selectedConvenioId ||
+                    completedCategories[category]
                   }
                   className="px-4 py-2 bg-brand-500 text-white rounded-md hover:bg-brand-600 disabled:bg-gray-400"
                 >

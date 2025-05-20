@@ -23,6 +23,7 @@ const navItems: NavItem[] = [
       { name: "Subir Expediente", path: "/expediente/subir-expediente", pro: false },
       { name: "Ver Expediente", path: "/expediente/ver-expediente", pro: false },
       { name: "Administrar Parámetros", path: "/expediente/administrar-parametros", pro: false },
+       { name: "Presupuesto", path: "/expediente/presupuesto", pro: false },
     ],
   },
   {
