@@ -40,7 +40,8 @@ export async function GET() {
   try {
     const pool = await sql.connect(config);
     const result = await pool.request().query(`
-      SELECT [NombreProyecto]
+      SELECT [convenioID],
+       [NombreProyecto]
             ,[Localidad]
             ,[Distrito]
             ,[Provincia]
