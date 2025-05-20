@@ -33,6 +33,8 @@ type BudgetItem = {
   PrecioUnitario: number;
   CostoTotal: number;
   Category: string;
+  Level: number;
+  Parent?: string;
 };
 
 type BudgetData = {
@@ -50,7 +52,6 @@ const BudgetModule: React.FC = () => {
   const [errorBudget, setErrorBudget] = useState<string>("");
   const [isTableExpanded, setIsTableExpanded] = useState<boolean>(true);
 
-  // Fetch convenios from the API
   const fetchConvenios = useCallback(async () => {
     try {
       setLoadingConvenios(true);
@@ -69,7 +70,6 @@ const BudgetModule: React.FC = () => {
     }
   }, []);
 
-  // Fetch budget data for the selected convenio
   const fetchBudgetData = useCallback(async (convenioId: number) => {
     try {
       setLoadingBudget(true);
@@ -88,29 +88,24 @@ const BudgetModule: React.FC = () => {
     }
   }, []);
 
-  // Load convenios on component mount
   useEffect(() => {
     fetchConvenios();
   }, [fetchConvenios]);
 
-  // Load budget data when a convenio is selected
   useEffect(() => {
     if (selectedConvenioId) {
       fetchBudgetData(selectedConvenioId);
     }
   }, [selectedConvenioId, fetchBudgetData]);
 
-  // Format numbers for display
   const formatNumber = (num: number) => {
-    if (num >= 1000000) return `${(num / 1000000).toFixed(2)}`;
-    if (num >= 1000) return `${(num / 1000).toFixed(2)}`;
+    if (num >= 1000000) return `${(num / 1000000).toFixed(2)}M`;
+    if (num >= 1000) return `${(num / 1000).toFixed(2)}K`;
     return num.toFixed(2);
   };
 
-  // Colors for pie chart
   const COLORS = ['#0088FE', '#FFBB28'];
 
-  // Direct and indirect costs
   const directCost = 1664640.73;
   const indirectCost = 245465.41;
   const totalCost = directCost + indirectCost;
@@ -123,7 +118,6 @@ const BudgetModule: React.FC = () => {
     <div className="p-6 max-w-6xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">Módulo de Presupuesto</h1>
 
-      {/* Convenio Dropdown */}
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
           Selecciona un Convenio
@@ -148,7 +142,6 @@ const BudgetModule: React.FC = () => {
         )}
       </div>
 
-      {/* Budget Content */}
       {selectedConvenioId && (
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
           {loadingBudget && <p className="text-gray-500">Cargando datos del presupuesto...</p>}
@@ -158,10 +151,8 @@ const BudgetModule: React.FC = () => {
           )}
           {!loadingBudget && budgetData.items.length > 0 && (
             <div className="space-y-6">
-              {/* Debug Log */}
               {console.log('Budget items:', budgetData.items)}
 
-              {/* Summary */}
               <div>
                 <h2 className="text-xl font-semibold mb-2">Resumen</h2>
                 <p className="text-gray-700 dark:text-gray-300">
@@ -169,7 +160,6 @@ const BudgetModule: React.FC = () => {
                 </p>
               </div>
 
-              {/* Budget Table */}
               <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
                 <button
                   onClick={() => setIsTableExpanded(!isTableExpanded)}
@@ -194,20 +184,30 @@ const BudgetModule: React.FC = () => {
                           </tr>
                         </thead>
                         <tbody>
-                          {budgetData.items.map((item, index) => (
-                            <tr
-                              key={index}
-                              className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
-                            >
-                              <td className="px-6 py-4">{item.Codigo}</td>
-                              <td className="px-6 py-4">{item.Descripción}</td>
-                              <td className="px-6 py-4">{item.Unidad}</td>
-                              <td className="px-6 py-4">{formatNumber(item.Cantidad)}</td>
-                              <td className="px-6 py-4">{formatNumber(item.PrecioUnitario)}</td>
-                              <td className="px-6 py-4">{formatNumber(item.CostoTotal)}</td>
-                              <td className="px-6 py-4">{item.Category}</td>
-                            </tr>
-                          ))}
+                          {budgetData.items.map((item, index) => {
+                            const isGroup = item.Level < 2; // Level 0 (top-level group) or Level 1 (subgroup)
+                            const indent = item.Level * 20; // Indent based on level (px)
+                            const rowStyle = isGroup
+                              ? item.Level === 0
+                                ? 'bg-gray-200 dark:bg-gray-700 font-bold' // Top-level group
+                                : 'bg-gray-100 dark:bg-gray-600 font-semibold' // Subgroup
+                              : 'bg-white dark:bg-gray-800'; // Item
+
+                            return (
+                              <tr
+                                key={index}
+                                className={`border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 ${rowStyle}`}
+                              >
+                                <td className="px-6 py-4" style={{ paddingLeft: `${indent}px` }}>{item.Codigo}</td>
+                                <td className="px-6 py-4" style={{ paddingLeft: `${indent + 10}px` }}>{item.Descripción}</td>
+                                <td className="px-6 py-4">{isGroup ? '' : item.Unidad}</td>
+                                <td className="px-6 py-4">{isGroup ? '' : formatNumber(item.Cantidad)}</td>
+                                <td className="px-6 py-4">{isGroup ? '' : formatNumber(item.PrecioUnitario)}</td>
+                                <td className="px-6 py-4">{formatNumber(item.CostoTotal)}</td>
+                                <td className="px-6 py-4">{isGroup ? '' : item.Category}</td>
+                              </tr>
+                            );
+                          })}
                         </tbody>
                       </table>
                     </div>
@@ -215,7 +215,6 @@ const BudgetModule: React.FC = () => {
                 )}
               </div>
 
-              {/* Bar Chart */}
               <div>
                 <h2 className="text-xl font-semibold mb-2">Distribución de Costos por Categoría</h2>
                 <ResponsiveContainer width="100%" height={400}>
@@ -230,7 +229,6 @@ const BudgetModule: React.FC = () => {
                 </ResponsiveContainer>
               </div>
 
-              {/* Pie Chart */}
               <div>
                 <h2 className="text-xl font-semibold mb-2">Costos Directos vs. Indirectos</h2>
                 <ResponsiveContainer width="100%" height={400}>

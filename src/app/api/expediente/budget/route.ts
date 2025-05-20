@@ -29,6 +29,8 @@ interface BudgetItem {
   PrecioUnitario: number;
   CostoTotal: number;
   Category: string;
+  Level: number; // 0 for top-level, 1 for subgroup, 2 for sub-subgroup
+  Parent?: string; // Reference to the parent item's Descripción
 }
 
 export async function GET(request: NextRequest) {
@@ -99,7 +101,7 @@ export async function GET(request: NextRequest) {
     const data = XLSX.utils.sheet_to_json(sheet, { header: 1 });
     console.log('Primeras 5 filas del archivo Excel:', data.slice(0, 5));
 
-    // Encontrar la fila de encabezados, considerando 'Item' en las primeras tres columnas
+    // Encontrar la fila de encabezados
     let headerRowIndex = -1;
     const expectedHeaders = ['Item', 'Descripción', 'Und.', 'Metrado', 'P.U.', 'Parcial'];
     for (let i = 0; i < data.length; i++) {
@@ -134,7 +136,10 @@ export async function GET(request: NextRequest) {
     ];
 
     const items: BudgetItem[] = [];
+    const groupTotals: { [key: string]: number } = {}; // To store totals for groups
     console.log('Procesando datos a partir de la fila', headerRowIndex + 1);
+
+    // First pass: Process items and calculate totals for groups
     for (let i = headerRowIndex + 1; i < data.length; i++) {
       const row = data[i] as any[];
       const startIndex = row.findIndex((cell, idx) => idx >= 0 && cell?.toString().trim());
@@ -142,29 +147,68 @@ export async function GET(request: NextRequest) {
         console.log('Saltando fila vacía:', row);
         continue; // Saltar filas completamente vacías
       }
+
       const codigo = row[0]?.toString().trim() || 'N/A';
       const slicedRow = row.slice(0, 8); // Take the first 8 columns to cover Item to Parcial
       console.log('Procesando fila', i, 'con datos:', slicedRow);
 
-      // Skip rows without Unidad or Metrado (likely summary rows)
-      if (!slicedRow[4] || !slicedRow[5]) {
-        console.log('Saltando fila sin unidad o metrado:', row);
-        continue;
-      }
+      // Determine level based on empty cells in B and C
+      let level = 0;
+      if (!row[1] && !row[2]) level = 0; // Top-level group (e.g., "OBRAS PROVISIONALES...")
+      else if (!row[2]) level = 1; // Subgroup (e.g., "TRABAJOS PRELIMINARES")
+      else level = 2; // Sub-subgroup (e.g., "CARTEL DE OBRA 4.00 X 2.50")
 
       const partial = parseFloat(slicedRow[7]) || 0; // Parcial (CostoTotal) is in column H (index 7)
       const category = categories.find(cat => cat.codes.some(prefix => codigo.startsWith(prefix)));
-      if (category) category.value += partial;
+      if (category && level === 2) category.value += partial; // Only add to categories for actual items (Level 2)
 
+      // Find the parent description for subgroups and sub-subgroups
+      let parent = null;
+      if (level > 0) {
+        for (let j = i - 1; j >= headerRowIndex + 1; j--) {
+          const prevRow = data[j] as any[];
+          const prevLevel = (!prevRow[1] && !prevRow[2]) ? 0 : (!prevRow[2] ? 1 : 2);
+          if (prevLevel < level) {
+            parent = prevRow[3]?.toString().trim() || null;
+            break;
+          }
+        }
+      }
+
+      // Update group totals
+      if (level === 2 && parent) {
+        let currentParent = parent;
+        while (currentParent) {
+          groupTotals[currentParent] = (groupTotals[currentParent] || 0) + partial;
+          // Find the parent's parent (for nested groups)
+          const parentIndex = items.findIndex(item => item.Descripción === currentParent);
+          if (parentIndex !== -1) {
+            currentParent = items[parentIndex].Parent || null;
+          } else {
+            currentParent = null;
+          }
+        }
+      }
+
+      // Add the item to the list
       items.push({
         Codigo: codigo,
-        Descripción: slicedRow[3]?.toString().trim() || 'N/A', // Descripción is in column D (index 3)
-        Unidad: slicedRow[4]?.toString().trim() || 'N/A',     // Unidad is in column E (index 4)
-        Cantidad: parseFloat(slicedRow[5]) || 0,              // Cantidad (Metrado) is in column F (index 5)
-        PrecioUnitario: parseFloat(slicedRow[6]) || 0,        // Precio Unitario (P.U.) is in column G (index 6)
-        CostoTotal: partial,                                  // Costo Total (Parcial) is in column H (index 7)
+        Descripción: slicedRow[3]?.toString().trim() || 'N/A',
+        Unidad: slicedRow[4]?.toString().trim() || 'N/A',
+        Cantidad: parseFloat(slicedRow[5]) || 0,
+        PrecioUnitario: parseFloat(slicedRow[6]) || 0,
+        CostoTotal: partial,
         Category: category ? category.name : 'Other',
+        Level: level,
+        Parent: parent,
       });
+    }
+
+    // Second pass: Update group rows with their aggregated totals
+    for (let item of items) {
+      if (item.Level < 2) {
+        item.CostoTotal = groupTotals[item.Descripción] || item.CostoTotal;
+      }
     }
 
     console.log('Datos procesados, total de ítems:', items.length);
