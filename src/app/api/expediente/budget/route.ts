@@ -21,6 +21,16 @@ const dbConfig = {
   },
 };
 
+interface BudgetItem {
+  Codigo: string;
+  Descripción: string;
+  Unidad: string;
+  Cantidad: number;
+  PrecioUnitario: number;
+  CostoTotal: number;
+  Category: string;
+}
+
 export async function GET(request: NextRequest) {
   let pool;
   try {
@@ -133,20 +143,26 @@ export async function GET(request: NextRequest) {
         continue; // Saltar filas completamente vacías
       }
       const codigo = row[0]?.toString().trim() || 'N/A';
-      const slicedRow = row.slice(0, 6); // Tomar los 6 campos relevantes
+      const slicedRow = row.slice(0, 8); // Take the first 8 columns to cover Item to Parcial
       console.log('Procesando fila', i, 'con datos:', slicedRow);
 
-      const partial = parseFloat(slicedRow[5]) || 0; // Parcial está en la posición 5
+      // Skip rows without Unidad or Metrado (likely summary rows)
+      if (!slicedRow[4] || !slicedRow[5]) {
+        console.log('Saltando fila sin unidad o metrado:', row);
+        continue;
+      }
+
+      const partial = parseFloat(slicedRow[7]) || 0; // Parcial (CostoTotal) is in column H (index 7)
       const category = categories.find(cat => cat.codes.some(prefix => codigo.startsWith(prefix)));
       if (category) category.value += partial;
 
       items.push({
         Codigo: codigo,
-        Descripción: slicedRow[2]?.toString().trim() || 'N/A', // Ajuste para alinear con Descripción en columna D
-        Unidad: slicedRow[3]?.toString().trim() || 'N/A',
-        Cantidad: parseFloat(slicedRow[4]) || 0,
-        PrecioUnitario: parseFloat(slicedRow[5]) || 0,
-        CostoTotal: partial,
+        Descripción: slicedRow[3]?.toString().trim() || 'N/A', // Descripción is in column D (index 3)
+        Unidad: slicedRow[4]?.toString().trim() || 'N/A',     // Unidad is in column E (index 4)
+        Cantidad: parseFloat(slicedRow[5]) || 0,              // Cantidad (Metrado) is in column F (index 5)
+        PrecioUnitario: parseFloat(slicedRow[6]) || 0,        // Precio Unitario (P.U.) is in column G (index 6)
+        CostoTotal: partial,                                  // Costo Total (Parcial) is in column H (index 7)
         Category: category ? category.name : 'Other',
       });
     }
@@ -171,14 +187,4 @@ export async function GET(request: NextRequest) {
       await pool.close();
     }
   }
-}
-
-interface BudgetItem {
-  Codigo: string;
-  Descripción: string;
-  Unidad: string;
-  Cantidad: number;
-  PrecioUnitario: number;
-  CostoTotal: number;
-  Category: string;
 }

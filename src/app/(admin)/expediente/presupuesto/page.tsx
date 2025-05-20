@@ -27,7 +27,7 @@ type Convenio = {
 
 type BudgetItem = {
   Codigo: string;
-  Descripcion: string;
+  Descripción: string;
   Unidad: string;
   Cantidad: number;
   PrecioUnitario: number;
@@ -102,8 +102,8 @@ const BudgetModule: React.FC = () => {
 
   // Format numbers for display
   const formatNumber = (num: number) => {
-    if (num >= 1000000) return `${(num / 1000000).toFixed(2)}M`;
-    if (num >= 1000) return `${(num / 1000).toFixed(2)}K`;
+    if (num >= 1000000) return `${(num / 1000000).toFixed(2)}`;
+    if (num >= 1000) return `${(num / 1000).toFixed(2)}`;
     return num.toFixed(2);
   };
 
@@ -158,6 +158,9 @@ const BudgetModule: React.FC = () => {
           )}
           {!loadingBudget && budgetData.items.length > 0 && (
             <div className="space-y-6">
+              {/* Debug Log */}
+              {console.log('Budget items:', budgetData.items)}
+
               {/* Summary */}
               <div>
                 <h2 className="text-xl font-semibold mb-2">Resumen</h2>
@@ -197,7 +200,7 @@ const BudgetModule: React.FC = () => {
                               className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
                             >
                               <td className="px-6 py-4">{item.Codigo}</td>
-                              <td className="px-6 py-4">{item.Descripcion}</td>
+                              <td className="px-6 py-4">{item.Descripción}</td>
                               <td className="px-6 py-4">{item.Unidad}</td>
                               <td className="px-6 py-4">{formatNumber(item.Cantidad)}</td>
                               <td className="px-6 py-4">{formatNumber(item.PrecioUnitario)}</td>
