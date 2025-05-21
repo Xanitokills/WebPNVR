@@ -95,7 +95,17 @@ export async function GET(request: NextRequest) {
 
     console.log('Parseando el archivo Excel con XLSX');
     const workbook = XLSX.read(buffer, { type: 'buffer' });
-    const sheetName = workbook.SheetNames[0];
+const sheetName = workbook.SheetNames.find(name => name.toLowerCase() === 'presupuesto');
+if (!sheetName) {
+  console.log('No se encontró la pestaña "PRESUPUESTO" en el archivo Excel');
+  return NextResponse.json(
+    { error: 'No se encontró la pestaña "PRESUPUESTO" en el archivo Excel' },
+    { status: 400 }
+  );
+}
+
+
+
     console.log('Hoja seleccionada:', sheetName);
     const sheet = workbook.Sheets[sheetName];
     const data = XLSX.utils.sheet_to_json(sheet, { header: 1 });
