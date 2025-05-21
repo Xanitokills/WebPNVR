@@ -1,41 +1,43 @@
 import { NextRequest, NextResponse } from "next/server";
 import sql from "mssql";
 
-export async function GET() {
-  const variablesRequeridas = {
+// Configuración de variables de entorno
+const getDbConfig = () => {
+  const requiredEnvVars = {
     DB_USER: process.env.DB_USER,
     DB_PASSWORD: process.env.DB_PASSWORD,
     DB_SERVER: process.env.DB_SERVER,
+    DB_NAME: process.env.DB_NAME, // Añadimos DB_NAME
   };
 
-  const variablesFaltantes = Object.entries(variablesRequeridas)
-    .filter(([, valor]) => !valor)
-    .map(([clave]) => clave);
+  const missingEnvVars = Object.entries(requiredEnvVars)
+    .filter(([, value]) => !value)
+    .map(([key]) => key);
 
-  if (variablesFaltantes.length > 0) {
-    return NextResponse.json(
-      { error: `Faltan las siguientes variables de entorno: ${variablesFaltantes.join(", ")}` },
-      { status: 500 }
-    );
+  if (missingEnvVars.length > 0) {
+    throw new Error(`Faltan las siguientes variables de entorno: ${missingEnvVars.join(", ")}`);
   }
 
-  const configuracion = {
-    user: variablesRequeridas.DB_USER as string,
-    password: variablesRequeridas.DB_PASSWORD as string,
-    server: variablesRequeridas.DB_SERVER as string,
-    database: "PNVR",
+  return {
+    user: requiredEnvVars.DB_USER as string,
+    password: requiredEnvVars.DB_PASSWORD as string,
+    server: requiredEnvVars.DB_SERVER as string,
+    database: requiredEnvVars.DB_NAME as string, // Usamos DB_NAME desde las variables de entorno
     options: {
       encrypt: false,
       trustServerCertificate: true,
     },
   };
+};
 
+export async function GET() {
   try {
-    const pool = await sql.connect(configuracion);
-    const resultado = await pool
+    const config = getDbConfig();
+    const pool = await sql.connect(config);
+    const result = await pool
       .request()
-      .query("SELECT * FROM [PNVR].[dbo].[Grupo]");
-    return NextResponse.json(resultado.recordset);
+      .query("SELECT * FROM [dbo].[Grupo]"); // Simplifiqué la consulta eliminando [PNVR] ya que el database se especifica en la conexión
+    return NextResponse.json(result.recordset);
   } catch (error) {
     console.error("Error en la consulta GET:", error);
     return NextResponse.json(
@@ -46,44 +48,16 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  const body = await request.json();
-
-  const variablesRequeridas = {
-    DB_USER: process.env.DB_USER,
-    DB_PASSWORD: process.env.DB_PASSWORD,
-    DB_SERVER: process.env.DB_SERVER,
-  };
-
-  const variablesFaltantes = Object.entries(variablesRequeridas)
-    .filter(([, valor]) => !valor)
-    .map(([clave]) => clave);
-
-  if (variablesFaltantes.length > 0) {
-    return NextResponse.json(
-      { error: `Faltan las siguientes variables de entorno: ${variablesFaltantes.join(", ")}` },
-      { status: 500 }
-    );
-  }
-
-  const configuracion = {
-    user: variablesRequeridas.DB_USER as string,
-    password: variablesRequeridas.DB_PASSWORD as string,
-    server: variablesRequeridas.DB_SERVER as string,
-    database: "PNVR",
-    options: {
-      encrypt: false,
-      trustServerCertificate: true,
-    },
-  };
-
   try {
-    const pool = await sql.connect(configuracion);
+    const body = await request.json();
+    const config = getDbConfig();
+    const pool = await sql.connect(config);
     const result = await pool
       .request()
       .input("nombre", sql.NVarChar(100), body.nombre)
       .input("estado", sql.Int, body.estado || null)
       .query(
-        "INSERT INTO [PNVR].[dbo].[Grupo] (nombre, estado) VALUES (@nombre, @estado); SELECT SCOPE_IDENTITY() as id_grupo"
+        "INSERT INTO [dbo].[Grupo] (nombre, estado) VALUES (@nombre, @estado); SELECT SCOPE_IDENTITY() as id_grupo"
       );
     const newId = result.recordset[0].id_grupo;
     const newGrupo = { id_grupo: newId, nombre: body.nombre, estado: body.estado || null };

@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import sql from "mssql";
-import fs from "fs/promises";
-import path from "path";
 
-export async function GET() {
+// Configuración de variables de entorno
+const getDbConfig = () => {
   const requiredEnvVars = {
     DB_USER: process.env.DB_USER,
     DB_PASSWORD: process.env.DB_PASSWORD,
     DB_SERVER: process.env.DB_SERVER,
+    DB_NAME: process.env.DB_NAME,
   };
 
   const missingEnvVars = Object.entries(requiredEnvVars)
@@ -15,28 +15,24 @@ export async function GET() {
     .map(([key]) => key);
 
   if (missingEnvVars.length > 0) {
-    return NextResponse.json(
-      {
-        error: `Missing required environment variables: ${missingEnvVars.join(
-          ", "
-        )}`,
-      },
-      { status: 500 }
-    );
+    throw new Error(`Missing required environment variables: ${missingEnvVars.join(", ")}`);
   }
 
-  const config = {
+  return {
     user: requiredEnvVars.DB_USER as string,
     password: requiredEnvVars.DB_PASSWORD as string,
     server: requiredEnvVars.DB_SERVER as string,
-    database: "PNVR",
+    database: requiredEnvVars.DB_NAME as string,
     options: {
       encrypt: false,
       trustServerCertificate: true,
     },
   };
+};
 
+export async function GET() {
   try {
+    const config = getDbConfig();
     const pool = await sql.connect(config);
     const result = await pool.request().query(`
       SELECT [id_convenio]
@@ -66,12 +62,11 @@ export async function GET() {
             ,[fecha_inicio_estimada]
             ,[fecha_termino_estimada]
             ,[anio_intervencion]
-      FROM [PNVR].[dbo].[Convenios]
+      FROM [dbo].[Convenios]
     `);
     return NextResponse.json(result.recordset);
   } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Unknown error";
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
       { error: "Failed to retrieve convenios", details: errorMessage },
       { status: 500 }
@@ -80,41 +75,9 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  const formData = await request.formData();
-
-  const requiredEnvVars = {
-    DB_USER: process.env.DB_USER,
-    DB_PASSWORD: process.env.DB_PASSWORD,
-    DB_SERVER: process.env.DB_SERVER,
-  };
-
-  const missingEnvVars = Object.entries(requiredEnvVars)
-    .filter(([, value]) => !value)
-    .map(([key]) => key);
-
-  if (missingEnvVars.length > 0) {
-    return NextResponse.json(
-      {
-        error: `Missing required environment variables: ${missingEnvVars.join(
-          ", "
-        )}`,
-      },
-      { status: 500 }
-    );
-  }
-
-  const config = {
-    user: requiredEnvVars.DB_USER as string,
-    password: requiredEnvVars.DB_PASSWORD as string,
-    server: requiredEnvVars.DB_SERVER as string,
-    database: "PNVR",
-    options: {
-      encrypt: false,
-      trustServerCertificate: true,
-    },
-  };
-
   try {
+    const formData = await request.formData();
+    const config = getDbConfig();
     const pool = await sql.connect(config);
 
     // Extract form data
@@ -151,12 +114,8 @@ export async function POST(request: NextRequest) {
       ? parseInt(formData.get("id_ubicacion") as string)
       : null;
     const fecha_convenio = formData.get("fecha_convenio") as string | null;
-    const fecha_transferencia = formData.get("fecha_transferencia") as
-      | string
-      | null;
-    const fecha_limite_inicio = formData.get("fecha_limite_inicio") as
-      | string
-      | null;
+    const fecha_transferencia = formData.get("fecha_transferencia") as string | null;
+    const fecha_limite_inicio = formData.get("fecha_limite_inicio") as string | null;
     const fecha_inicio = formData.get("fecha_inicio") as string | null;
     const plazo_ejecucion = formData.get("plazo_ejecucion")
       ? parseInt(formData.get("plazo_ejecucion") as string)
@@ -168,27 +127,14 @@ export async function POST(request: NextRequest) {
       ? parseInt(formData.get("dias_ampliacion") as string)
       : null;
     const fecha_termino = formData.get("fecha_termino") as string | null;
-    const fecha_acta_termino = formData.get("fecha_acta_termino") as
-      | string
-      | null;
+    const fecha_acta_termino = formData.get("fecha_acta_termino") as string | null;
     const motivo_atraso = formData.get("motivo_atraso") as string | null;
-    const accion_mitigacion = formData.get("accion_mitigacion") as
-      | string
-      | null;
-    const fecha_inicio_estimada = formData.get("fecha_inicio_estimada") as
-      | string
-      | null;
-    const fecha_termino_estimada = formData.get("fecha_termino_estimada") as
-      | string
-      | null;
+    const accion_mitigacion = formData.get("accion_mitigacion") as string | null;
+    const fecha_inicio_estimada = formData.get("fecha_inicio_estimada") as string | null;
+    const fecha_termino_estimada = formData.get("fecha_termino_estimada") as string | null;
     const anio_intervencion = formData.get("anio_intervencion")
       ? parseInt(formData.get("anio_intervencion") as string)
       : null;
-
-    // File handling (optional, assuming no file uploads based on schema)
-    // If files are needed, you can add similar logic as the original for uploads
-    const uploadDir = path.join(process.cwd(), "public", "uploads");
-    await fs.mkdir(uploadDir, { recursive: true });
 
     const request = pool.request();
     request
@@ -220,7 +166,7 @@ export async function POST(request: NextRequest) {
       .input("anio_intervencion", sql.Int, anio_intervencion);
 
     const result = await request.query(`
-      INSERT INTO [PNVR].[dbo].[Convenios] (
+      INSERT INTO [dbo].[Convenios] (
         cod_ugt, nombre_proyecto, id_grupo, id_tipo_intervencion, id_programa_presupuestal,
         id_tipo_fenomeno, id_tipo_material, id_estado, id_sub_estado, id_priorizacion,
         id_tipo_meta, id_ubicacion, fecha_convenio, fecha_transferencia, fecha_limite_inicio,
@@ -237,10 +183,9 @@ export async function POST(request: NextRequest) {
       )
     `);
 
-    return NextResponse.json(result.recordset[0]);
+    return NextResponse.json(result.recordset[0], { status: 201 });
   } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Unknown error";
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
       { error: "Failed to create convenio", details: errorMessage },
       { status: 500 }

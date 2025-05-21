@@ -3,8 +3,8 @@
 CREATE TABLE Convenios(
 	id_convenio int identity primary key,
 	cod_ugt varchar(50) NULL,
-	cod_Convenios varchar(50) NOT NULL,
-	nombre_Convenios varchar(50) NOT NULL,
+	cod_Convenio varchar(50) NOT NULL,
+	nombre_Convenio varchar(50) NOT NULL,
 	id_grupo int NULL,
 	id_tipo_intervencion int NULL,
 	id_programa_presupuestal int NULL,
@@ -64,6 +64,15 @@ PRIMARY KEY CLUSTERED
 ) ON [PRIMARY]
 GO
 
+CREATE TABLE Convenio_Personal (
+    id_convenio int,
+    id_personal INT,
+    id_cargo INT,
+    PRIMARY KEY (id_convenio, id_personal, id_cargo),  -- Clave compuesta
+    FOREIGN KEY (id_convenio) REFERENCES Convenios(id_convenio),
+    FOREIGN KEY (id_personal) REFERENCES Personal(id_personal),
+    FOREIGN KEY (id_cargo) REFERENCES Cargo(id_cargo)
+);
 
 
 CREATE TABLE [dbo].[Convocatoria](
