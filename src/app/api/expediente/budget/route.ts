@@ -14,7 +14,7 @@ const dbConfig = {
   user: process.env.DB_USER as string,
   password: process.env.DB_PASSWORD as string,
   server: process.env.DB_SERVER as string,
-  database: 'PNVR2',
+  database: process.env.DB_NAME as string, // Read from .env instead of hardcoding 'PNVR2'
   options: {
     encrypt: false,
     trustServerCertificate: true,
@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
           FechaCarga,
           CreadoEn,
           ActualizadoEn
-        FROM [PNVR2].[dbo].[ExpedienteTecnico]
+        FROM [${process.env.DB_NAME}].[dbo].[ExpedienteTecnico]
         WHERE id_convenio = @id_convenio
           AND Categoria = @category
           AND TipoArchivo = 'Excel'
@@ -95,16 +95,14 @@ export async function GET(request: NextRequest) {
 
     console.log('Parseando el archivo Excel con XLSX');
     const workbook = XLSX.read(buffer, { type: 'buffer' });
-const sheetName = workbook.SheetNames.find(name => name.toLowerCase() === 'presupuesto');
-if (!sheetName) {
-  console.log('No se encontró la pestaña "PRESUPUESTO" en el archivo Excel');
-  return NextResponse.json(
-    { error: 'No se encontró la pestaña "PRESUPUESTO" en el archivo Excel' },
-    { status: 400 }
-  );
-}
-
-
+    const sheetName = workbook.SheetNames.find(name => name.toLowerCase() === 'presupuesto');
+    if (!sheetName) {
+      console.log('No se encontró la pestaña "PRESUPUESTO" en el archivo Excel');
+      return NextResponse.json(
+        { error: 'No se encontró la pestaña "PRESUPUESTO" en el archivo Excel' },
+        { status: 400 }
+      );
+    }
 
     console.log('Hoja seleccionada:', sheetName);
     const sheet = workbook.Sheets[sheetName];
