@@ -14,7 +14,7 @@ const dbConfig = {
   user: process.env.DB_USER as string,
   password: process.env.DB_PASSWORD as string,
   server: process.env.DB_SERVER as string,
-  database: 'PNVR',
+  database: 'PNVR2',
   options: {
     encrypt: false,
     trustServerCertificate: true,
@@ -36,25 +36,25 @@ interface BudgetItem {
 export async function GET(request: NextRequest) {
   let pool;
   try {
-    console.log('Iniciando solicitud GET /api/expediente/budget con convenioId:', request.url);
+    console.log('Iniciando solicitud GET /api/expediente/budget con id_convenio:', request.url);
     const { searchParams } = new URL(request.url);
-    const convenioId = searchParams.get('convenioId');
+    const id_convenio = searchParams.get('id_convenio');
 
-    if (!convenioId) {
-      console.log('Error: convenioId no proporcionado');
+    if (!id_convenio) {
+      console.log('Error: id_convenio no proporcionado');
       return NextResponse.json(
-        { error: 'El convenioId es requerido' },
+        { error: 'El id_convenio es requerido' },
         { status: 400 }
       );
     }
 
-    console.log('Conectando a la base de datos con convenioId:', convenioId);
+    console.log('Conectando a la base de datos con id_convenio:', id_convenio);
     pool = await sql.connect(dbConfig);
 
     console.log('Ejecutando consulta SQL para obtener archivo Excel');
     const result = await pool
       .request()
-      .input('convenioId', sql.Int, parseInt(convenioId))
+      .input('id_convenio', sql.Int, parseInt(id_convenio))
       .input('category', sql.NVarChar, '3. METRADOS Y PRESUPUESTO')
       .query(`
         SELECT 
@@ -66,14 +66,14 @@ export async function GET(request: NextRequest) {
           FechaCarga,
           CreadoEn,
           ActualizadoEn
-        FROM [PNVR].[dbo].[ExpedienteTecnico]
-        WHERE ConvenioId = @convenioId
+        FROM [PNVR2].[dbo].[ExpedienteTecnico]
+        WHERE id_convenio = @id_convenio
           AND Categoria = @category
           AND TipoArchivo = 'Excel'
       `);
 
     if (result.recordset.length === 0) {
-      console.log('No se encontró un archivo Excel en la categoría "3. METRADOS Y PRESUPUESTO" para convenioId:', convenioId);
+      console.log('No se encontró un archivo Excel en la categoría "3. METRADOS Y PRESUPUESTO" para id_convenio:', id_convenio);
       return NextResponse.json(
         { error: 'No se encontró un archivo Excel en la categoría "3. METRADOS Y PRESUPUESTO"' },
         { status: 404 }

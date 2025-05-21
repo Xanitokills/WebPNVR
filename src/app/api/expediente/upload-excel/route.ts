@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     user: variablesRequeridas.DB_USER as string,
     password: variablesRequeridas.DB_PASSWORD as string,
     server: variablesRequeridas.DB_SERVER as string,
-    database: "PNVR",
+    database: "PNVR2",
     options: {
       encrypt: false,
       trustServerCertificate: true,
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     // Parse form data
     const formData = await request.formData();
     const category = formData.get("category") as string;
-    const convenioId = formData.get("convenioId") as string;
+    const convenioId = formData.get("id_convenio") as string;
 
     if (!category || !convenioId) {
       return NextResponse.json(
@@ -107,8 +107,8 @@ export async function POST(request: NextRequest) {
           .input("Categoria", sql.NVarChar, category)
           .input("FechaCarga", sql.DateTime, new Date())
           .query(`
-            INSERT INTO [PNVR].[dbo].[ExpedienteTecnico] 
-            (ConvenioId, NombreArchivo, TipoArchivo, RutaArchivo, TamañoArchivo, Descripcion, Categoria, FechaCarga)
+            INSERT INTO [PNVR2].[dbo].[ExpedienteTecnico] 
+            (id_convenio, NombreArchivo, TipoArchivo, RutaArchivo, TamañoArchivo, Descripcion, Categoria, FechaCarga)
             VALUES (@ConvenioId, @NombreArchivo, @TipoArchivo, @RutaArchivo, @TamañoArchivo, @Descripcion, @Categoria, @FechaCarga)
           `);
       }

@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     user: requiredEnvVars.DB_USER as string,
     password: requiredEnvVars.DB_PASSWORD as string,
     server: requiredEnvVars.DB_SERVER as string,
-    database: "PNVR",
+    database: "PNVR2",
     options: {
       encrypt: false,
       trustServerCertificate: true,
@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
     // Query to fetch files from ExpedienteTecnico
     const result = await pool
       .request()
-      .input("ConvenioId", sql.Int, parseInt(convenioId))
+      .input("Id_Convenio", sql.Int, parseInt(convenioId))
       .query(`
         SELECT 
           NombreArchivo,
@@ -62,8 +62,8 @@ export async function GET(request: NextRequest) {
           CreadoEn,
           ActualizadoEn,
           Categoria
-        FROM [PNVR].[dbo].[ExpedienteTecnico]
-        WHERE ConvenioId = @ConvenioId
+        FROM [PNVR2].[dbo].[ExpedienteTecnico]
+        WHERE Id_Convenio = @Id_Convenio
         ORDER BY Categoria, NombreArchivo
       `);
 

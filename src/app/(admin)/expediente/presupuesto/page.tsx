@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 
 type Convenio = {
-  convenioID: number;
+  id_convenio: number;
   NombreProyecto: string;
   Localidad: string;
   Distrito: string;
@@ -56,7 +56,7 @@ const BudgetModule: React.FC = () => {
   const fetchConvenios = useCallback(async () => {
     try {
       setLoadingConvenios(true);
-      const response = await fetch("http://localhost:3003/api/groconvenios/convenios2");
+      const response = await fetch("http://localhost:3003/api/groconvenios/convenios");
       const data = await response.json();
       if (response.ok) {
         setConvenios(data);
@@ -71,10 +71,10 @@ const BudgetModule: React.FC = () => {
     }
   }, []);
 
-  const fetchBudgetData = useCallback(async (convenioId: number) => {
+  const fetchBudgetData = useCallback(async (id_convenio: number) => {
     try {
       setLoadingBudget(true);
-      const response = await fetch(`/api/expediente/budget?convenioId=${convenioId}`);
+      const response = await fetch(`/api/expediente/budget?id_convenio=${id_convenio}`);
       const data = await response.json();
       if (response.ok) {
         setBudgetData(data);
@@ -171,8 +171,8 @@ const BudgetModule: React.FC = () => {
               Selecciona un convenio
             </option>
             {convenios.map((convenio) => (
-              <option key={convenio.convenioID} value={convenio.convenioID}>
-                {convenio.NombreProyecto} (ID: {convenio.convenioID})
+              <option key={convenio.id_convenio} value={convenio.id_convenio}>
+                {convenio.NombreProyecto} (ID: {convenio.id_convenio})
               </option>
             ))}
           </select>

@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 
 type Convenio = {
-  convenioID: number;
+  id_convenio: number;
   NombreProyecto: string;
   Localidad: string;
   Distrito: string;
@@ -69,12 +69,12 @@ const SubirExpediente: React.FC = () => {
   const fetchConvenios = useCallback(async () => {
     try {
       setLoadingConvenios(true);
-      const response = await fetch("http://localhost:3003/api/groconvenios/convenios2");
+      const response = await fetch("http://localhost:3003/api/groconvenios/convenios");
       const data = await response.json();
       if (response.ok) {
         setConvenios(data);
         setErrorConvenios("");
-        if (data.length > 0) setSelectedConvenioId(data[0].convenioID);
+        if (data.length > 0) setSelectedConvenioId(data[0].id_convenio);
       } else {
         setErrorConvenios(data.error || "Error al cargar los convenios.");
       }
@@ -201,7 +201,7 @@ const SubirExpediente: React.FC = () => {
         formData.append(`file-${index}`, file);
       });
       formData.append("category", category);
-      formData.append("convenioId", selectedConvenioId.toString());
+      formData.append("id_convenio", selectedConvenioId.toString());
 
       try {
         setUploadStatusByCategory((prev) => ({
@@ -281,8 +281,8 @@ const SubirExpediente: React.FC = () => {
               Selecciona un convenio
             </option>
             {convenios.map((convenio) => (
-              <option key={convenio.convenioID} value={convenio.convenioID}>
-                {convenio.NombreProyecto} (ID: {convenio.convenioID})
+              <option key={convenio.id_convenio} value={convenio.id_convenio}>
+                {convenio.NombreProyecto} (ID: {convenio.id_convenio})
               </option>
             ))}
           </select>

@@ -67,14 +67,45 @@ interface FormData {
   cod_ugt: string;
   cod_Convenio: string;
   nombre_Convenio: string;
+  id_grupo: string;
+  id_tipo_intervencion: string;
+  id_programa_presupuestal: string;
+  id_tipo_fenomeno: string;
+  id_tipo_material: string;
+  id_estado: string;
+  id_sub_estado: string;
+  id_priorizacion: string;
+  id_tipo_meta: string;
+  id_Localidad: string;
+  id_Distrito: string;
+  id_Provincia: string;
+  id_Departamento: string;
   fecha_Convenios: string;
+  fecha_transferencia: string;
+  fecha_limite_inicio: string;
   fecha_inicio: string;
+  plazo_ejecucion: string;
+  dias_paralizados: string;
+  dias_ampliacion: string;
   fecha_termino: string;
+  fecha_acta_termino: string;
+  motivo_atraso: string;
+  accion_mitigacion: string;
+  fecha_inicio_estimada: string;
+  fecha_termino_estimada: string;
   anio_intervencion: string;
   Entidad: string;
   Programa: string;
   Proyectista: string;
   Evaluador: string;
+  PresupuestoBase: string;
+  PresupuestoFinanciamiento: string;
+  AporteBeneficiario: string;
+  SimboloMonetario: string;
+  IGV: string;
+  PlazoEjecucionMeses: string;
+  PlazoEjecucionDias: string;
+  NumeroBeneficiarios: string;
 }
 
 const VerConvenios = () => {
@@ -88,14 +119,45 @@ const VerConvenios = () => {
     cod_ugt: "",
     cod_Convenio: "",
     nombre_Convenio: "",
+    id_grupo: "",
+    id_tipo_intervencion: "",
+    id_programa_presupuestal: "",
+    id_tipo_fenomeno: "",
+    id_tipo_material: "",
+    id_estado: "",
+    id_sub_estado: "",
+    id_priorizacion: "",
+    id_tipo_meta: "",
+    id_Localidad: "",
+    id_Distrito: "",
+    id_Provincia: "",
+    id_Departamento: "",
     fecha_Convenios: "",
+    fecha_transferencia: "",
+    fecha_limite_inicio: "",
     fecha_inicio: "",
+    plazo_ejecucion: "",
+    dias_paralizados: "",
+    dias_ampliacion: "",
     fecha_termino: "",
+    fecha_acta_termino: "",
+    motivo_atraso: "",
+    accion_mitigacion: "",
+    fecha_inicio_estimada: "",
+    fecha_termino_estimada: "",
     anio_intervencion: "",
     Entidad: "",
     Programa: "",
     Proyectista: "",
     Evaluador: "",
+    PresupuestoBase: "",
+    PresupuestoFinanciamiento: "",
+    AporteBeneficiario: "",
+    SimboloMonetario: "",
+    IGV: "",
+    PlazoEjecucionMeses: "",
+    PlazoEjecucionDias: "",
+    NumeroBeneficiarios: "",
   });
 
   const estadoColores: { [key: string]: { bg: string; text: string } } = {
@@ -118,7 +180,7 @@ const VerConvenios = () => {
     const fetchConvenios = async () => {
       try {
         console.log("Fetching convenios...");
-        const response = await fetch("/api/groconvenios/convenios2");
+        const response = await fetch("/api/groconvenios/convenios");
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
         console.log("Raw data from API:", data);
@@ -167,14 +229,45 @@ const VerConvenios = () => {
       cod_ugt: convenio.cod_ugt || "",
       cod_Convenio: convenio.cod_Convenio || "",
       nombre_Convenio: convenio.nombre_Convenio || "",
+      id_grupo: convenio.id_grupo !== null ? String(convenio.id_grupo) : "",
+      id_tipo_intervencion: convenio.id_tipo_intervencion !== null ? String(convenio.id_tipo_intervencion) : "",
+      id_programa_presupuestal: convenio.id_programa_presupuestal !== null ? String(convenio.id_programa_presupuestal) : "",
+      id_tipo_fenomeno: convenio.id_tipo_fenomeno !== null ? String(convenio.id_tipo_fenomeno) : "",
+      id_tipo_material: convenio.id_tipo_material !== null ? String(convenio.id_tipo_material) : "",
+      id_estado: convenio.id_estado !== null ? String(convenio.id_estado) : "",
+      id_sub_estado: convenio.id_sub_estado !== null ? String(convenio.id_sub_estado) : "",
+      id_priorizacion: convenio.id_priorizacion !== null ? String(convenio.id_priorizacion) : "",
+      id_tipo_meta: convenio.id_tipo_meta !== null ? String(convenio.id_tipo_meta) : "",
+      id_Localidad: convenio.id_Localidad !== null ? String(convenio.id_Localidad) : "",
+      id_Distrito: convenio.id_Distrito !== null ? String(convenio.id_Distrito) : "",
+      id_Provincia: convenio.id_Provincia !== null ? String(convenio.id_Provincia) : "",
+      id_Departamento: convenio.id_Departamento !== null ? String(convenio.id_Departamento) : "",
       fecha_Convenios: convenio.fecha_Convenios ? convenio.fecha_Convenios.split("T")[0] : "",
+      fecha_transferencia: convenio.fecha_transferencia ? convenio.fecha_transferencia.split("T")[0] : "",
+      fecha_limite_inicio: convenio.fecha_limite_inicio ? convenio.fecha_limite_inicio.split("T")[0] : "",
       fecha_inicio: convenio.fecha_inicio ? convenio.fecha_inicio.split("T")[0] : "",
+      plazo_ejecucion: convenio.plazo_ejecucion !== null ? String(convenio.plazo_ejecucion) : "",
+      dias_paralizados: convenio.dias_paralizados !== null ? String(convenio.dias_paralizados) : "",
+      dias_ampliacion: convenio.dias_ampliacion !== null ? String(convenio.dias_ampliacion) : "",
       fecha_termino: convenio.fecha_termino ? convenio.fecha_termino.split("T")[0] : "",
+      fecha_acta_termino: convenio.fecha_acta_termino ? convenio.fecha_acta_termino.split("T")[0] : "",
+      motivo_atraso: convenio.motivo_atraso || "",
+      accion_mitigacion: convenio.accion_mitigacion || "",
+      fecha_inicio_estimada: convenio.fecha_inicio_estimada ? convenio.fecha_inicio_estimada.split("T")[0] : "",
+      fecha_termino_estimada: convenio.fecha_termino_estimada ? convenio.fecha_termino_estimada.split("T")[0] : "",
       anio_intervencion: convenio.anio_intervencion !== null ? String(convenio.anio_intervencion) : "",
       Entidad: convenio.Entidad || "",
       Programa: convenio.Programa || "",
       Proyectista: convenio.Proyectista || "",
       Evaluador: convenio.Evaluador || "",
+      PresupuestoBase: convenio.PresupuestoBase !== null ? String(convenio.PresupuestoBase) : "",
+      PresupuestoFinanciamiento: convenio.PresupuestoFinanciamiento !== null ? String(convenio.PresupuestoFinanciamiento) : "",
+      AporteBeneficiario: convenio.AporteBeneficiario !== null ? String(convenio.AporteBeneficiario) : "",
+      SimboloMonetario: convenio.SimboloMonetario || "",
+      IGV: convenio.IGV !== null ? String(convenio.IGV) : "",
+      PlazoEjecucionMeses: convenio.PlazoEjecucionMeses !== null ? String(convenio.PlazoEjecucionMeses) : "",
+      PlazoEjecucionDias: convenio.PlazoEjecucionDias !== null ? String(convenio.PlazoEjecucionDias) : "",
+      NumeroBeneficiarios: convenio.NumeroBeneficiarios !== null ? String(convenio.NumeroBeneficiarios) : "",
     });
     console.log("Form data initialized:", formData);
     setEditModalOpen(true);
@@ -198,12 +291,20 @@ const VerConvenios = () => {
     }
 
     const fechaConvenios = formData.fecha_Convenios ? new Date(formData.fecha_Convenios) : null;
+    const fechaTransferencia = formData.fecha_transferencia ? new Date(formData.fecha_transferencia) : null;
+    const fechaLimiteInicio = formData.fecha_limite_inicio ? new Date(formData.fecha_limite_inicio) : null;
     const fechaInicio = formData.fecha_inicio ? new Date(formData.fecha_inicio) : null;
     const fechaTermino = formData.fecha_termino ? new Date(formData.fecha_termino) : null;
+    const fechaActaTermino = formData.fecha_acta_termino ? new Date(formData.fecha_acta_termino) : null;
+    const fechaInicioEstimada = formData.fecha_inicio_estimada ? new Date(formData.fecha_inicio_estimada) : null;
+    const fechaTerminoEstimada = formData.fecha_termino_estimada ? new Date(formData.fecha_termino_estimada) : null;
 
-    if ((fechaConvenios && isNaN(fechaConvenios.getTime())) ||
-        (fechaInicio && isNaN(fechaInicio.getTime())) ||
-        (fechaTermino && isNaN(fechaTermino.getTime()))) {
+    const invalidDates = [
+      fechaConvenios, fechaTransferencia, fechaLimiteInicio, fechaInicio,
+      fechaTermino, fechaActaTermino, fechaInicioEstimada, fechaTerminoEstimada
+    ].filter(date => date && isNaN(date.getTime()));
+
+    if (invalidDates.length > 0) {
       setError("Formato de fecha inválido.");
       return;
     }
@@ -213,27 +314,57 @@ const VerConvenios = () => {
       return;
     }
 
-    const anioIntervencionValue = formData.anio_intervencion ? Number(formData.anio_intervencion) : null;
+    const numericFields = {
+      id_grupo: Number(formData.id_grupo) || null,
+      id_tipo_intervencion: Number(formData.id_tipo_intervencion) || null,
+      id_programa_presupuestal: Number(formData.id_programa_presupuestal) || null,
+      id_tipo_fenomeno: Number(formData.id_tipo_fenomeno) || null,
+      id_tipo_material: Number(formData.id_tipo_material) || null,
+      id_estado: Number(formData.id_estado) || null,
+      id_sub_estado: Number(formData.id_sub_estado) || null,
+      id_priorizacion: Number(formData.id_priorizacion) || null,
+      id_tipo_meta: Number(formData.id_tipo_meta) || null,
+      id_Localidad: Number(formData.id_Localidad) || null,
+      id_Distrito: Number(formData.id_Distrito) || null,
+      id_Provincia: Number(formData.id_Provincia) || null,
+      id_Departamento: Number(formData.id_Departamento) || null,
+      plazo_ejecucion: Number(formData.plazo_ejecucion) || null,
+      dias_paralizados: Number(formData.dias_paralizados) || null,
+      dias_ampliacion: Number(formData.dias_ampliacion) || null,
+      anio_intervencion: Number(formData.anio_intervencion) || null,
+      PresupuestoBase: Number(formData.PresupuestoBase) || null,
+      PresupuestoFinanciamiento: Number(formData.PresupuestoFinanciamiento) || null,
+      AporteBeneficiario: Number(formData.AporteBeneficiario) || null,
+      IGV: Number(formData.IGV) || null,
+      PlazoEjecucionMeses: Number(formData.PlazoEjecucionMeses) || null,
+      PlazoEjecucionDias: Number(formData.PlazoEjecucionDias) || null,
+      NumeroBeneficiarios: Number(formData.NumeroBeneficiarios) || null,
+    };
 
     try {
       console.log("Saving convenio with id:", selectedConvenioId);
       console.log("Form data to save:", formData);
-      const response = await fetch(`/api/convenios/${selectedConvenioId}`, {
+      const response = await fetch(`/api/groconvenios/convenios/${selectedConvenioId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          cod_ugt: formData.cod_ugt,
-          cod_Convenio: formData.cod_Convenio,
-          nombre_Convenio: formData.nombre_Convenio,
+          ...formData,
+          ...numericFields,
           fecha_Convenios: formData.fecha_Convenios || null,
+          fecha_transferencia: formData.fecha_transferencia || null,
+          fecha_limite_inicio: formData.fecha_limite_inicio || null,
           fecha_inicio: formData.fecha_inicio || null,
           fecha_termino: formData.fecha_termino || null,
-          anio_intervencion: anioIntervencionValue,
+          fecha_acta_termino: formData.fecha_acta_termino || null,
+          motivo_atraso: formData.motivo_atraso || null,
+          accion_mitigacion: formData.accion_mitigacion || null,
+          fecha_inicio_estimada: formData.fecha_inicio_estimada || null,
+          fecha_termino_estimada: formData.fecha_termino_estimada || null,
           Entidad: formData.Entidad || null,
           Programa: formData.Programa || null,
           Proyectista: formData.Proyectista || null,
           Evaluador: formData.Evaluador || null,
-          id_estado: convenioOriginal.id_estado,
+          SimboloMonetario: formData.SimboloMonetario || null,
         }),
       });
 
@@ -246,7 +377,6 @@ const VerConvenios = () => {
       const finalConvenio = {
         ...updatedConvenio,
         Estado_Convenio: convenioOriginal.Estado_Convenio,
-        id_estado: updatedConvenio.id_estado || convenioOriginal.id_estado,
         Grupo: convenioOriginal.Grupo,
         Interevencion: convenioOriginal.Interevencion,
         Programa_Presupuestal: convenioOriginal.Programa_Presupuestal,
@@ -276,14 +406,45 @@ const VerConvenios = () => {
         cod_ugt: "",
         cod_Convenio: "",
         nombre_Convenio: "",
+        id_grupo: "",
+        id_tipo_intervencion: "",
+        id_programa_presupuestal: "",
+        id_tipo_fenomeno: "",
+        id_tipo_material: "",
+        id_estado: "",
+        id_sub_estado: "",
+        id_priorizacion: "",
+        id_tipo_meta: "",
+        id_Localidad: "",
+        id_Distrito: "",
+        id_Provincia: "",
+        id_Departamento: "",
         fecha_Convenios: "",
+        fecha_transferencia: "",
+        fecha_limite_inicio: "",
         fecha_inicio: "",
+        plazo_ejecucion: "",
+        dias_paralizados: "",
+        dias_ampliacion: "",
         fecha_termino: "",
+        fecha_acta_termino: "",
+        motivo_atraso: "",
+        accion_mitigacion: "",
+        fecha_inicio_estimada: "",
+        fecha_termino_estimada: "",
         anio_intervencion: "",
         Entidad: "",
         Programa: "",
         Proyectista: "",
         Evaluador: "",
+        PresupuestoBase: "",
+        PresupuestoFinanciamiento: "",
+        AporteBeneficiario: "",
+        SimboloMonetario: "",
+        IGV: "",
+        PlazoEjecucionMeses: "",
+        PlazoEjecucionDias: "",
+        NumeroBeneficiarios: "",
       });
     } catch (error) {
       console.error("Error al actualizar el convenio:", error);
@@ -302,7 +463,7 @@ const VerConvenios = () => {
 
     try {
       console.log("Deleting convenio with id:", id);
-      const response = await fetch(`/api/convenios/${id}`, { method: "DELETE" });
+      const response = await fetch(`/api/groconvenios/convenios/${id}`, { method: "DELETE" });
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || "Error al eliminar el convenio");
@@ -547,15 +708,13 @@ const VerConvenios = () => {
 
       {editModalOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl max-w-md w-full">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl max-w-3xl w-full overflow-y-auto max-h-[90vh]">
             <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">
               Editar Convenio
             </h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
-                  Código UGT
-                </label>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Código UGT</label>
                 <input
                   type="text"
                   value={formData.cod_ugt}
@@ -564,9 +723,7 @@ const VerConvenios = () => {
                 />
               </div>
               <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
-                  Código Convenio
-                </label>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Código Convenio</label>
                 <input
                   type="text"
                   value={formData.cod_Convenio}
@@ -575,9 +732,7 @@ const VerConvenios = () => {
                 />
               </div>
               <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
-                  Nombre Convenio
-                </label>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Nombre Convenio</label>
                 <input
                   type="text"
                   value={formData.nombre_Convenio}
@@ -587,9 +742,124 @@ const VerConvenios = () => {
                 />
               </div>
               <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
-                  Fecha Convenios
-                </label>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">ID Grupo</label>
+                <input
+                  type="number"
+                  value={formData.id_grupo}
+                  onChange={(e) => setFormData({ ...formData, id_grupo: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">ID Tipo Intervención</label>
+                <input
+                  type="number"
+                  value={formData.id_tipo_intervencion}
+                  onChange={(e) => setFormData({ ...formData, id_tipo_intervencion: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">ID Programa Presupuestal</label>
+                <input
+                  type="number"
+                  value={formData.id_programa_presupuestal}
+                  onChange={(e) => setFormData({ ...formData, id_programa_presupuestal: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">ID Tipo Fenómeno</label>
+                <input
+                  type="number"
+                  value={formData.id_tipo_fenomeno}
+                  onChange={(e) => setFormData({ ...formData, id_tipo_fenomeno: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">ID Tipo Material</label>
+                <input
+                  type="number"
+                  value={formData.id_tipo_material}
+                  onChange={(e) => setFormData({ ...formData, id_tipo_material: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">ID Estado</label>
+                <input
+                  type="number"
+                  value={formData.id_estado}
+                  onChange={(e) => setFormData({ ...formData, id_estado: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">ID Sub Estado</label>
+                <input
+                  type="number"
+                  value={formData.id_sub_estado}
+                  onChange={(e) => setFormData({ ...formData, id_sub_estado: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">ID Priorización</label>
+                <input
+                  type="number"
+                  value={formData.id_priorizacion}
+                  onChange={(e) => setFormData({ ...formData, id_priorizacion: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">ID Tipo Meta</label>
+                <input
+                  type="number"
+                  value={formData.id_tipo_meta}
+                  onChange={(e) => setFormData({ ...formData, id_tipo_meta: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">ID Localidad</label>
+                <input
+                  type="number"
+                  value={formData.id_Localidad}
+                  onChange={(e) => setFormData({ ...formData, id_Localidad: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">ID Distrito</label>
+                <input
+                  type="number"
+                  value={formData.id_Distrito}
+                  onChange={(e) => setFormData({ ...formData, id_Distrito: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">ID Provincia</label>
+                <input
+                  type="number"
+                  value={formData.id_Provincia}
+                  onChange={(e) => setFormData({ ...formData, id_Provincia: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">ID Departamento</label>
+                <input
+                  type="number"
+                  value={formData.id_Departamento}
+                  onChange={(e) => setFormData({ ...formData, id_Departamento: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Fecha Convenios</label>
                 <input
                   type="date"
                   value={formData.fecha_Convenios}
@@ -598,9 +868,25 @@ const VerConvenios = () => {
                 />
               </div>
               <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
-                  Fecha de Inicio
-                </label>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Fecha Transferencia</label>
+                <input
+                  type="date"
+                  value={formData.fecha_transferencia}
+                  onChange={(e) => setFormData({ ...formData, fecha_transferencia: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Fecha Límite Inicio</label>
+                <input
+                  type="date"
+                  value={formData.fecha_limite_inicio}
+                  onChange={(e) => setFormData({ ...formData, fecha_limite_inicio: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Fecha Inicio</label>
                 <input
                   type="date"
                   value={formData.fecha_inicio}
@@ -609,9 +895,34 @@ const VerConvenios = () => {
                 />
               </div>
               <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
-                  Fecha de Término
-                </label>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Plazo Ejecución</label>
+                <input
+                  type="number"
+                  value={formData.plazo_ejecucion}
+                  onChange={(e) => setFormData({ ...formData, plazo_ejecucion: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Días Paralizados</label>
+                <input
+                  type="number"
+                  value={formData.dias_paralizados}
+                  onChange={(e) => setFormData({ ...formData, dias_paralizados: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Días Ampliación</label>
+                <input
+                  type="number"
+                  value={formData.dias_ampliacion}
+                  onChange={(e) => setFormData({ ...formData, dias_ampliacion: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Fecha Término</label>
                 <input
                   type="date"
                   value={formData.fecha_termino}
@@ -620,9 +931,52 @@ const VerConvenios = () => {
                 />
               </div>
               <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
-                  Año Intervención
-                </label>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Fecha Acta Término</label>
+                <input
+                  type="date"
+                  value={formData.fecha_acta_termino}
+                  onChange={(e) => setFormData({ ...formData, fecha_acta_termino: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Motivo Atraso</label>
+                <input
+                  type="text"
+                  value={formData.motivo_atraso}
+                  onChange={(e) => setFormData({ ...formData, motivo_atraso: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Acción Mitigación</label>
+                <input
+                  type="text"
+                  value={formData.accion_mitigacion}
+                  onChange={(e) => setFormData({ ...formData, accion_mitigacion: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Fecha Inicio Estimada</label>
+                <input
+                  type="date"
+                  value={formData.fecha_inicio_estimada}
+                  onChange={(e) => setFormData({ ...formData, fecha_inicio_estimada: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Fecha Término Estimada</label>
+                <input
+                  type="date"
+                  value={formData.fecha_termino_estimada}
+                  onChange={(e) => setFormData({ ...formData, fecha_termino_estimada: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Año Intervención</label>
                 <input
                   type="number"
                   value={formData.anio_intervencion}
@@ -631,9 +985,7 @@ const VerConvenios = () => {
                 />
               </div>
               <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
-                  Entidad
-                </label>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Entidad</label>
                 <input
                   type="text"
                   value={formData.Entidad}
@@ -642,9 +994,7 @@ const VerConvenios = () => {
                 />
               </div>
               <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
-                  Programa
-                </label>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Programa</label>
                 <input
                   type="text"
                   value={formData.Programa}
@@ -653,9 +1003,7 @@ const VerConvenios = () => {
                 />
               </div>
               <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
-                  Proyectista
-                </label>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Proyectista</label>
                 <input
                   type="text"
                   value={formData.Proyectista}
@@ -664,13 +1012,87 @@ const VerConvenios = () => {
                 />
               </div>
               <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
-                  Evaluador
-                </label>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Evaluador</label>
                 <input
                   type="text"
                   value={formData.Evaluador}
                   onChange={(e) => setFormData({ ...formData, Evaluador: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Presupuesto Base</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={formData.PresupuestoBase}
+                  onChange={(e) => setFormData({ ...formData, PresupuestoBase: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Presupuesto Financiamiento</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={formData.PresupuestoFinanciamiento}
+                  onChange={(e) => setFormData({ ...formData, PresupuestoFinanciamiento: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Aporte Beneficiario</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={formData.AporteBeneficiario}
+                  onChange={(e) => setFormData({ ...formData, AporteBeneficiario: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Símbolo Monetario</label>
+                <input
+                  type="text"
+                  value={formData.SimboloMonetario}
+                  onChange={(e) => setFormData({ ...formData, SimboloMonetario: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">IGV</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={formData.IGV}
+                  onChange={(e) => setFormData({ ...formData, IGV: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Plazo Ejecución Meses</label>
+                <input
+                  type="number"
+                  value={formData.PlazoEjecucionMeses}
+                  onChange={(e) => setFormData({ ...formData, PlazoEjecucionMeses: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Plazo Ejecución Días</label>
+                <input
+                  type="number"
+                  value={formData.PlazoEjecucionDias}
+                  onChange={(e) => setFormData({ ...formData, PlazoEjecucionDias: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Número Beneficiarios</label>
+                <input
+                  type="number"
+                  value={formData.NumeroBeneficiarios}
+                  onChange={(e) => setFormData({ ...formData, NumeroBeneficiarios: e.target.value })}
                   className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -684,14 +1106,45 @@ const VerConvenios = () => {
                     cod_ugt: "",
                     cod_Convenio: "",
                     nombre_Convenio: "",
+                    id_grupo: "",
+                    id_tipo_intervencion: "",
+                    id_programa_presupuestal: "",
+                    id_tipo_fenomeno: "",
+                    id_tipo_material: "",
+                    id_estado: "",
+                    id_sub_estado: "",
+                    id_priorizacion: "",
+                    id_tipo_meta: "",
+                    id_Localidad: "",
+                    id_Distrito: "",
+                    id_Provincia: "",
+                    id_Departamento: "",
                     fecha_Convenios: "",
+                    fecha_transferencia: "",
+                    fecha_limite_inicio: "",
                     fecha_inicio: "",
+                    plazo_ejecucion: "",
+                    dias_paralizados: "",
+                    dias_ampliacion: "",
                     fecha_termino: "",
+                    fecha_acta_termino: "",
+                    motivo_atraso: "",
+                    accion_mitigacion: "",
+                    fecha_inicio_estimada: "",
+                    fecha_termino_estimada: "",
                     anio_intervencion: "",
                     Entidad: "",
                     Programa: "",
                     Proyectista: "",
                     Evaluador: "",
+                    PresupuestoBase: "",
+                    PresupuestoFinanciamiento: "",
+                    AporteBeneficiario: "",
+                    SimboloMonetario: "",
+                    IGV: "",
+                    PlazoEjecucionMeses: "",
+                    PlazoEjecucionDias: "",
+                    NumeroBeneficiarios: "",
                   });
                   setError(null);
                 }}
