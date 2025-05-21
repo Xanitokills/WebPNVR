@@ -1,5 +1,3 @@
-
-
 CREATE TABLE Convenios(
 	id_convenio int identity primary key,
 	cod_ugt varchar(50) NULL,
@@ -73,6 +71,60 @@ CREATE TABLE Convenio_Personal (
     FOREIGN KEY (id_personal) REFERENCES Personal(id_personal),
     FOREIGN KEY (id_cargo) REFERENCES Cargo(id_cargo)
 );
+
+
+
+CREATE TABLE [Departamento] (
+    id_Departamento INT IDENTITY(1,1) NOT NULL,
+    nombre_Departamento NVARCHAR(100) NOT NULL,
+    codigo_Departamento NVARCHAR(10) NULL, -- Optional code (e.g., UBIGEO code)
+    CreadoEn DATETIME DEFAULT GETDATE() NOT NULL,
+    ActualizadoEn DATETIME DEFAULT GETDATE() NOT NULL,
+    CONSTRAINT PK_Departamento PRIMARY KEY (id_Departamento),
+    CONSTRAINT UQ_Departamento_Nombre UNIQUE (nombre_Departamento)
+);
+
+CREATE TABLE [dbo].[Provincia] (
+    id_Provincia INT IDENTITY(1,1) NOT NULL,
+    nombre_Provincia NVARCHAR(100) NOT NULL,
+    codigo_Provincia NVARCHAR(10) NULL, -- Optional code
+    id_Departamento INT NOT NULL,
+    CreadoEn DATETIME DEFAULT GETDATE() NOT NULL,
+    ActualizadoEn DATETIME DEFAULT GETDATE() NOT NULL,
+    CONSTRAINT PK_Provincia PRIMARY KEY (id_Provincia),
+    CONSTRAINT FK_Provincia_Departamento FOREIGN KEY (id_Departamento) 
+        REFERENCES [Departamento](id_Departamento),
+    CONSTRAINT UQ_Provincia_Nombre_Departamento UNIQUE (nombre_Provincia, id_Departamento)
+);
+
+CREATE TABLE [Distrito] (
+    id_Distrito INT IDENTITY(1,1) NOT NULL,
+    nombre_Distrito NVARCHAR(100) NOT NULL,
+    codigo_Distrito NVARCHAR(10) NULL, -- Optional code
+    id_Provincia INT NOT NULL,
+    CreadoEn DATETIME DEFAULT GETDATE() NOT NULL,
+    ActualizadoEn DATETIME DEFAULT GETDATE() NOT NULL,
+    CONSTRAINT PK_Distrito PRIMARY KEY (id_Distrito),
+    CONSTRAINT FK_Distrito_Provincia FOREIGN KEY (id_Provincia) 
+        REFERENCES [Provincia](id_Provincia),
+    CONSTRAINT UQ_Distrito_Nombre_Provincia UNIQUE (nombre_Distrito, id_Provincia)
+);
+
+CREATE TABLE [Localidad] (
+    id_Localidad INT IDENTITY(1,1) NOT NULL,
+    nombre_Localidad NVARCHAR(100) NOT NULL,
+    codigo_Localidad NVARCHAR(10) NULL, -- Optional code
+    id_Distrito INT NOT NULL,
+    CreadoEn DATETIME DEFAULT GETDATE() NOT NULL,
+    ActualizadoEn DATETIME DEFAULT GETDATE() NOT NULL,
+    CONSTRAINT PK_Localidad PRIMARY KEY (id_Localidad),
+    CONSTRAINT FK_Localidad_Distrito FOREIGN KEY (id_Distrito) 
+        REFERENCES [Distrito](id_Distrito),
+    CONSTRAINT UQ_Localidad_Nombre_Distrito UNIQUE (nombre_Localidad, id_Distrito)
+);
+
+
+
 
 
 CREATE TABLE [dbo].[Convocatoria](
@@ -847,6 +899,17 @@ PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
+
+CREATE TABLE [Convenio_Personal] (
+    id_convenio int,
+    id_personal INT,
+    id_cargo INT,
+    PRIMARY KEY (id_convenio, id_personal, id_cargo),  -- Clave compuesta
+    FOREIGN KEY (id_convenio) REFERENCES Convenios(id_convenio),
+    FOREIGN KEY (id_personal) REFERENCES Personal(id_personal),
+    FOREIGN KEY (id_cargo) REFERENCES Cargo(id_cargo)
+);
+
 SET ANSI_PADDING ON
 GO
 
