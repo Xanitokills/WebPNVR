@@ -15,6 +15,17 @@ type NavItem = {
 };
 
 const navItems: NavItem[] = [
+
+    {
+    name: "Expedientes",
+    icon: <TableIcon />,
+    subItems: [
+      { name: "Subir Expediente", path: "/expediente/subir-expediente", pro: false },
+      { name: "Ver Expediente", path: "/expediente/ver-expediente", pro: false },
+      { name: "Administrar Parámetros", path: "/expediente/administrar-parametros", pro: false },
+       { name: "Presupuesto", path: "/expediente/presupuesto", pro: false },
+    ],
+  },
   {
     name: "Convenios",
     icon: <TableIcon />,
@@ -34,6 +45,8 @@ const navItems: NavItem[] = [
       { name: "Administrar Parámetros", path: "/administrar-parametros", pro: false },
     ],
   },
+
+  
 ];
 
 const othersItems: NavItem[] = [
