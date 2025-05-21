@@ -4,8 +4,9 @@ import { FiEdit, FiTrash2 } from "react-icons/fi";
 
 interface Convenio {
   id_convenio: string;
-  cod_ugt: string;
-  nombre_proyecto: string;
+  cod_ugt: string | null;
+  cod_Convenio: string | null;
+  nombre_Convenio: string;
   id_grupo: number | null;
   id_tipo_intervencion: number | null;
   id_programa_presupuestal: number | null;
@@ -15,8 +16,11 @@ interface Convenio {
   id_sub_estado: number | null;
   id_priorizacion: number | null;
   id_tipo_meta: number | null;
-  id_ubicacion: number | null;
-  fecha_convenio: string | null;
+  id_Localidad: number | null;
+  id_Distrito: number | null;
+  id_Provincia: number | null;
+  id_Departamento: number | null;
+  fecha_Convenios: string | null;
   fecha_transferencia: string | null;
   fecha_limite_inicio: string | null;
   fecha_inicio: string | null;
@@ -30,15 +34,47 @@ interface Convenio {
   fecha_inicio_estimada: string | null;
   fecha_termino_estimada: string | null;
   anio_intervencion: number | null;
-  estado_convenio?: string | null;
+  Entidad: string | null;
+  Programa: string | null;
+  Proyectista: string | null;
+  Evaluador: string | null;
+  PresupuestoBase: number | null;
+  PresupuestoFinanciamiento: number | null;
+  AporteBeneficiario: number | null;
+  SimboloMonetario: string | null;
+  IGV: number | null;
+  PlazoEjecucionMeses: number | null;
+  PlazoEjecucionDias: number | null;
+  NumeroBeneficiarios: number | null;
+  CreadoEn: string | null;
+  ActualizadoEn: string | null;
+  Grupo: string | null;
+  Interevencion: string | null;
+  Programa_Presupuestal: string | null;
+  Tipo_Fenomeno: string | null;
+  Tipo_Material: string | null;
+  Estado_Convenio: string | null;
+  Sub_Estado_Convenio: string | null;
+  Priorizacion: string | null;
+  Meta: string | null;
+  Localidad: string | null;
+  Distrito: string | null;
+  Provincia: string | null;
+  Departamento: string | null;
 }
 
 interface FormData {
   cod_ugt: string;
-  nombre_proyecto: string;
+  cod_Convenio: string;
+  nombre_Convenio: string;
+  fecha_Convenios: string;
   fecha_inicio: string;
   fecha_termino: string;
   anio_intervencion: string;
+  Entidad: string;
+  Programa: string;
+  Proyectista: string;
+  Evaluador: string;
 }
 
 const VerConvenios = () => {
@@ -50,10 +86,16 @@ const VerConvenios = () => {
   const [selectedConvenioId, setSelectedConvenioId] = useState<string | null>(null);
   const [formData, setFormData] = useState<FormData>({
     cod_ugt: "",
-    nombre_proyecto: "",
+    cod_Convenio: "",
+    nombre_Convenio: "",
+    fecha_Convenios: "",
     fecha_inicio: "",
     fecha_termino: "",
     anio_intervencion: "",
+    Entidad: "",
+    Programa: "",
+    Proyectista: "",
+    Evaluador: "",
   });
 
   const estadoColores: { [key: string]: { bg: string; text: string } } = {
@@ -76,27 +118,24 @@ const VerConvenios = () => {
     const fetchConvenios = async () => {
       try {
         console.log("Fetching convenios...");
-        const response = await fetch("/api/convenios");
+        const response = await fetch("/api/groconvenios/convenios2");
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
         console.log("Raw data from API:", data);
         if (!Array.isArray(data)) throw new Error("Received data is not an array");
 
-        const conveniosWithEstado = data.map((convenio: Convenio) => {
-          const estadoKey = Object.keys(estadoIds).find(
+        const conveniosWithEstado = data.map((convenio: Convenio) => ({
+          ...convenio,
+          Estado_Convenio: convenio.Estado_Convenio || Object.keys(estadoIds).find(
             (key) => estadoIds[key] === convenio.id_estado
-          );
-          return {
-            ...convenio,
-            estado_convenio: estadoKey || "PENDIENTE",
-          };
-        });
+          ) || "PENDIENTE",
+        }));
         console.log("Processed convenios:", conveniosWithEstado);
         setConvenios(conveniosWithEstado);
         setFilteredConvenios(conveniosWithEstado);
       } catch (error) {
         console.error("Error fetching convenios:", error);
-        setError("Failed to load convenios");
+        setError("No se pudieron cargar los convenios");
       }
     };
     fetchConvenios();
@@ -118,7 +157,7 @@ const VerConvenios = () => {
   }, [error]);
 
   const handleEdit = (convenio: Convenio) => {
-    if (convenio.estado_convenio === "FINALIZADO") {
+    if (convenio.Estado_Convenio === "FINALIZADO") {
       setError("No se puede editar un convenio finalizado.");
       return;
     }
@@ -126,10 +165,16 @@ const VerConvenios = () => {
     setSelectedConvenioId(convenio.id_convenio);
     setFormData({
       cod_ugt: convenio.cod_ugt || "",
-      nombre_proyecto: convenio.nombre_proyecto || "",
+      cod_Convenio: convenio.cod_Convenio || "",
+      nombre_Convenio: convenio.nombre_Convenio || "",
+      fecha_Convenios: convenio.fecha_Convenios ? convenio.fecha_Convenios.split("T")[0] : "",
       fecha_inicio: convenio.fecha_inicio ? convenio.fecha_inicio.split("T")[0] : "",
       fecha_termino: convenio.fecha_termino ? convenio.fecha_termino.split("T")[0] : "",
       anio_intervencion: convenio.anio_intervencion !== null ? String(convenio.anio_intervencion) : "",
+      Entidad: convenio.Entidad || "",
+      Programa: convenio.Programa || "",
+      Proyectista: convenio.Proyectista || "",
+      Evaluador: convenio.Evaluador || "",
     });
     console.log("Form data initialized:", formData);
     setEditModalOpen(true);
@@ -141,8 +186,8 @@ const VerConvenios = () => {
       return;
     }
 
-    if (!formData.cod_ugt || !formData.nombre_proyecto || !formData.fecha_inicio || !formData.fecha_termino) {
-      setError("Por favor, completa todos los campos requeridos.");
+    if (!formData.nombre_Convenio) {
+      setError("El nombre del convenio es obligatorio.");
       return;
     }
 
@@ -152,13 +197,18 @@ const VerConvenios = () => {
       return;
     }
 
-    const fechaInicio = new Date(formData.fecha_inicio);
-    const fechaTermino = new Date(formData.fecha_termino);
-    if (isNaN(fechaInicio.getTime()) || isNaN(fechaTermino.getTime())) {
+    const fechaConvenios = formData.fecha_Convenios ? new Date(formData.fecha_Convenios) : null;
+    const fechaInicio = formData.fecha_inicio ? new Date(formData.fecha_inicio) : null;
+    const fechaTermino = formData.fecha_termino ? new Date(formData.fecha_termino) : null;
+
+    if ((fechaConvenios && isNaN(fechaConvenios.getTime())) ||
+        (fechaInicio && isNaN(fechaInicio.getTime())) ||
+        (fechaTermino && isNaN(fechaTermino.getTime()))) {
       setError("Formato de fecha inválido.");
       return;
     }
-    if (fechaInicio > fechaTermino) {
+
+    if (fechaInicio && fechaTermino && fechaInicio > fechaTermino) {
       setError("La fecha de inicio no puede ser posterior a la fecha de término.");
       return;
     }
@@ -173,10 +223,16 @@ const VerConvenios = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           cod_ugt: formData.cod_ugt,
-          nombre_proyecto: formData.nombre_proyecto,
-          fecha_inicio: formData.fecha_inicio,
-          fecha_termino: formData.fecha_termino,
+          cod_Convenio: formData.cod_Convenio,
+          nombre_Convenio: formData.nombre_Convenio,
+          fecha_Convenios: formData.fecha_Convenios || null,
+          fecha_inicio: formData.fecha_inicio || null,
+          fecha_termino: formData.fecha_termino || null,
           anio_intervencion: anioIntervencionValue,
+          Entidad: formData.Entidad || null,
+          Programa: formData.Programa || null,
+          Proyectista: formData.Proyectista || null,
+          Evaluador: formData.Evaluador || null,
           id_estado: convenioOriginal.id_estado,
         }),
       });
@@ -189,8 +245,20 @@ const VerConvenios = () => {
       const updatedConvenio = await response.json();
       const finalConvenio = {
         ...updatedConvenio,
-        estado_convenio: convenioOriginal.estado_convenio,
+        Estado_Convenio: convenioOriginal.Estado_Convenio,
         id_estado: updatedConvenio.id_estado || convenioOriginal.id_estado,
+        Grupo: convenioOriginal.Grupo,
+        Interevencion: convenioOriginal.Interevencion,
+        Programa_Presupuestal: convenioOriginal.Programa_Presupuestal,
+        Tipo_Fenomeno: convenioOriginal.Tipo_Fenomeno,
+        Tipo_Material: convenioOriginal.Tipo_Material,
+        Sub_Estado_Convenio: convenioOriginal.Sub_Estado_Convenio,
+        Priorizacion: convenioOriginal.Priorizacion,
+        Meta: convenioOriginal.Meta,
+        Localidad: convenioOriginal.Localidad,
+        Distrito: convenioOriginal.Distrito,
+        Provincia: convenioOriginal.Provincia,
+        Departamento: convenioOriginal.Departamento,
       };
 
       const updatedConvenios = convenios.map((item) =>
@@ -206,10 +274,16 @@ const VerConvenios = () => {
       setSelectedConvenioId(null);
       setFormData({
         cod_ugt: "",
-        nombre_proyecto: "",
+        cod_Convenio: "",
+        nombre_Convenio: "",
+        fecha_Convenios: "",
         fecha_inicio: "",
         fecha_termino: "",
         anio_intervencion: "",
+        Entidad: "",
+        Programa: "",
+        Proyectista: "",
+        Evaluador: "",
       });
     } catch (error) {
       console.error("Error al actualizar el convenio:", error);
@@ -219,7 +293,7 @@ const VerConvenios = () => {
 
   const handleDelete = async (id: string) => {
     const convenio = convenios.find((c) => c.id_convenio === id);
-    if (!convenio || convenio.estado_convenio === "FINALIZADO") {
+    if (!convenio || convenio.Estado_Convenio === "FINALIZADO") {
       setError("No se puede eliminar un convenio finalizado.");
       return;
     }
@@ -231,7 +305,7 @@ const VerConvenios = () => {
       const response = await fetch(`/api/convenios/${id}`, { method: "DELETE" });
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Error deleting convenio");
+        throw new Error(errorData.error || "Error al eliminar el convenio");
       }
       const updatedConvenios = convenios.filter((item) => item.id_convenio !== id);
       setConvenios(updatedConvenios);
@@ -241,26 +315,30 @@ const VerConvenios = () => {
           : updatedConvenios
       );
     } catch (error) {
-      console.error("Error deleting convenio:", error);
-      setError(error instanceof Error ? error.message : "Error deleting convenio");
+      console.error("Error al eliminar el convenio:", error);
+      setError(error instanceof Error ? error.message : "Error al eliminar el convenio");
     }
   };
 
   const tableHeaders = [
     "ID Convenio",
     "Código UGT",
-    "Nombre Proyecto",
-    "ID Grupo",
-    "ID Tipo Intervención",
-    "ID Programa Presupuestal",
-    "ID Tipo Fenómeno",
-    "ID Tipo Material",
-    "ID Estado",
-    "ID Sub Estado",
-    "ID Priorización",
-    "ID Tipo Meta",
-    "ID Ubicación",
-    "Fecha Convenio",
+    "Código Convenio",
+    "Nombre Convenio",
+    "Grupo",
+    "Tipo Intervención",
+    "Programa Presupuestal",
+    "Tipo Fenómeno",
+    "Tipo Material",
+    "Estado",
+    "Sub Estado",
+    "Priorización",
+    "Tipo Meta",
+    "Localidad",
+    "Distrito",
+    "Provincia",
+    "Departamento",
+    "Fecha Convenios",
     "Fecha Transferencia",
     "Fecha Límite Inicio",
     "Fecha Inicio",
@@ -274,6 +352,20 @@ const VerConvenios = () => {
     "Fecha Inicio Estimada",
     "Fecha Término Estimada",
     "Año Intervención",
+    "Entidad",
+    "Programa",
+    "Proyectista",
+    "Evaluador",
+    "Presupuesto Base",
+    "Presupuesto Financiamiento",
+    "Aporte Beneficiario",
+    "Símbolo Monetario",
+    "IGV",
+    "Plazo Ejecución Meses",
+    "Plazo Ejecución Días",
+    "Número Beneficiarios",
+    "Creado En",
+    "Actualizado En",
     "Estado Convenio",
     "Acción",
   ];
@@ -325,7 +417,7 @@ const VerConvenios = () => {
             <tbody>
               {filteredConvenios.length > 0 ? (
                 filteredConvenios.map((convenio) => {
-                  const estado = convenio.estado_convenio || "No definido";
+                  const estado = convenio.Estado_Convenio || "No definido";
                   const colores = estadoColores[estado] || {
                     bg: "bg-gray-100 dark:bg-gray-700",
                     text: "text-gray-800 dark:text-gray-200",
@@ -338,20 +430,24 @@ const VerConvenios = () => {
                       className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                     >
                       <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.id_convenio}</td>
-                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.cod_ugt}</td>
-                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.nombre_proyecto}</td>
-                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.id_grupo ?? "N/A"}</td>
-                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.id_tipo_intervencion ?? "N/A"}</td>
-                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.id_programa_presupuestal ?? "N/A"}</td>
-                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.id_tipo_fenomeno ?? "N/A"}</td>
-                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.id_tipo_material ?? "N/A"}</td>
-                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.id_estado ?? "N/A"}</td>
-                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.id_sub_estado ?? "N/A"}</td>
-                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.id_priorizacion ?? "N/A"}</td>
-                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.id_tipo_meta ?? "N/A"}</td>
-                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.id_ubicacion ?? "N/A"}</td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.cod_ugt ?? "N/A"}</td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.cod_Convenio ?? "N/A"}</td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.nombre_Convenio}</td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.Grupo ?? "N/A"}</td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.Interevencion ?? "N/A"}</td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.Programa_Presupuestal ?? "N/A"}</td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.Tipo_Fenomeno ?? "N/A"}</td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.Tipo_Material ?? "N/A"}</td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.Estado_Convenio ?? "N/A"}</td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.Sub_Estado_Convenio ?? "N/A"}</td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.Priorizacion ?? "N/A"}</td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.Meta ?? "N/A"}</td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.Localidad ?? "N/A"}</td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.Distrito ?? "N/A"}</td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.Provincia ?? "N/A"}</td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.Departamento ?? "N/A"}</td>
                       <td className="py-4 px-4 text-gray-900 dark:text-white">
-                        {convenio.fecha_convenio ? new Date(convenio.fecha_convenio).toLocaleDateString() : "N/A"}
+                        {convenio.fecha_Convenios ? new Date(convenio.fecha_Convenios).toLocaleDateString() : "N/A"}
                       </td>
                       <td className="py-4 px-4 text-gray-900 dark:text-white">
                         {convenio.fecha_transferencia ? new Date(convenio.fecha_transferencia).toLocaleDateString() : "N/A"}
@@ -380,6 +476,24 @@ const VerConvenios = () => {
                         {convenio.fecha_termino_estimada ? new Date(convenio.fecha_termino_estimada).toLocaleDateString() : "N/A"}
                       </td>
                       <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.anio_intervencion ?? "N/A"}</td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.Entidad ?? "N/A"}</td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.Programa ?? "N/A"}</td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.Proyectista ?? "N/A"}</td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.Evaluador ?? "N/A"}</td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.PresupuestoBase ? convenio.PresupuestoBase.toFixed(2) : "N/A"}</td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.PresupuestoFinanciamiento ? convenio.PresupuestoFinanciamiento.toFixed(2) : "N/A"}</td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.AporteBeneficiario ? convenio.AporteBeneficiario.toFixed(2) : "N/A"}</td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.SimboloMonetario ?? "N/A"}</td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.IGV ? convenio.IGV.toFixed(2) : "N/A"}</td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.PlazoEjecucionMeses ?? "N/A"}</td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.PlazoEjecucionDias ?? "N/A"}</td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">{convenio.NumeroBeneficiarios ?? "N/A"}</td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">
+                        {convenio.CreadoEn ? new Date(convenio.CreadoEn).toLocaleDateString() : "N/A"}
+                      </td>
+                      <td className="py-4 px-4 text-gray-900 dark:text-white">
+                        {convenio.ActualizadoEn ? new Date(convenio.ActualizadoEn).toLocaleDateString() : "N/A"}
+                      </td>
                       <td className="py-4 px-4">
                         <span
                           className={`px-2 py-1 rounded-full text-xs font-medium ${colores.bg} ${colores.text}`}
@@ -447,19 +561,40 @@ const VerConvenios = () => {
                   value={formData.cod_ugt}
                   onChange={(e) => setFormData({ ...formData, cod_ugt: e.target.value })}
                   className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                  Código Convenio
+                </label>
+                <input
+                  type="text"
+                  value={formData.cod_Convenio}
+                  onChange={(e) => setFormData({ ...formData, cod_Convenio: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                  Nombre Convenio
+                </label>
+                <input
+                  type="text"
+                  value={formData.nombre_Convenio}
+                  onChange={(e) => setFormData({ ...formData, nombre_Convenio: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
                   required
                 />
               </div>
               <div>
                 <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
-                  Nombre Proyecto
+                  Fecha Convenios
                 </label>
                 <input
-                  type="text"
-                  value={formData.nombre_proyecto}
-                  onChange={(e) => setFormData({ ...formData, nombre_proyecto: e.target.value })}
+                  type="date"
+                  value={formData.fecha_Convenios}
+                  onChange={(e) => setFormData({ ...formData, fecha_Convenios: e.target.value })}
                   className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                  required
                 />
               </div>
               <div>
@@ -471,7 +606,6 @@ const VerConvenios = () => {
                   value={formData.fecha_inicio}
                   onChange={(e) => setFormData({ ...formData, fecha_inicio: e.target.value })}
                   className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                  required
                 />
               </div>
               <div>
@@ -483,7 +617,6 @@ const VerConvenios = () => {
                   value={formData.fecha_termino}
                   onChange={(e) => setFormData({ ...formData, fecha_termino: e.target.value })}
                   className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                  required
                 />
               </div>
               <div>
@@ -497,6 +630,50 @@ const VerConvenios = () => {
                   className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
                 />
               </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                  Entidad
+                </label>
+                <input
+                  type="text"
+                  value={formData.Entidad}
+                  onChange={(e) => setFormData({ ...formData, Entidad: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                  Programa
+                </label>
+                <input
+                  type="text"
+                  value={formData.Programa}
+                  onChange={(e) => setFormData({ ...formData, Programa: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                  Proyectista
+                </label>
+                <input
+                  type="text"
+                  value={formData.Proyectista}
+                  onChange={(e) => setFormData({ ...formData, Proyectista: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                  Evaluador
+                </label>
+                <input
+                  type="text"
+                  value={formData.Evaluador}
+                  onChange={(e) => setFormData({ ...formData, Evaluador: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
             </div>
             <div className="mt-6 flex justify-end space-x-2">
               <button
@@ -505,10 +682,16 @@ const VerConvenios = () => {
                   setSelectedConvenioId(null);
                   setFormData({
                     cod_ugt: "",
-                    nombre_proyecto: "",
+                    cod_Convenio: "",
+                    nombre_Convenio: "",
+                    fecha_Convenios: "",
                     fecha_inicio: "",
                     fecha_termino: "",
                     anio_intervencion: "",
+                    Entidad: "",
+                    Programa: "",
+                    Proyectista: "",
+                    Evaluador: "",
                   });
                   setError(null);
                 }}

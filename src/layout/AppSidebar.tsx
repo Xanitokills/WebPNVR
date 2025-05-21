@@ -31,7 +31,7 @@ const navItems: NavItem[] = [
     icon: <TableIcon />,
     subItems: [
       { name: "Personal", path: "/personal", pro: false },
-      { name: "Ver Convenios", path: "/convenios", pro: false },
+      { name: "Ver Convenios", path: "/convenios/convenios", pro: false },
       { name: "Administrar Parámetros",  path: "/parametros", pro: false },
     ],
   },

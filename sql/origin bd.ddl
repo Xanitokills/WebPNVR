@@ -1221,3 +1221,21 @@ GO
 ALTER TABLE [dbo].[ExpedienteTecnico]  WITH CHECK ADD FOREIGN KEY([Id_convenio])
 REFERENCES [dbo].[Convenios] ([Id_Convenio])
 GO
+
+
+ALTER TABLE [dbo].[convenios]  WITH CHECK ADD  CONSTRAINT [FK_convenios_Departamento] FOREIGN KEY([id_Departamento])
+REFERENCES [dbo].[Departamento] ([id_departamento])
+GO
+
+
+ALTER TABLE [dbo].[convenios]  WITH CHECK ADD  CONSTRAINT [FK_convenios_Provincia] FOREIGN KEY([id_Provincia])
+REFERENCES [dbo].[Provincia] ([id_provincia])
+GO
+
+ALTER TABLE [dbo].[convenios]  WITH CHECK ADD  CONSTRAINT [FK_convenios_Distrito] FOREIGN KEY([id_Distrito])
+REFERENCES [dbo].[Distrito] ([id_Distrito])
+GO
+
+ALTER TABLE [dbo].[convenios]  WITH CHECK ADD  CONSTRAINT [FK_convenios_Localidad] FOREIGN KEY([id_Localidad])
+REFERENCES [dbo].[localidad] ([id_localidad])
+GO

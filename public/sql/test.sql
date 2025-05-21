@@ -1,5 +1,5 @@
 
-INSERT INTO [PNVR2].[dbo].[Convocatorias] (titulo, descripcion, fecha_inicio, fecha_fin, estado)
+INSERT INTO Convocatoria(titulo, descripcion, fecha_inicio, fecha_fin, estado)
 VALUES 
   ('Convocatoria de Investigación 2025', 'Convocatoria para proyectos de investigación en sostenibilidad.', '2025-06-01', '2025-12-31', 1),
   ('Capacitación Docente 2025', 'Programa de capacitación para docentes en nuevas tecnologías.', '2025-07-15', '2025-09-30', 1),
@@ -7,21 +7,21 @@ VALUES
   ('Convocatoria de Becas Estudiantiles', 'Becas para estudiantes de posgrado en ciencias.', '2025-05-20', '2025-11-20', 1),
   ('Taller de Emprendimiento', 'Taller para emprendedores en el sector tecnológico.', '2025-06-10', '2025-07-10', 0);
 
+  select * from Convocatoria
 
-
-INSERT INTO Estado_Convocatoria (descripcion) VALUES ('PENDIENTE-APROBACION');
-INSERT INTO Estado_Convocatoria (descripcion) VALUES ('APROBADO-SUPERVISOR');
-INSERT INTO Estado_Convocatoria (descripcion) VALUES ('APROBADO-MONITOR');
-INSERT INTO Estado_Convocatoria (descripcion) VALUES ('APROBADO-REPRESENTANTE');
-INSERT INTO Estado_Convocatoria (descripcion) VALUES ('OBSERVADO');
-INSERT INTO Estado_Convocatoria (descripcion) VALUES ('ANULADO');
-INSERT INTO Estado_Convocatoria (descripcion) VALUES ('FINALIZADO');
+INSERT INTO Estado_Convocatoria (estado) VALUES ('PENDIENTE-APROBACION');
+INSERT INTO Estado_Convocatoria (estado) VALUES ('APROBADO-SUPERVISOR');
+INSERT INTO Estado_Convocatoria (estado) VALUES ('APROBADO-MONITOR');
+INSERT INTO Estado_Convocatoria (estado) VALUES ('APROBADO-REPRESENTANTE');
+INSERT INTO Estado_Convocatoria (estado) VALUES ('OBSERVADO');
+INSERT INTO Estado_Convocatoria (estado) VALUES ('ANULADO');
+INSERT INTO Estado_Convocatoria (estado) VALUES ('FINALIZADO');
 
 
 
  --
 
- INSERT INTO [PNVR2].[dbo].[cargo] (descripcion, estado) VALUES
+ INSERT INTO [cargo] (descripcion, estado) VALUES
 ('REPRESENTANTE', 1),
 ('ASISTENTE TÉCNICO - PLANTA', 1),
 ('ESPECIALISTA FINANCIERO', 1),
@@ -43,7 +43,7 @@ INSERT INTO Estado_Convocatoria (descripcion) VALUES ('FINALIZADO');
 
 
 
-INSERT INTO [PNVR2].[dbo].[Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES
+INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES
 (1, 'Doris Fresia', 'Alvarado', 'Crisanto', '00000001', '940182081', 'dalvaradoc@vivienda.gob.pe'),
 (1, 'Carlos Eloy', 'Veliz', 'Aguilar', '00000002', '950467272', 'cveliz@vivienda.gob.pe'),
 (1, 'Jose Jesus', 'Arauco', 'Cham', '00000003', '928264318', 'jarauco@vivienda.gob.pe'),
@@ -59,7 +59,7 @@ INSERT INTO [PNVR2].[dbo].[Personal] (id_cargo, nombre, Apellido_Paterno, Apelli
 ---
 
 
-INSERT INTO [PNVR2].[dbo].[Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES
+INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES
 (2, 'Maritza', 'Bustinza', 'Sancho', '00000013', '916546834', 'mvcs_pnvr_mbs@viviendaext.pe'),
 (2, 'Ivan Renzo', 'Taipe', 'Puclla', '00000014', '943615814', 'mvcs_pnvr_irtp@viviendaext.pe' ),
 (2, 'Alan Aderly', 'Machaca', 'Arocutipa', '00000015', '928809382', 'mvcs_pnvr_aama@viviendaext.pe'),
@@ -72,7 +72,7 @@ INSERT INTO [PNVR2].[dbo].[Personal] (id_cargo, nombre, Apellido_Paterno, Apelli
 (2, 'Juan Diego', 'Rivero', 'Ugarte', '00000022', '974214782', 'jrivero@vivienda.gob.pe');
 
 --
-INSERT INTO [PNVR2].[dbo].[Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES
+INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES
 (3, 'Fernando', 'Atapaucar', 'Guevara', '00000023', '990020663', 'fatapaucar@vivienda.gob.pe'),
 (3, 'Arsely', 'Olave', 'Peña', '00000024', '984393326', 'mvcs_pnvr_aop@viviendaext.pe'),
 (3, 'Monica', 'Aliaga', 'Perez', '00000025', '991549484', 'mvcs_pnvr_map@viviendaext.pe'),
@@ -80,7 +80,7 @@ INSERT INTO [PNVR2].[dbo].[Personal] (id_cargo, nombre, Apellido_Paterno, Apelli
 (3, 'Yover', 'Sandoval', 'Anaya', '00000027', '930953353', 'yanaya@vivienda.gob.pe');
 
 --
-INSERT INTO [PNVR2].[dbo].[Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES
+INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES
 (4, 'Saul Yoel', 'Ccahuana', 'Pucllas', '00000028', '967900800', 'mvcs_pnvr_sycp@viviendaext.pe'),
 (4, 'Helbert', 'Machaca', 'Cutipa', '00000029', '951512969', 'helbert.machacacutipa@gmail.com'),
 (4, 'Paul', 'Anglas', 'Roque', '00000030', '945944438', 'epar501@hotmail.com'),
@@ -88,7 +88,7 @@ INSERT INTO [PNVR2].[dbo].[Personal] (id_cargo, nombre, Apellido_Paterno, Apelli
 (4, 'Henderson Julio', 'Inca', 'Quispe', '00000032', '985916849', 'arq.inca@gmail.com'),
 (4, 'Jose Luis', 'Matos', 'Benavides', '00000033', '999919115', 'jlmatosbenavides@gmail.com');
 --
-INSERT INTO [PNVR2].[dbo].[Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES
+INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES
 (5, 'Erick Emersson', 'Huaman', 'Chuquija', '00000034', '987788874', 'mvcs_pnvr_eehc@viviendaext.pe'),
 (5, 'Jorge Enrique', 'Huallpa', 'Mamani', '00000035', '986744336', 'canenitoh@hotmail.com'),
 (5, 'William Eduardo', 'Quispe', 'Velasquez', '00000036', '988118027', 'arq.william0501@gmail.com'),
@@ -103,7 +103,7 @@ INSERT INTO [PNVR2].[dbo].[Personal] (id_cargo, nombre, Apellido_Paterno, Apelli
 
 
 --
-INSERT INTO [PNVR2].[dbo].[Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES
+INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES
 (6, 'Dina', 'Carrasco', 'Zuñiga', '00000045', '983129008', 'mvcs_pnvr_dcz@viviendaext.pe'),
 (6, 'Cynthia', 'Velasco', 'Costas', '00000046', '948275044', 'civeco31@gmail.com'),
 (6, 'Natali Patricia', 'Sinchi Roca', 'Gonzales', '00000047', '932462636', 'natalisinchiroca1@gmail.com'),
@@ -115,7 +115,7 @@ INSERT INTO [PNVR2].[dbo].[Personal] (id_cargo, nombre, Apellido_Paterno, Apelli
 (6, 'Ruzmery', 'Ururi', 'Quispe', '00000053', '951837596', 'kaythrousmery@gmail.com'),
 (6, 'Rosalia', 'Choquehuayta', 'Pacosonco', '00000054', '988297339', 'liachp1990@gmail.com');
 
-INSERT INTO [PNVR2].[dbo].[Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES
+INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES
 (7, 'Denisse Zusan', 'Quispe', 'Mamani', '00000055', '937096263', 'susan.dqm@gmail.com'),
 (7, 'Marcos', 'Velarde', 'Llavilla', '00000056', '960770733', 'velardemarcos46@gmail.com'),
 (7, 'Yovana Josefina', 'Caceres', 'Caceres', '00000057', '956227221', 'yovanacacerescaceres@gmail.com'),
@@ -129,14 +129,14 @@ INSERT INTO [PNVR2].[dbo].[Personal] (id_cargo, nombre, Apellido_Paterno, Apelli
 (7, 'Ivon Katherin', 'Cano', 'Achahui', '00000065', '984888019', 'ivoncano56@gmail.com'),
 (7, 'Sandra', 'Caceres', 'Tito', '00000066', '955801130', 'sandracacerest@gmail.com');
 
-INSERT INTO [PNVR2].[dbo].[Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES
+INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES
 (8, 'Fanny Rossmery', 'Limaylla', 'Gutierrez', '00000067', '964508272', 'mvcs_pnvr_frlg@viviendaext.pe'),
 (8, 'Melvin Saul', 'Herrera', 'Villanueva', '00000068', '983403514', 'msherreravillanueva@gmail.com'),
 (8, 'Luis Alvaro', 'Castillo', 'Velo', '00000069', '955032749', 'acastillov.1618@gmail.com'),
 (8, 'Mirian Estefhany', 'Ascuña', 'Quiroga', '00000070', '999999999', 'mvcs_pnvr_meaq@viviendaext.pe');
 
 
-INSERT INTO [PNVR2].[dbo].[Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES
+INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES
 (9, 'Leonardo Alex', 'Valderrama', 'Ramírez', '18011691', '996964919', 'leonardoalexv@gmail.com'),
 (9, 'Roger Raul', 'Macedo', 'Escudero', '33320297', '988655060', 'raulmaes13@hotmail.com'),
 (9, 'Jose Rayfranco', 'Moreno', 'Haro', '47787532', '972603577', 'rayfrancomh@gmail.com'),
@@ -336,7 +336,7 @@ INSERT INTO [PNVR2].[dbo].[Personal] (id_cargo, nombre, Apellido_Paterno, Apelli
 (9, 'José Raúl', 'Chiroque', 'Pineda', '47608167', '955345891', 'jraul.cp7@hotmail.com'),
 (9, 'William Lui', 'Holgado', 'Velasquez', '41785805', '955534501', 'Ing.williamholgado@gmail.com');
 
-INSERT INTO [PNVR2].[dbo].[Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES
+INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES
 (10, 'Rene', 'Chura', 'Huisa', '25311813', '961729908', 'rene.ch.huisa@gmail.com'),
 (10, 'Jarwy Arturo', 'Gomez', 'Fasanando', '01126733', '932814410', 'jarwy20@gmail.com'),
 (10, 'Abraham Ulisis', 'Flores', 'Carbajal', '42523283', '920103849', 'erosflores100@gmail.com'),
@@ -524,7 +524,7 @@ INSERT INTO [PNVR2].[dbo].[Personal] (id_cargo, nombre, Apellido_Paterno, Apelli
 -----
 
 -- Insert statements for the Personal table (Asistente Administrativo NE, id_cargo = 10)
-INSERT INTO [PNVR2].[dbo].[Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES
+INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES
 (11, 'Mavid Graciela', 'Martínez', 'Cervantes', '45082652', '968217235', 'mavid.martinez.26@gmail.com'),
 (11, 'Henry Piter', 'Romero', 'Fur', '46071417', '931530804', 'piterford@gmail.com'),
 (11, 'Jhover Yofre', 'Santa Cruz', 'Fernandez', '74946125', '993962441', 'jhoveryofre1998.12s@gmail.com'),
@@ -723,7 +723,7 @@ INSERT INTO [PNVR2].[dbo].[Personal] (id_cargo, nombre, Apellido_Paterno, Apelli
 
 --
 -- Insert statements for the Personal table (Gestor Social, id_cargo = 12)
-INSERT INTO [PNVR2].[dbo].[Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES
+INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES
 (12, 'Hernan Martin', 'Ayala', 'De La Torre', '16791094', '988113048', 'hernan.ayala@cip.org.pe'),
 (12, 'Roly', 'Marin', 'Calvo', '22499256', '956256115', 'rolymarinc@gmail.com'),
 (12, 'Aracely Del Pilar', 'Custodio', 'Gonzales', '46218787', '981379515', 'ara519@hotmail.com'),
@@ -898,7 +898,7 @@ INSERT INTO [PNVR2].[dbo].[Personal] (id_cargo, nombre, Apellido_Paterno, Apelli
 (12, 'Nestor Miguel', 'Terrones', 'Alfaro', '70016494', '933904908', 'nmterrones@gmail.com');
 
 
-INSERT INTO [PNVR2].[dbo].[Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES
+INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES
 (13, 'Oswaldo Americo', 'Laguna', 'Espinoza', '10000001', '959525518', ' '),
 (13, 'Zolio Juan', 'Espinoza', 'Linan', '10000002', '957946122', ' '),
 (13, 'Rudolfo', 'Diaz', 'Guerra', '10000003', '955866047', ' '),
@@ -1039,7 +1039,7 @@ INSERT INTO [PNVR2].[dbo].[Personal] (id_cargo, nombre, Apellido_Paterno, Apelli
 
 ---
 
-INSERT INTO [PNVR2].[dbo].[Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo)
+INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo)
 VALUES 
 (14, 'Josue Isaias', 'Laguna', 'Segura', NULL, '959354045', NULL),
 (14, 'Edwin Ivo', 'Espinoza', 'Ramirez', NULL, '917180975', NULL),
@@ -1263,7 +1263,7 @@ VALUES
 
 --
 
-INSERT INTO [PNVR2].[dbo].[Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo)
+INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo)
 VALUES 
 (15, 'Cirilo Victoriano',   'Chavez', 'Obregon', NULL, '973264223', NULL),
 (15, 'Vilma Auleria', '     Paucar', 'Melgarejo', NULL, '974472449', NULL),
@@ -1486,7 +1486,7 @@ VALUES
 
 select * from cargo
 
-INSERT INTO [PNVR2].[dbo].[Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo)
+INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo)
 VALUES 
 (16, 'Roberto Rolando', 'Veramendi', 'Garay', NULL, '938108224', NULL),
 (16, 'Modesto Clemente', 'Trinidad', 'Chacpi', NULL, '999217076', NULL),
@@ -1702,7 +1702,7 @@ VALUES
 (16, 'Edward', 'Perez', 'Gavidia', NULL, '984303803', NULL);
 --
 
-INSERT INTO [PNVR2].[dbo].[Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo)
+INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo)
 VALUES 
 (17, 'Jose', 'Espinoza', 'Mejia', NULL, '966431536', NULL),
 (17, 'Gregoria Susana', 'Castillo', 'Caqui', NULL, '953081072', NULL),
@@ -1921,7 +1921,7 @@ VALUES
 
 ----
 
-INSERT INTO [PNVR2].[dbo].[Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo)
+INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo)
 VALUES 
 (18, 'Esther Dominga', 'Leiva', 'Vega', NULL, '957250976', NULL),
 (18, 'Humberto Carlos', 'Salazar', 'Laguna', NULL, '937667299', NULL),
