@@ -4,13 +4,10 @@ import { FaFilePdf, FaFileWord, FaCheck, FaEllipsisV, FaEye, FaBan } from "react
 import { FiEdit, FiTrash2 } from "react-icons/fi";
 
 interface ItemConvocatoria {
-  id_item: number;
+  id_item_convocatoria: number;
   descripcion: string;
-  tipo_material: string | null;
-  cantidad: number;
-  unidad_medida: string | null;
-  precio_referencial: number | null;
-  especificaciones_tecnicas: string | null;
+  id_tipo_item_convocatoria: number;
+  id_tipo_unidad_medida: number | null;
 }
 
 interface Validacion {
@@ -23,7 +20,7 @@ interface Validacion {
 }
 
 interface Documento {
-  id_documento: number;
+  id_convocatoria_documento: number;
   nombre: string;
   tipo: string;
   formato: string;
@@ -34,46 +31,86 @@ interface Documento {
 
 interface Convocatoria {
   id_convocatoria: number;
+  id_convenio: string;
+  id_tipo: number;
+  codigo_seace: string;
   titulo: string;
   descripcion: string;
-  fecha_inicio: string;
-  fecha_fin: string;
-  vigencia: number | null;
+  presupuesto: number;
+  fecha_publicacion: string;
+  fecha_fin_publicacion: string | null;
+  fecha_inicio_ofertas: string | null;
+  fecha_otorgamiento_buena_pro: string | null;
+  fecha_limite_ofertas: string;
+  fecha_apertura_sobre: string | null;
+  fecha_estimada_adjudicacion: string;
+  duracion_contrato: number;
+  created_at: string;
+  vigencia: boolean;
   pdf_file_path: string | null;
   word_file_path: string | null;
-  estado_convocatoria: string | null;
-  id_Estado_Convocatoria: number;
+  id_item_convocatoria: number | null;
+  id_tipo_item_convocatoria: number | null;
+  cantidad: number | null;
+  id_estado: number;
+  Anexos: string | null;
+  QR_PATH: string | null;
+  id_convocatoria_documento: number | null;
+  estado_convocatoria: string;
   items: ItemConvocatoria[];
   documentos: Documento[];
 }
 
 interface FormData {
+  id_convenio: string;
+  id_tipo: number;
+  codigo_seace: string;
   titulo: string;
   descripcion: string;
-  fecha_inicio: string;
-  fecha_fin: string;
+  presupuesto: number;
+  fecha_publicacion: string;
+  fecha_limite_ofertas: string;
+  fecha_estimada_adjudicacion: string;
+  duracion_contrato: number;
   vigencia: string;
-  items: ItemConvocatoria[];
-  documentos: Documento[];
+  id_estado: number;
+  fecha_fin_publicacion?: string;
+  fecha_inicio_ofertas?: string;
+  fecha_otorgamiento_buena_pro?: string;
+  fecha_apertura_sobre?: string;
+  pdf_file_path?: string;
+  word_file_path?: string;
+  id_item_convocatoria?: number;
+  id_tipo_item_convocatoria?: number;
+  cantidad?: number;
+  Anexos?: string;
+  QR_PATH?: string;
+  id_convocatoria_documento?: number;
 }
 
 const VerConvocatorias = () => {
-  const [filtervigencia, setFiltervigencia] = useState<string>("");
+  const [filterVigencia, setFilterVigencia] = useState<string>("");
   const [convocatorias, setConvocatorias] = useState<Convocatoria[]>([]);
   const [filteredConvocatorias, setFilteredConvocatorias] = useState<Convocatoria[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState<number | null>(null);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [editModalOpen, setEditModalOpen] = useState<boolean>(false);
+  const [createModalOpen, setCreateModalOpen] = useState<boolean>(false);
   const [selectedConvocatoriaId, setSelectedConvocatoriaId] = useState<number | null>(null);
   const [formData, setFormData] = useState<FormData>({
+    id_convenio: "",
+    id_tipo: 0,
+    codigo_seace: "",
     titulo: "",
     descripcion: "",
-    fecha_inicio: "",
-    fecha_fin: "",
+    presupuesto: 0,
+    fecha_publicacion: "",
+    fecha_limite_ofertas: "",
+    fecha_estimada_adjudicacion: "",
+    duracion_contrato: 0,
     vigencia: "",
-    items: [],
-    documentos: [],
+    id_estado: 0,
   });
   const [expandedRows, setExpandedRows] = useState<number[]>([]);
 
@@ -143,11 +180,11 @@ const VerConvocatorias = () => {
   }, []);
 
   useEffect(() => {
-    const filtered = filtervigencia
-      ? convocatorias.filter((c) => String(c.vigencia) === filtervigencia)
+    const filtered = filterVigencia
+      ? convocatorias.filter((c) => String(c.vigencia ? 1 : 0) === filterVigencia)
       : convocatorias;
     setFilteredConvocatorias(filtered);
-  }, [filtervigencia, convocatorias]);
+  }, [filterVigencia, convocatorias]);
 
   useEffect(() => {
     if (error) {
@@ -188,7 +225,7 @@ const VerConvocatorias = () => {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          id_Estado_Convocatoria: estadoIds[newState],
+          id_estado: estadoIds[newState],
         }),
       });
 
@@ -199,13 +236,13 @@ const VerConvocatorias = () => {
 
       const updatedConvocatorias = convocatorias.map((item) =>
         item.id_convocatoria === id
-          ? { ...item, estado_convocatoria: newState, id_Estado_Convocatoria: estadoIds[newState] }
+          ? { ...item, estado_convocatoria: newState, id_estado: estadoIds[newState] }
           : item
       );
       setConvocatorias(updatedConvocatorias);
       setFilteredConvocatorias(
-        filtervigencia
-          ? updatedConvocatorias.filter((c) => String(c.vigencia) === filtervigencia)
+        filterVigencia
+          ? updatedConvocatorias.filter((c) => String(c.vigencia ? 1 : 0) === filterVigencia)
           : updatedConvocatorias
       );
     } catch (error) {
@@ -225,7 +262,7 @@ const VerConvocatorias = () => {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          id_Estado_Convocatoria: estadoIds[newState],
+          id_estado: estadoIds[newState],
         }),
       });
 
@@ -236,13 +273,13 @@ const VerConvocatorias = () => {
 
       const updatedConvocatorias = convocatorias.map((item) =>
         item.id_convocatoria === selectedConvocatoriaId
-          ? { ...item, estado_convocatoria: newState, id_Estado_Convocatoria: estadoIds[newState] }
+          ? { ...item, estado_convocatoria: newState, id_estado: estadoIds[newState] }
           : item
       );
       setConvocatorias(updatedConvocatorias);
       setFilteredConvocatorias(
-        filtervigencia
-          ? updatedConvocatorias.filter((c) => String(c.vigencia) === filtervigencia)
+        filterVigencia
+          ? updatedConvocatorias.filter((c) => String(c.vigencia ? 1 : 0) === filterVigencia)
           : updatedConvocatorias
       );
       setError(null);
@@ -262,13 +299,30 @@ const VerConvocatorias = () => {
     }
     setSelectedConvocatoriaId(convocatoria.id_convocatoria);
     setFormData({
+      id_convenio: convocatoria.id_convenio,
+      id_tipo: convocatoria.id_tipo,
+      codigo_seace: convocatoria.codigo_seace,
       titulo: convocatoria.titulo,
       descripcion: convocatoria.descripcion,
-      fecha_inicio: convocatoria.fecha_inicio.split("T")[0],
-      fecha_fin: convocatoria.fecha_fin.split("T")[0],
-      vigencia: convocatoria.vigencia !== null ? String(convocatoria.vigencia) : "",
-      items: convocatoria.items,
-      documentos: convocatoria.documentos,
+      presupuesto: convocatoria.presupuesto,
+      fecha_publicacion: convocatoria.fecha_publicacion.split("T")[0],
+      fecha_limite_ofertas: convocatoria.fecha_limite_ofertas.split("T")[0],
+      fecha_estimada_adjudicacion: convocatoria.fecha_estimada_adjudicacion.split("T")[0],
+      duracion_contrato: convocatoria.duracion_contrato,
+      vigencia: convocatoria.vigencia ? "1" : "0",
+      id_estado: convocatoria.id_estado,
+      fecha_fin_publicacion: convocatoria.fecha_fin_publicacion?.split("T")[0] || "",
+      fecha_inicio_ofertas: convocatoria.fecha_inicio_ofertas?.split("T")[0] || "",
+      fecha_otorgamiento_buena_pro: convocatoria.fecha_otorgamiento_buena_pro?.split("T")[0] || "",
+      fecha_apertura_sobre: convocatoria.fecha_apertura_sobre?.split("T")[0] || "",
+      pdf_file_path: convocatoria.pdf_file_path || "",
+      word_file_path: convocatoria.word_file_path || "",
+      id_item_convocatoria: convocatoria.id_item_convocatoria || undefined,
+      id_tipo_item_convocatoria: convocatoria.id_tipo_item_convocatoria || undefined,
+      cantidad: convocatoria.cantidad || undefined,
+      Anexos: convocatoria.Anexos || "",
+      QR_PATH: convocatoria.QR_PATH || "",
+      id_convocatoria_documento: convocatoria.id_convocatoria_documento || undefined,
     });
     setEditModalOpen(true);
   };
@@ -276,32 +330,52 @@ const VerConvocatorias = () => {
   const handleSave = async () => {
     if (selectedConvocatoriaId === null) return;
 
-    if (!formData.titulo || !formData.descripcion || !formData.fecha_inicio || !formData.fecha_fin) {
+    if (
+      !formData.id_convenio ||
+      !formData.id_tipo ||
+      !formData.codigo_seace ||
+      !formData.titulo ||
+      !formData.descripcion ||
+      !formData.presupuesto ||
+      !formData.fecha_publicacion ||
+      !formData.fecha_limite_ofertas ||
+      !formData.fecha_estimada_adjudicacion ||
+      !formData.duracion_contrato ||
+      !formData.id_estado
+    ) {
       setError("Por favor, completa todos los campos requeridos.");
       return;
     }
-
-    const convocatoriaOriginal = convocatorias.find((c) => c.id_convocatoria === selectedConvocatoriaId);
-    if (!convocatoriaOriginal) {
-      setError("Convocatoria no encontrada.");
-      return;
-    }
-
-    const vigenciaValue = formData.vigencia === "" ? null : Number(formData.vigencia);
 
     try {
       const response = await fetch(`/api/convocatoria/${selectedConvocatoriaId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          id_convenio: formData.id_convenio,
+          id_tipo: formData.id_tipo,
+          codigo_seace: formData.codigo_seace,
           titulo: formData.titulo,
           descripcion: formData.descripcion,
-          fecha_inicio: formData.fecha_inicio,
-          fecha_fin: formData.fecha_fin,
-          vigencia: vigenciaValue,
-          id_Estado_Convocatoria: convocatoriaOriginal.id_Estado_Convocatoria,
-          items: formData.items,
-          documentos: formData.documentos,
+          presupuesto: formData.presupuesto,
+          fecha_publicacion: formData.fecha_publicacion,
+          fecha_limite_ofertas: formData.fecha_limite_ofertas,
+          fecha_estimada_adjudicacion: formData.fecha_estimada_adjudicacion,
+          duracion_contrato: formData.duracion_contrato,
+          vigencia: formData.vigencia === "1" ? true : false,
+          id_estado: formData.id_estado,
+          fecha_fin_publicacion: formData.fecha_fin_publicacion || null,
+          fecha_inicio_ofertas: formData.fecha_inicio_ofertas || null,
+          fecha_otorgamiento_buena_pro: formData.fecha_otorgamiento_buena_pro || null,
+          fecha_apertura_sobre: formData.fecha_apertura_sobre || null,
+          pdf_file_path: formData.pdf_file_path || null,
+          word_file_path: formData.word_file_path || null,
+          id_item_convocatoria: formData.id_item_convocatoria || null,
+          id_tipo_item_convocatoria: formData.id_tipo_item_convocatoria || null,
+          cantidad: formData.cantidad || null,
+          Anexos: formData.Anexos || null,
+          QR_PATH: formData.QR_PATH || null,
+          id_convocatoria_documento: formData.id_convocatoria_documento || null,
         }),
       });
 
@@ -313,13 +387,13 @@ const VerConvocatorias = () => {
       const updatedConvocatoria = await response.json();
       const updatedConvocatorias = convocatorias.map((item) =>
         item.id_convocatoria === selectedConvocatoriaId
-          ? { ...item, ...formData, id_Estado_Convocatoria: convocatoriaOriginal.id_Estado_Convocatoria }
+          ? { ...item, ...formData, vigencia: formData.vigencia === "1" }
           : item
       );
       setConvocatorias(updatedConvocatorias);
       setFilteredConvocatorias(
-        filtervigencia
-          ? updatedConvocatorias.filter((c) => String(c.vigencia) === filtervigencia)
+        filterVigencia
+          ? updatedConvocatorias.filter((c) => String(c.vigencia ? 1 : 0) === filterVigencia)
           : updatedConvocatorias
       );
       setError(null);
@@ -329,7 +403,118 @@ const VerConvocatorias = () => {
     } finally {
       setEditModalOpen(false);
       setSelectedConvocatoriaId(null);
-      setFormData({ titulo: "", descripcion: "", fecha_inicio: "", fecha_fin: "", vigencia: "", items: [], documentos: [] });
+      setFormData({
+        id_convenio: "",
+        id_tipo: 0,
+        codigo_seace: "",
+        titulo: "",
+        descripcion: "",
+        presupuesto: 0,
+        fecha_publicacion: "",
+        fecha_limite_ofertas: "",
+        fecha_estimada_adjudicacion: "",
+        duracion_contrato: 0,
+        vigencia: "",
+        id_estado: 0,
+      });
+    }
+  };
+
+  const handleCreate = async () => {
+    if (
+      !formData.id_convenio ||
+      !formData.id_tipo ||
+      !formData.codigo_seace ||
+      !formData.titulo ||
+      !formData.descripcion ||
+      !formData.presupuesto ||
+      !formData.fecha_publicacion ||
+      !formData.fecha_limite_ofertas ||
+      !formData.fecha_estimada_adjudicacion ||
+      !formData.duracion_contrato ||
+      !formData.id_estado
+    ) {
+      setError("Por favor, completa todos los campos requeridos.");
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/convocatoria", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id_convenio: formData.id_convenio,
+          id_tipo: formData.id_tipo,
+          codigo_seace: formData.codigo_seace,
+          titulo: formData.titulo,
+          descripcion: formData.descripcion,
+          presupuesto: formData.presupuesto,
+          fecha_publicacion: formData.fecha_publicacion,
+          fecha_limite_ofertas: formData.fecha_limite_ofertas,
+          fecha_estimada_adjudicacion: formData.fecha_estimada_adjudicacion,
+          duracion_contrato: formData.duracion_contrato,
+          created_at: new Date().toISOString(),
+          vigencia: formData.vigencia === "1" ? true : false,
+          pdf_file_path: formData.pdf_file_path || null,
+          word_file_path: formData.word_file_path || null,
+          id_item_convocatoria: formData.id_item_convocatoria || null,
+          id_tipo_item_convocatoria: formData.id_tipo_item_convocatoria || null,
+          cantidad: formData.cantidad || null,
+          id_estado: formData.id_estado,
+          fecha_fin_publicacion: formData.fecha_fin_publicacion || null,
+          fecha_inicio_ofertas: formData.fecha_inicio_ofertas || null,
+          fecha_otorgamiento_buena_pro: formData.fecha_otorgamiento_buena_pro || null,
+          fecha_apertura_sobre: formData.fecha_apertura_sobre || null,
+          Anexos: formData.Anexos || null,
+          QR_PATH: formData.QR_PATH || null,
+          id_convocatoria_documento: formData.id_convocatoria_documento || null,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Error al crear la convocatoria");
+      }
+
+      const newConvocatoria = await response.json();
+      const updatedConvocatorias = [
+        ...convocatorias,
+        {
+          ...formData,
+          id_convocatoria: newConvocatoria.id_convocatoria,
+          created_at: new Date().toISOString(),
+          vigencia: formData.vigencia === "1",
+          estado_convocatoria: "PENDIENTE-APROBACION", // Assuming default state
+          items: [],
+          documentos: [],
+        },
+      ];
+      setConvocatorias(updatedConvocatorias);
+      setFilteredConvocatorias(
+        filterVigencia
+          ? updatedConvocatorias.filter((c) => String(c.vigencia ? 1 : 0) === filterVigencia)
+          : updatedConvocatorias
+      );
+      setError(null);
+    } catch (error) {
+      console.error("Error creando la convocatoria:", error);
+      setError(error instanceof Error ? error.message : "Error al crear la convocatoria");
+    } finally {
+      setCreateModalOpen(false);
+      setFormData({
+        id_convenio: "",
+        id_tipo: 0,
+        codigo_seace: "",
+        titulo: "",
+        descripcion: "",
+        presupuesto: 0,
+        fecha_publicacion: "",
+        fecha_limite_ofertas: "",
+        fecha_estimada_adjudicacion: "",
+        duracion_contrato: 0,
+        vigencia: "",
+        id_estado: 0,
+      });
     }
   };
 
@@ -348,8 +533,8 @@ const VerConvocatorias = () => {
       const updatedConvocatorias = convocatorias.filter((item) => item.id_convocatoria !== id);
       setConvocatorias(updatedConvocatorias);
       setFilteredConvocatorias(
-        filtervigencia
-          ? updatedConvocatorias.filter((c) => String(c.vigencia) === filtervigencia)
+        filterVigencia
+          ? updatedConvocatorias.filter((c) => String(c.vigencia ? 1 : 0) === filterVigencia)
           : updatedConvocatorias
       );
       setError(null);
@@ -372,9 +557,17 @@ const VerConvocatorias = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="ml-0 lg:ml-[90px] transition-all duration-300 ease-in-out p-6">
-        <h1 className="text-3xl font-bold mb-6 text-gray-900 dark:text-white">
-          Convocatorias
-        </h1>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            Convocatorias
+          </h1>
+          <button
+            onClick={() => setCreateModalOpen(true)}
+            className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+          >
+            Crear Convocatoria
+          </button>
+        </div>
 
         {error && (
           <div className="mb-4 p-4 bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-200 rounded-lg">
@@ -387,8 +580,8 @@ const VerConvocatorias = () => {
             Filtrar por vigencia:
           </label>
           <select
-            value={filtervigencia}
-            onChange={(e) => setFiltervigencia(e.target.value)}
+            value={filterVigencia}
+            onChange={(e) => setFilterVigencia(e.target.value)}
             className="p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Todos</option>
@@ -404,10 +597,13 @@ const VerConvocatorias = () => {
                 {[
                   "",
                   "ID",
+                  "Convenio",
+                  "Código SEACE",
                   "Título",
-                  "Descripción",
-                  "Fecha Inicio",
-                  "Fecha Fin",
+                  "Presupuesto",
+                  "Fecha Publicación",
+                  "Fecha Límite Ofertas",
+                  "Fecha Estimada Adjudicación",
                   "Vigencia",
                   "Archivo PDF",
                   "Archivo Word",
@@ -453,32 +649,35 @@ const VerConvocatorias = () => {
                           {convocatoria.id_convocatoria}
                         </td>
                         <td className="py-4 px-6 text-gray-900 dark:text-white">
+                          {convocatoria.id_convenio}
+                        </td>
+                        <td className="py-4 px-6 text-gray-900 dark:text-white">
+                          {convocatoria.codigo_seace}
+                        </td>
+                        <td className="py-4 px-6 text-gray-900 dark:text-white">
                           {convocatoria.titulo}
                         </td>
                         <td className="py-4 px-6 text-gray-900 dark:text-white">
-                          {convocatoria.descripcion}
+                          {convocatoria.presupuesto.toFixed(2)}
                         </td>
                         <td className="py-4 px-6 text-gray-900 dark:text-white">
-                          {new Date(convocatoria.fecha_inicio).toLocaleDateString()}
+                          {new Date(convocatoria.fecha_publicacion).toLocaleDateString()}
                         </td>
                         <td className="py-4 px-6 text-gray-900 dark:text-white">
-                          {new Date(convocatoria.fecha_fin).toLocaleDateString()}
+                          {new Date(convocatoria.fecha_limite_ofertas).toLocaleDateString()}
+                        </td>
+                        <td className="py-4 px-6 text-gray-900 dark:text-white">
+                          {new Date(convocatoria.fecha_estimada_adjudicacion).toLocaleDateString()}
                         </td>
                         <td className="py-4 px-6">
                           <span
                             className={`px-2 py-1 rounded-full text-xs font-medium ${
-                              convocatoria.vigencia === 1
+                              convocatoria.vigencia
                                 ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                                : convocatoria.vigencia === 0
-                                ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
-                                : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200"
+                                : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
                             }`}
                           >
-                            {convocatoria.vigencia === 1
-                              ? "Activo"
-                              : convocatoria.vigencia === 0
-                              ? "Inactivo"
-                              : "No definido"}
+                            {convocatoria.vigencia ? "Activo" : "Inactivo"}
                           </span>
                         </td>
                         <td className="py-4 px-6 text-gray-900 dark:text-white">
@@ -545,9 +744,7 @@ const VerConvocatorias = () => {
                                     return (
                                       <button
                                         key={action}
-                                        onClick={() => {
-                                          handleStateChange(convocatoria.id_convocatoria, action);
-                                        }}
+                                        onClick={() => handleStateChange(convocatoria.id_convocatoria, action)}
                                         className="flex items-center w-full text-left px-4 py-2 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
                                       >
                                         <Icon className="mr-2" size={16} />
@@ -585,68 +782,25 @@ const VerConvocatorias = () => {
                         <>
                           {convocatoria.items.length > 0 && (
                             <tr>
-                              <td colSpan={11} className="p-4 bg-gray-100 dark:bg-gray-700">
+                              <td colSpan={14} className="p-4 bg-gray-100 dark:bg-gray-700">
                                 <h4 className="text-lg font-semibold text-gray-900 dark:text-white">Ítems</h4>
                                 <table className="min-w-full mt-2">
                                   <thead>
                                     <tr>
                                       <th className="py-2 px-4 text-left">Descripción</th>
                                       <th className="py-2 px-4 text-left">Cantidad</th>
-                                      <th className="py-2 px-4 text-left">Precio Ref.</th>
                                       <th className="py-2 px-4 text-left">Acción</th>
                                     </tr>
                                   </thead>
                                   <tbody>
                                     {convocatoria.items.map((item) => (
-                                      <tr key={item.id_item}>
-                                        <td className="py-2 px-4">
-                                          <input
-                                            type="text"
-                                            value={item.descripcion}
-                                            onChange={(e) => {
-                                              const updatedItems = convocatoria.items.map((i) =>
-                                                i.id_item === item.id_item ? { ...i, descripcion: e.target.value } : i
-                                              );
-                                              setFormData({ ...formData, items: updatedItems });
-                                            }}
-                                            className="w-full p-1 border rounded"
-                                            disabled={isFinalizado}
-                                          />
-                                        </td>
-                                        <td className="py-2 px-4">
-                                          <input
-                                            type="number"
-                                            value={item.cantidad}
-                                            onChange={(e) => {
-                                              const updatedItems = convocatoria.items.map((i) =>
-                                                i.id_item === item.id_item ? { ...i, cantidad: Number(e.target.value) } : i
-                                              );
-                                              setFormData({ ...formData, items: updatedItems });
-                                            }}
-                                            className="w-full p-1 border rounded"
-                                            disabled={isFinalizado}
-                                          />
-                                        </td>
-                                        <td className="py-2 px-4">
-                                          <input
-                                            type="number"
-                                            step="0.01"
-                                            value={item.precio_referencial || ""}
-                                            onChange={(e) => {
-                                              const updatedItems = convocatoria.items.map((i) =>
-                                                i.id_item === item.id_item ? { ...i, precio_referencial: Number(e.target.value) } : i
-                                              );
-                                              setFormData({ ...formData, items: updatedItems });
-                                            }}
-                                            className="w-full p-1 border rounded"
-                                            disabled={isFinalizado}
-                                          />
-                                        </td>
+                                      <tr key={item.id_item_convocatoria}>
+                                        <td className="py-2 px-4">{item.descripcion}</td>
+                                        <td className="py-2 px-4">{item.cantidad}</td>
                                         <td className="py-2 px-4">
                                           <button
                                             onClick={() => {
-                                              const updatedItems = convocatoria.items.filter((i) => i.id_item !== item.id_item);
-                                              setFormData({ ...formData, items: updatedItems });
+                                              // Implement item deletion if needed
                                             }}
                                             className="text-red-500 hover:text-red-600"
                                             disabled={isFinalizado}
@@ -664,8 +818,8 @@ const VerConvocatorias = () => {
                           {convocatoria.documentos.length > 0 &&
                             convocatoria.documentos.map((doc) => (
                               doc.validaciones.length > 0 && (
-                                <tr key={doc.id_documento}>
-                                  <td colSpan={11} className="p-4 bg-gray-100 dark:bg-gray-700">
+                                <tr key={doc.id_convocatoria_documento}>
+                                  <td colSpan={14} className="p-4 bg-gray-100 dark:bg-gray-700">
                                     <h4 className="text-lg font-semibold text-gray-900 dark:text-white">Validaciones: {doc.nombre}</h4>
                                     <table className="min-w-full mt-2">
                                       <thead>
@@ -680,60 +834,9 @@ const VerConvocatorias = () => {
                                         {doc.validaciones.map((val) => (
                                           <tr key={val.id_validacion}>
                                             <td className="py-2 px-4">{val.nivel_validacion}</td>
-                                            <td className="py-2 px-4">
-                                              <select
-                                                value={val.estado}
-                                                onChange={(e) => {
-                                                  const updatedValidaciones = doc.validaciones.map((v) =>
-                                                    v.id_validacion === val.id_validacion ? { ...v, estado: e.target.value } : v
-                                                  );
-                                                  const updatedDocumentos = convocatoria.documentos.map((d) =>
-                                                    d.id_documento === doc.id_documento ? { ...d, validaciones: updatedValidaciones } : d
-                                                  );
-                                                  setFormData({ ...formData, documentos: updatedDocumentos });
-                                                }}
-                                                className="w-full p-1 border rounded"
-                                                disabled={isFinalizado}
-                                              >
-                                                <option value="Pendiente">Pendiente</option>
-                                                <option value="Aprobado">Aprobado</option>
-                                                <option value="Rechazado">Rechazado</option>
-                                              </select>
-                                            </td>
-                                            <td className="py-2 px-4">
-                                              <input
-                                                type="text"
-                                                value={val.usuario_validador}
-                                                onChange={(e) => {
-                                                  const updatedValidaciones = doc.validaciones.map((v) =>
-                                                    v.id_validacion === val.id_validacion ? { ...v, usuario_validador: e.target.value } : v
-                                                  );
-                                                  const updatedDocumentos = convocatoria.documentos.map((d) =>
-                                                    d.id_documento === doc.id_documento ? { ...d, validaciones: updatedValidaciones } : d
-                                                  );
-                                                  setFormData({ ...formData, documentos: updatedDocumentos });
-                                                }}
-                                                className="w-full p-1 border rounded"
-                                                disabled={isFinalizado}
-                                              />
-                                            </td>
-                                            <td className="py-2 px-4">
-                                              <input
-                                                type="text"
-                                                value={val.comentarios || ""}
-                                                onChange={(e) => {
-                                                  const updatedValidaciones = doc.validaciones.map((v) =>
-                                                    v.id_validacion === val.id_validacion ? { ...v, comentarios: e.target.value } : v
-                                                  );
-                                                  const updatedDocumentos = convocatoria.documentos.map((d) =>
-                                                    d.id_documento === doc.id_documento ? { ...d, validaciones: updatedValidaciones } : d
-                                                  );
-                                                  setFormData({ ...formData, documentos: updatedDocumentos });
-                                                }}
-                                                className="w-full p-1 border rounded"
-                                                disabled={isFinalizado}
-                                              />
-                                            </td>
+                                            <td className="py-2 px-4">{val.estado}</td>
+                                            <td className="py-2 px-4">{val.usuario_validador}</td>
+                                            <td className="py-2 px-4">{val.comentarios || "Sin comentarios"}</td>
                                           </tr>
                                         ))}
                                       </tbody>
@@ -742,6 +845,29 @@ const VerConvocatorias = () => {
                                 </tr>
                               )
                             ))}
+                          {convocatoria.Anexos && (
+                            <tr>
+                              <td colSpan={14} className="p-4 bg-gray-100 dark:bg-gray-700">
+                                <h4 className="text-lg font-semibold text-gray-900 dark:text-white">Anexos</h4>
+                                <p>{convocatoria.Anexos}</p>
+                              </td>
+                            </tr>
+                          )}
+                          {convocatoria.QR_PATH && (
+                            <tr>
+                              <td colSpan={14} className="p-4 bg-gray-100 dark:bg-gray-700">
+                                <h4 className="text-lg font-semibold text-gray-900 dark:text-white">QR</h4>
+                                <a
+                                  href={`/${convocatoria.QR_PATH}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-500 hover:text-blue-600"
+                                >
+                                  Ver QR
+                                </a>
+                              </td>
+                            </tr>
+                          )}
                         </>
                       )}
                     </React.Fragment>
@@ -750,7 +876,7 @@ const VerConvocatorias = () => {
               ) : (
                 <tr>
                   <td
-                    colSpan={11}
+                    colSpan={14}
                     className="py-4 px-6 text-center text-gray-500 dark:text-gray-400"
                   >
                     No se encontraron convocatorias
@@ -801,6 +927,42 @@ const VerConvocatorias = () => {
             <div className="space-y-4">
               <div>
                 <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                  ID Convenio
+                </label>
+                <input
+                  type="text"
+                  value={formData.id_convenio}
+                  onChange={(e) => setFormData({ ...formData, id_convenio: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                  ID Tipo
+                </label>
+                <input
+                  type="number"
+                  value={formData.id_tipo}
+                  onChange={(e) => setFormData({ ...formData, id_tipo: Number(e.target.value) })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                  Código SEACE
+                </label>
+                <input
+                  type="text"
+                  value={formData.codigo_seace}
+                  onChange={(e) => setFormData({ ...formData, codigo_seace: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
                   Título
                 </label>
                 <input
@@ -825,24 +987,61 @@ const VerConvocatorias = () => {
               </div>
               <div>
                 <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
-                  Fecha de Inicio
+                  Presupuesto
                 </label>
                 <input
-                  type="date"
-                  value={formData.fecha_inicio}
-                  onChange={(e) => setFormData({ ...formData, fecha_inicio: e.target.value })}
+                  type="number"
+                  step="0.01"
+                  value={formData.presupuesto}
+                  onChange={(e) => setFormData({ ...formData, presupuesto: Number(e.target.value) })}
                   className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
                   required
                 />
               </div>
               <div>
                 <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
-                  Fecha de Fin
+                  Fecha de Publicación
                 </label>
                 <input
                   type="date"
-                  value={formData.fecha_fin}
-                  onChange={(e) => setFormData({ ...formData, fecha_fin: e.target.value })}
+                  value={formData.fecha_publicacion}
+                  onChange={(e) => setFormData({ ...formData, fecha_publicacion: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                  Fecha Límite Ofertas
+                </label>
+                <input
+                  type="date"
+                  value={formData.fecha_limite_ofertas}
+                  onChange={(e) => setFormData({ ...formData, fecha_limite_ofertas: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                  Fecha Estimada Adjudicación
+                </label>
+                <input
+                  type="date"
+                  value={formData.fecha_estimada_adjudicacion}
+                  onChange={(e) => setFormData({ ...formData, fecha_estimada_adjudicacion: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                  Duración Contrato (días)
+                </label>
+                <input
+                  type="number"
+                  value={formData.duracion_contrato}
+                  onChange={(e) => setFormData({ ...formData, duracion_contrato: Number(e.target.value) })}
                   className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
                   required
                 />
@@ -861,13 +1060,126 @@ const VerConvocatorias = () => {
                   <option value="0">Inactivo</option>
                 </select>
               </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                  ID Estado
+                </label>
+                <input
+                  type="number"
+                  value={formData.id_estado}
+                  onChange={(e) => setFormData({ ...formData, id_estado: Number(e.target.value) })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                  Fecha Fin Publicación
+                </label>
+                <input
+                  type="datetime-local"
+                  value={formData.fecha_fin_publicacion}
+                  onChange={(e) => setFormData({ ...formData, fecha_fin_publicacion: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                  Fecha Inicio Ofertas
+                </label>
+                <input
+                  type="datetime-local"
+                  value={formData.fecha_inicio_ofertas}
+                  onChange={(e) => setFormData({ ...formData, fecha_inicio_ofertas: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                  Fecha Otorgamiento Buena Pro
+                </label>
+                <input
+                  type="datetime-local"
+                  value={formData.fecha_otorgamiento_buena_pro}
+                  onChange={(e) => setFormData({ ...formData, fecha_otorgamiento_buena_pro: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                  Fecha Apertura Sobre
+                </label>
+                <input
+                  type="datetime-local"
+                  value={formData.fecha_apertura_sobre}
+                  onChange={(e) => setFormData({ ...formData, fecha_apertura_sobre: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                  PDF Path
+                </label>
+                <input
+                  type="text"
+                  value={formData.pdf_file_path}
+                  onChange={(e) => setFormData({ ...formData, pdf_file_path: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                  Word Path
+                </label>
+                <input
+                  type="text"
+                  value={formData.word_file_path}
+                  onChange={(e) => setFormData({ ...formData, word_file_path: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                  Anexos
+                </label>
+                <input
+                  type="text"
+                  value={formData.Anexos}
+                  onChange={(e) => setFormData({ ...formData, Anexos: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                  QR Path
+                </label>
+                <input
+                  type="text"
+                  value={formData.QR_PATH}
+                  onChange={(e) => setFormData({ ...formData, QR_PATH: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
             </div>
             <div className="mt-6 flex justify-end space-x-2">
               <button
                 onClick={() => {
                   setEditModalOpen(false);
                   setSelectedConvocatoriaId(null);
-                  setFormData({ titulo: "", descripcion: "", fecha_inicio: "", fecha_fin: "", vigencia: "", items: [], documentos: [] });
+                  setFormData({
+                    id_convenio: "",
+                    id_tipo: 0,
+                    codigo_seace: "",
+                    titulo: "",
+                    descripcion: "",
+                    presupuesto: 0,
+                    fecha_publicacion: "",
+                    fecha_limite_ofertas: "",
+                    fecha_estimada_adjudicacion: "",
+                    duracion_contrato: 0,
+                    vigencia: "",
+                    id_estado: 0,
+                  });
                   setError(null);
                 }}
                 className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors"
@@ -879,6 +1191,284 @@ const VerConvocatorias = () => {
                 className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
               >
                 Guardar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {createModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl max-w-lg w-full">
+            <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">
+              Crear Convocatoria
+            </h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                  ID Convenio
+                </label>
+                <input
+                  type="text"
+                  value={formData.id_convenio}
+                  onChange={(e) => setFormData({ ...formData, id_convenio: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                  ID Tipo
+                </label>
+                <input
+                  type="number"
+                  value={formData.id_tipo}
+                  onChange={(e) => setFormData({ ...formData, id_tipo: Number(e.target.value) })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                  Código SEACE
+                </label>
+                <input
+                  type="text"
+                  value={formData.codigo_seace}
+                  onChange={(e) => setFormData({ ...formData, codigo_seace: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                  Título
+                </label>
+                <input
+                  type="text"
+                  value={formData.titulo}
+                  onChange={(e) => setFormData({ ...formData, titulo: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                  Descripción
+                </label>
+                <textarea
+                  value={formData.descripcion}
+                  onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  rows={4}
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                  Presupuesto
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={formData.presupuesto}
+                  onChange={(e) => setFormData({ ...formData, presupuesto: Number(e.target.value) })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                  Fecha de Publicación
+                </label>
+                <input
+                  type="date"
+                  value={formData.fecha_publicacion}
+                  onChange={(e) => setFormData({ ...formData, fecha_publicacion: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                  Fecha Límite Ofertas
+                </label>
+                <input
+                  type="date"
+                  value={formData.fecha_limite_ofertas}
+                  onChange={(e) => setFormData({ ...formData, fecha_limite_ofertas: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                  Fecha Estimada Adjudicación
+                </label>
+                <input
+                  type="date"
+                  value={formData.fecha_estimada_adjudicacion}
+                  onChange={(e) => setFormData({ ...formData, fecha_estimada_adjudicacion: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                  Duración Contrato (días)
+                </label>
+                <input
+                  type="number"
+                  value={formData.duracion_contrato}
+                  onChange={(e) => setFormData({ ...formData, duracion_contrato: Number(e.target.value) })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                  Vigencia
+                </label>
+                <select
+                  value={formData.vigencia}
+                  onChange={(e) => setFormData({ ...formData, vigencia: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Seleccione vigencia</option>
+                  <option value="1">Activo</option>
+                  <option value="0">Inactivo</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                  ID Estado
+                </label>
+                <input
+                  type="number"
+                  value={formData.id_estado}
+                  onChange={(e) => setFormData({ ...formData, id_estado: Number(e.target.value) })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                  Fecha Fin Publicación
+                </label>
+                <input
+                  type="datetime-local"
+                  value={formData.fecha_fin_publicacion}
+                  onChange={(e) => setFormData({ ...formData, fecha_fin_publicacion: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                  Fecha Inicio Ofertas
+                </label>
+                <input
+                  type="datetime-local"
+                  value={formData.fecha_inicio_ofertas}
+                  onChange={(e) => setFormData({ ...formData, fecha_inicio_ofertas: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                  Fecha Otorgamiento Buena Pro
+                </label>
+                <input
+                  type="datetime-local"
+                  value={formData.fecha_otorgamiento_buena_pro}
+                  onChange={(e) => setFormData({ ...formData, fecha_otorgamiento_buena_pro: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                  Fecha Apertura Sobre
+                </label>
+                <input
+                  type="datetime-local"
+                  value={formData.fecha_apertura_sobre}
+                  onChange={(e) => setFormData({ ...formData, fecha_apertura_sobre: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                  PDF Path
+                </label>
+                <input
+                  type="text"
+                  value={formData.pdf_file_path}
+                  onChange={(e) => setFormData({ ...formData, pdf_file_path: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                  Word Path
+                </label>
+                <input
+                  type="text"
+                  value={formData.word_file_path}
+                  onChange={(e) => setFormData({ ...formData, word_file_path: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                  Anexos
+                </label>
+                <input
+                  type="text"
+                  value={formData.Anexos}
+                  onChange={(e) => setFormData({ ...formData, Anexos: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">
+                  QR Path
+                </label>
+                <input
+                  type="text"
+                  value={formData.QR_PATH}
+                  onChange={(e) => setFormData({ ...formData, QR_PATH: e.target.value })}
+                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+            <div className="mt-6 flex justify-end space-x-2">
+              <button
+                onClick={() => {
+                  setCreateModalOpen(false);
+                  setFormData({
+                    id_convenio: "",
+                    id_tipo: 0,
+                    codigo_seace: "",
+                    titulo: "",
+                    descripcion: "",
+                    presupuesto: 0,
+                    fecha_publicacion: "",
+                    fecha_limite_ofertas: "",
+                    fecha_estimada_adjudicacion: "",
+                    duracion_contrato: 0,
+                    vigencia: "",
+                    id_estado: 0,
+                  });
+                  setError(null);
+                }}
+                className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleCreate}
+                className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+              >
+                Crear
               </button>
             </div>
           </div>
