@@ -29,7 +29,7 @@ type BudgetItem = {
   Codigo: string;
   Descripción: string;
   Unidad: string;
-  Cantidad: number;
+  Metrado: number;
   PrecioUnitario: number;
   CostoTotal: number;
   Level: number;
@@ -214,7 +214,7 @@ const BudgetModule: React.FC = () => {
                             <th className="px-6 py-3">Código</th>
                             <th className="px-6 py-3">Descripción</th>
                             <th className="px-6 py-3">Unidad</th>
-                            <th className="px-6 py-3">Cantidad</th>
+                            <th className="px-6 py-3">Metrado</th>
                             <th className="px-6 py-3">Precio Unitario (S/.)</th>
                             <th className="px-6 py-3">Costo Total (S/.)</th>
                        
@@ -255,7 +255,7 @@ const BudgetModule: React.FC = () => {
                                 <td className="px-6 py-4" style={{ paddingLeft: `${indent}px` }}>{item.Codigo}</td>
                                 <td className="px-6 py-4" style={{ paddingLeft: `${indent + 10}px` }}>{item.Descripción}</td>
                                 <td className="px-6 py-4">{isGroup ? '' : item.Unidad}</td>
-                                <td className="px-6 py-4">{isGroup ? '' : formatNumber(item.Cantidad)}</td>
+                                <td className="px-6 py-4">{isGroup ? '' : formatNumber(item.Metrado)}</td>
                                 <td className="px-6 py-4">{isGroup ? '' : formatNumber(item.PrecioUnitario)}</td>
                                 <td className="px-6 py-4">{formatNumber(item.CostoTotal)}</td>
                           

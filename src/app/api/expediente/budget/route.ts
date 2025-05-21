@@ -25,7 +25,7 @@ interface BudgetItem {
   Codigo: string;
   Descripción: string;
   Unidad: string;
-  Cantidad: number;
+  Metrado: number;
   PrecioUnitario: number;
   CostoTotal: number;
   Category: string;
@@ -203,7 +203,7 @@ export async function GET(request: NextRequest) {
         Codigo: codigo,
         Descripción: slicedRow[3]?.toString().trim() || 'N/A',
         Unidad: slicedRow[4]?.toString().trim() || 'N/A',
-        Cantidad: parseFloat(slicedRow[5]) || 0,
+        Metrado: parseFloat(slicedRow[5]) || 0,
         PrecioUnitario: parseFloat(slicedRow[6]) || 0,
         CostoTotal: partial,
         Category: category ? category.name : 'Other',
