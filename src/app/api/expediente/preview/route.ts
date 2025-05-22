@@ -1,15 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import path from "path";
 import fs from "fs/promises";
+import * as XLSX from "xlsx";
+import { v4 as uuidv4 } from "uuid";
 
-// Importar dinámicamente xlsx para manejar módulos CommonJS
-const XLSX = await import('xlsx').then(module => module.default || module);
-
-if (!XLSX || !XLSX.read) {
-  console.error('Error: El módulo XLSX no se cargó correctamente');
-  throw new Error('El módulo XLSX no se cargó correctamente');
-}
-
+// Interfaces
 interface BudgetItem {
   Codigo: string;
   ItemPadre: string;
@@ -32,295 +27,270 @@ interface ValidationReport {
   isValid: boolean;
 }
 
-async function parseExcelFile(filePath: string): Promise<{ items: BudgetItem[]; validation: ValidationReport }> {
-  console.log('Iniciando procesamiento de archivo Excel desde:', filePath);
-  const buffer = await fs.readFile(filePath);
+interface ExcelParseResult {
+  items: BudgetItem[];
+  validation: ValidationReport;
+}
 
-  console.log('Parseando el archivo Excel con XLSX');
-  const workbook = XLSX.read(buffer, { type: 'buffer', cellText: true, cellDates: false });
-  const sheetName = workbook.SheetNames.find(name => name.toLowerCase() === 'presupuesto');
+// Configuración
+const ALLOWED_FILE_TYPES = ["xlsx", "xls"];
+const MAX_HEADER_SEARCH_ROWS = 20;
+const MAX_ROWS = 10000;
+
+// Categorías predefinidas
+const CATEGORIES = [
+  { 
+    name: "Materials", 
+    codes: ["201", "204", "205", "207", "210", "211", "213", "216", "217", "222", 
+            "231", "234", "237", "238", "240", "241", "251", "262", "264", "265", 
+            "267", "268", "270", "272", "276", "293", "294", "295", "296", "298", "299"] 
+  },
+  { name: "Labor", codes: ["101"] },
+  { name: "Equipment", codes: ["301"] },
+  { name: "Freight", codes: ["203"] },
+];
+
+// Sinónimos para encabezados
+const HEADER_SYNONYMS = [
+  { expected: "Item", synonyms: ["item", "código", "codigo", "id"] },
+  { expected: "Descripción", synonyms: ["descripción", "descripcion", "nombre", "detalle"] },
+  { expected: "Und.", synonyms: ["und", "unidad", "unid", "u"] },
+  { expected: "Metrado", synonyms: ["metrado", "cantidad", "cant", "qty"] },
+  { expected: "P.U.", synonyms: ["p.u", "precio unitario", "precio", "unitario", "pu"] },
+  { expected: "Parcial", synonyms: ["parcial", "total", "costo", "subtotal"] },
+];
+
+// Lista simulada de convenios válidos
+const VALID_CONVENIO_IDS = [1, 2, 3, 4, 5];
+
+/**
+ * Normaliza un encabezado eliminando espacios y puntos.
+ * @param header - El encabezado a normalizar.
+ * @returns El encabezado normalizado.
+ */
+function normalizeHeader(header: string): string {
+  return header.toLowerCase().replace(/\s+/g, "").replace(/\./g, "");
+}
+
+// [Otras importaciones e interfaces permanecen iguales]
+
+/**
+ * Busca la fila de encabezados en los datos del Excel, enfocándose en la fila 15 y aceptando 2 celdas vacías después de 'Item'.
+ * @param data - Matriz de datos del Excel.
+ * @returns Objeto con el índice de la fila de encabezados y el mapeo de encabezados a índices de columna.
+ * @throws Error si no se encuentran encabezados válidos en la fila 15.
+ */
+function findHeaderRow(data: unknown[][]): { rowIndex: number; headers: { [key: string]: number } } {
+  const targetRowIndex = 14; // Fila 15
+  if (data.length <= targetRowIndex || !data[targetRowIndex]) {
+    console.log("Datos disponibles:", data.map(row => row.map(cell => cell?.toString().trim() || "").join("|")).slice(0, 20)); // Muestra las primeras 20 filas
+    throw new Error("Formato de archivo Excel inválido: no se encontraron datos en la fila 15");
+  }
+
+  const row = data[targetRowIndex];
+  console.log("Fila 15 cruda (índices 0-9):", row.slice(0, 10).map((cell, idx) => `${idx}: ${cell?.toString().trim() || '<vacío>'}`).join(", ")); // Muestra los primeros 10 elementos
+  console.log("Longitud total de fila 15:", row.length);
+
+  if (row.length < 8 || !row.some(cell => cell?.toString().trim())) {
+    console.log("Contenido de fila 15 completo:", row.map((cell, idx) => `${idx}: ${cell?.toString().trim() || '<vacío>'}`).join(", "));
+    throw new Error("Formato de archivo Excel inválido: la fila 15 no contiene suficientes columnas (se esperaban al menos 8)");
+  }
+
+  const headers = row.map(h => h?.toString().trim() || "");
+  console.log("Encabezados crudos en fila 15:", headers);
+  const normalizedHeaders = headers.map(normalizeHeader);
+  console.log("Encabezados normalizados:", normalizedHeaders);
+
+  const foundHeaders: { [key: string]: number } = {};
+  let matches = 0;
+
+  const expectedOrder = ["Item", null, null, "Descripción", "Und.", "Metrado", "P.U.", "Parcial"];
+  for (let i = 0; i < Math.min(normalizedHeaders.length, expectedOrder.length); i++) {
+    const expected = expectedOrder[i];
+    const header = normalizedHeaders[i];
+    console.log(`Índice ${i}: Esperado '${expected}', Encontrado '${header}'`);
+
+    if (expected === null) {
+      continue;
+    }
+
+    if (header && (header === normalizeHeader(expected) || HEADER_SYNONYMS.find(s => s.expected === expected)?.synonyms.some(syn => header.includes(normalizeHeader(syn))))) {
+      foundHeaders[expected] = i;
+      matches++;
+      console.log(`Encabezado '${expected}' encontrado en índice ${i}`);
+    }
+  }
+
+  console.log("Total de coincidencias:", matches);
+  console.log("Mapeo de encabezados:", foundHeaders);
+
+  if (matches < 5) {
+    throw new Error(`Formato de archivo Excel inválido: se esperaban 5 encabezados en la fila 15 (Item, Descripción, Und., Metrado, P.U., Parcial), encontrados: ${headers.filter(h => h).join(", ")}`);
+  }
+
+  return { rowIndex: targetRowIndex, headers: foundHeaders };
+}
+
+// [Resto del código (parseBudgetItem, parseExcelFile, POST) permanece igual]
+
+/**
+ * Procesa un archivo Excel y extrae ítems de presupuesto.
+ * @param workbook - Workbook de XLSX.
+ * @returns Resultado con ítems parseados y reporte de validación.
+ * @throws Error si el archivo no es válido o no se encuentra la hoja requerida.
+ */
+function parseExcelFile(workbook: XLSX.WorkBook): { items: BudgetItem[]; validation: ValidationReport } {
+  const sheetName = workbook.SheetNames.find(name => name.toLowerCase().includes("presupuesto"));
   if (!sheetName) {
-    console.log('No se encontró la pestaña "PRESUPUESTO" en el archivo Excel');
-    throw new Error('No se encontró la pestaña "PRESUPUESTO" en el archivo Excel');
+    throw new Error(`No se encontró la pestaña 'PRESUPUESTO' en el archivo Excel. Hojas disponibles: ${workbook.SheetNames.join(", ")}`);
   }
 
-  console.log('Hoja seleccionada:', sheetName);
-  const sheet = workbook.Sheets[sheetName];
-  const data = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: false, defval: '' }) as any[][];
-  console.log('Primeras 5 filas del archivo Excel:', data.slice(0, 5));
+  const worksheet = workbook.Sheets[sheetName];
+  const data = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: false, defval: "" }) as unknown[][];
 
-  // Definir los encabezados esperados con sinónimos
-  const headerSynonyms = [
-    { expected: 'Item', synonyms: ['item', 'código', 'codigo', 'id'] },
-    { expected: 'Descripción', synonyms: ['descripción', 'descripcion', 'nombre', 'detalle'] },
-    { expected: 'Und.', synonyms: ['und', 'unidad', 'unid', 'u'] },
-    { expected: 'Metrado', synonyms: ['metrado', 'cantidad', 'cant', 'qty'] },
-    { expected: 'P.U.', synonyms: ['p.u', 'precio unitario', 'precio', 'unitario', 'pu'] },
-    { expected: 'Parcial', synonyms: ['parcial', 'total', 'costo', 'subtotal'] },
-  ];
-
-  // Inicializar validación
-  const validation: ValidationReport = { warnings: [], errors: [], isValid: true };
-
-  // Buscar la fila de encabezados
-  let headerRowIndex = -1;
-  let headerIndices: { [key: string]: number } = {};
-  for (let i = 0; i < Math.min(data.length, 20); i++) {
-    const row = data[i];
-    if (row.length >= 6 && row.some(cell => cell?.toString().trim())) {
-      const headers = row.map(h => h?.toString().trim() || '');
-      const normalizedHeaders = headers.map(h => h.toLowerCase().replace(/\s+/g, '').replace(/\./g, ''));
-
-      let matches = 0;
-      const tempHeaders: { [key: string]: number } = {};
-      for (let j = 0; j < headerSynonyms.length; j++) {
-        const { expected, synonyms } = headerSynonyms[j];
-        const normalizedExpected = expected.toLowerCase().replace(/\s+/g, '').replace(/\./g, '');
-        const foundIndex = normalizedHeaders.findIndex(h =>
-          h && (h === normalizedExpected || synonyms.some(syn => h.includes(syn.toLowerCase().replace(/\s+/g, '').replace(/\./g, '')))
-        ));
-        if (foundIndex !== -1) {
-          matches++;
-          tempHeaders[expected] = foundIndex;
-        }
-      }
-
-      if (matches >= 5) {
-        headerRowIndex = i;
-        headerIndices = tempHeaders;
-        console.log('Encabezados encontrados en la fila', i + 1, ':', headers);
-        break;
-      }
-    }
-  }
-
-  if (headerRowIndex === -1) {
-    console.log('No se encontraron encabezados válidos en las primeras 20 filas');
-    validation.warnings.push('No se encontraron encabezados válidos; asumiendo estructura estándar');
-    if (data.some(row => row.length >= 6 && row[0]?.toString().trim() && row[1]?.toString().trim())) {
-      headerRowIndex = 0;
-      headerIndices = {
-        'Item': 0,
-        'Descripción': 1,
-        'Und.': 2,
-        'Metrado': 3,
-        'P.U.': 4,
-        'Parcial': 5,
-      };
-      console.log('Asumiendo encabezados por defecto:', headerIndices);
-    } else {
-      throw new Error('Formato de archivo Excel inválido: no se encontraron encabezados ni datos válidos');
-    }
-  }
-
-  const categories = [
-    { name: 'Materials', value: 0, codes: ['201', '204', '205', '207', '210', '211', '213', '216', '217', '222', '231', '234', '237', '238', '240', '241', '251', '262', '264', '265', '267', '268', '270', '272', '276', '293', '294', '295', '296', '298', '299'] },
-    { name: 'Labor', value: 0, codes: ['101'] },
-    { name: 'Equipment', value: 0, codes: ['301'] },
-    { name: 'Freight', value: 0, codes: ['203'] },
-  ];
+  const { rowIndex, headers } = findHeaderRow(data);
+  const startDataRow = rowIndex + 1; // Datos comienzan en fila 16
 
   const items: BudgetItem[] = [];
-  const groupTotals: { [key: string]: number } = {};
-  let lastLevel0Parent: string | null = null;
-  let lastLevel1Parent: string | null = null;
-  let currentSegment: string = '';
+  const validation: ValidationReport = { warnings: [], errors: [], isValid: true };
 
-  console.log('Procesando datos a partir de la fila', headerRowIndex + 1);
+  for (let i = startDataRow; i < data.length; i++) {
+    const row = data[i] as string[];
+    if (!row || row.length < 8) continue; // Ignorar filas vacías o con menos de 8 columnas
 
-  for (let i = headerRowIndex + 1; i < data.length; i++) {
-    const row = data[i] as any[];
-    const itemRaw = row[headerIndices['Item']]?.toString().trim() || '';
-    const descIndex = headerIndices['Descripción'];
-    const descripcion = row[descIndex]?.toString().replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ').trim() || '';
+    const itemStr = row[headers["Item"]] || "";
+    const description = row[headers["Descripción"]] || "";
+    const unit = row[headers["Und."]] || "";
+    const quantityStr = row[headers["Metrado"]] || "";
+    const precioUnitarioStr = row[headers["P.U."]] || "";
+    const parcialStr = row[headers["Parcial"]] || "";
 
-    console.log(`Fila ${i + 1}: ItemRaw = "${itemRaw}", Descripción = "${descripcion}"`);
+    if (!itemStr && !description) continue; // Ignorar filas completamente vacías
 
-    // Ignorar filas vacías o sin código
-    if (!itemRaw || !descripcion) {
-      console.log(`Fila ${i + 1}: Saltando fila vacía o sin datos`);
-      continue;
-    }
-
-    // Ignorar filas de resumen
-    if (descripcion.toUpperCase().includes('COSTO DIRECTO') ||
-        descripcion.toUpperCase().includes('COSTO INDIRECTO') ||
-        descripcion.toUpperCase().includes('COSTO TOTAL') ||
-        descripcion.toUpperCase().includes('APORTE') ||
-        descripcion.toUpperCase().includes('FINANCIA PNVR')) {
-      console.log(`Fila ${i + 1}: Saltando fila de resumen`);
-      continue;
-    }
-
-    // Determinar el nivel y separar ItemPadre, ItemHijo, ItemNieto
-    const itemParts = itemRaw.split(/\s+/).filter(part => part !== '');
-    const level = itemParts.length - 1; // "1" → 0, "1 1" → 1, "1 1 1" → 2
-    const itemPadre = itemParts[0] || '';
-    const itemHijo = itemParts.length > 1 ? itemParts[1] : '';
-    const itemNieto = itemParts.length > 2 ? itemParts[2] : '';
-
-    console.log(`Fila ${i + 1}: Nivel detectado = ${level}, Partes = ${itemParts}, ItemPadre = "${itemPadre}", ItemHijo = "${itemHijo}", ItemNieto = "${itemNieto}"`);
-
-    const codigo = itemRaw && descripcion ? `${itemRaw} - ${descripcion}` : itemRaw;
-
-    const unitIndex = headerIndices['Und.'];
-    const metradoRaw = row[headerIndices['Metrado']]?.toString().trim() || '0';
-    const precioUnitarioRaw = row[headerIndices['P.U.']]?.toString().trim() || '0';
-    const partialRaw = row[headerIndices['Parcial']]?.toString().trim() || '0';
-
-    const metrado = parseFloat(metradoRaw) || 0;
-    const precioUnitario = parseFloat(precioUnitarioRaw) || 0;
-    const partial = parseFloat(partialRaw) || 0;
-
-    const unidad = row[unitIndex]?.toString().trim() || '';
-
-    // Validaciones
-    if (!descripcion) {
-      validation.warnings.push(`Fila ${i + 1}: Descripción vacía para el código ${codigo}`);
-      console.log(`Fila ${i + 1}: Advertencia - Descripción vacía`);
-      continue;
-    }
-    if (level === 2 && (!unidad || isNaN(metrado) || isNaN(precioUnitario) || isNaN(partial) || metrado === 0 || precioUnitario === 0 || partial === 0)) {
-      validation.errors.push(`Fila ${i + 1}: Ítem de nivel 2 con datos incompletos o inválidos (Unidad: ${unidad}, Metrado: ${metrado}, P.U.: ${precioUnitario}, Parcial: ${partial})`);
-      validation.isValid = false;
-      console.log(`Fila ${i + 1}: Error - Datos inválidos para nivel 2`);
-      continue;
-    }
-
-    console.log(`Fila ${i + 1}: Procesando ítem - Código: ${codigo}, Nivel: ${level}, Unidad: ${unidad}, Metrado: ${metrado}, PrecioUnitario: ${precioUnitario}`);
-
-    const category = categories.find(cat => codigo.startsWith(cat.name));
-    if (category && level === 2) category.value += partial;
-
-    // Asignar segmento
-    if (level === 0) {
-      currentSegment = descripcion;
-      console.log(`Fila ${i + 1}: Segmento asignado = ${currentSegment}`);
-    }
-
-    // Asignar padre
-    let parent: string | null = null;
-    if (level === 1 && lastLevel0Parent) {
-      parent = lastLevel0Parent;
-      console.log(`Fila ${i + 1}: Padre asignado (Nivel 1) = ${parent}`);
-    } else if (level === 2 && lastLevel1Parent) {
-      parent = lastLevel1Parent;
-      console.log(`Fila ${i + 1}: Padre asignado (Nivel 2) = ${parent}`);
-    }
-
-    if (level === 0) {
-      lastLevel0Parent = descripcion;
-      lastLevel1Parent = null;
-      console.log(`Fila ${i + 1}: Nuevo padre de nivel 0 = ${lastLevel0Parent}`);
-    } else if (level === 1) {
-      lastLevel1Parent = descripcion;
-      console.log(`Fila ${i + 1}: Nuevo padre de nivel 1 = ${lastLevel1Parent}`);
-    }
-
-    // Acumular totales para los niveles superiores
-    if (level === 2 && parent) {
-      let currentParent = parent;
-      while (currentParent) {
-        groupTotals[currentParent] = (groupTotals[currentParent] || 0) + partial;
-        const parentIndex = items.findIndex(item => item.Descripción === currentParent);
-        if (parentIndex !== -1) {
-          currentParent = items[parentIndex].Parent || null;
-        } else {
-          currentParent = null;
-        }
-      }
-      console.log(`Fila ${i + 1}: Total acumulado para ${parent} = ${groupTotals[parent]}`);
-    }
+    const itemParts = itemStr.split(" - ").filter(part => part.trim());
+    const level = itemParts.length - 1;
+    const code = itemStr;
+    const quantity = parseFloat(quantityStr.replace(/[^0-9.-]/g, "")) || 0;
+    const precioUnitario = parseFloat(precioUnitarioStr.replace(/[^0-9.-]/g, "")) || 0;
+    const parcial = parseFloat(parcialStr.replace(/[^0-9.-]/g, "")) || 0;
 
     items.push({
-      Codigo: codigo,
-      ItemPadre: itemPadre,
-      ItemHijo: itemHijo,
-      ItemNieto: itemNieto,
-      Descripción: descripcion,
-      Unidad: unidad,
-      Cantidad: metrado,
+      Codigo: code,
+      ItemPadre: level > 0 ? itemParts.slice(0, -1).join(" - ") : "",
+      ItemHijo: level > 1 ? itemParts.slice(-2, -1).join(" - ") : "",
+      ItemNieto: level > 2 ? itemParts.slice(-1).join(" - ") : "",
+      Descripción: description,
+      Unidad: unit,
+      Cantidad: quantity,
       PrecioUnitario: precioUnitario,
-      CostoTotal: partial,
-      Category: category ? category.name : 'Other',
+      CostoTotal: parcial,
+      Category: "METRADOS Y PRESUPUESTO", // Categoría fija
       Level: level,
-      Parent: parent,
-      Segmento: currentSegment,
+      Parent: level > 0 ? itemParts.slice(0, -1).join(" - ") : undefined,
+      Segmento: "", // Sin segmento definido
     });
   }
 
-  // Actualizar CostoTotal para niveles superiores
-  for (let item of items) {
-    if (item.Level < 2) {
-      item.CostoTotal = groupTotals[item.Descripción] || item.CostoTotal;
-      console.log(`Actualizando CostoTotal para ${item.Descripción} a ${item.CostoTotal}`);
-    }
-  }
-
-  console.log('Datos procesados, total de ítems:', items.length, 'Lista de ítems:', items);
-  console.log('Reporte de validación:', validation);
   return { items, validation };
 }
 
+/**
+ * Maneja la solicitud POST para procesar un archivo Excel subido.
+ * @param request - La solicitud Next.js.
+ * @returns Respuesta JSON con los ítems procesados, validación y metadatos.
+ */
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
-    const category = formData.get("category") as string;
-    const id_convenio = formData.get("id_convenio") as string;
+    const category = formData.get("category")?.toString();
+    const id_convenio = formData.get("id_convenio")?.toString();
 
     if (!category || !id_convenio) {
       return NextResponse.json(
-        { error: "Category and id_convenio are required." },
+        { error: "Se requieren category e id_convenio" },
         { status: 400 }
       );
     }
 
-    const files = formData.entries();
+    // Validar id_convenio
+    if (!VALID_CONVENIO_IDS.includes(Number(id_convenio))) {
+      return NextResponse.json(
+        { error: "ID de convenio inválido" },
+        { status: 400 }
+      );
+    }
+
     let filePath: string | null = null;
-
-    for (const [key, value] of files) {
+    
+    for (const [key, value] of formData.entries()) {
       if (key.startsWith("file-") && value instanceof File) {
-        const file = value as File;
-        const fileName = file.name;
-        const fileExtension = fileName.split(".").pop()?.toLowerCase();
+        const file = value;
+        const fileExtension = file.name.split(".").pop()?.toLowerCase();
 
-        const allowedTypes = ["xlsx", "xls"];
-        if (!fileExtension || !allowedTypes.includes(fileExtension)) {
+        if (!fileExtension || !ALLOWED_FILE_TYPES.includes(fileExtension)) {
           return NextResponse.json(
-            { error: `Tipo de archivo no permitido: ${fileName}. Solo se permiten Excel.` },
+            { error: "Solo se permiten archivos Excel (.xlsx, .xls)" },
             { status: 400 }
           );
         }
 
-        const categoryFolder = category.replace(/[^a-zA-Z0-9]/g, "_");
-        const uploadDir = path.join(process.cwd(), "public", "Expedientes", categoryFolder);
-        filePath = path.join(uploadDir, fileName);
+        const safeCategory = category.replace(/[^a-zA-Z0-9]/g, "_");
+        const uploadDir = path.join(process.cwd(), "public", "Expedientes", safeCategory);
+        const uniqueFileName = `${uuidv4()}.${fileExtension}`;
+        filePath = path.join(uploadDir, uniqueFileName);
 
         await fs.mkdir(uploadDir, { recursive: true });
-        const arrayBuffer = await file.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
-        await fs.writeFile(filePath, buffer);
+        await fs.writeFile(filePath, Buffer.from(await file.arrayBuffer()));
         break;
       }
     }
 
     if (!filePath) {
       return NextResponse.json(
-        { error: "No se encontró ningún archivo para previsualizar." },
+        { error: "No se encontró archivo válido para procesar" },
         { status: 400 }
       );
     }
 
-    const { items, validation } = await parseExcelFile(filePath);
+    // Leer el archivo Excel
+    const fileBuffer = await fs.readFile(filePath);
+    const workbook = XLSX.read(fileBuffer, { type: "buffer" });
+
+    const { items, validation } = parseExcelFile(workbook);
+    
+    // Eliminar el archivo temporal
+    try {
+      await fs.unlink(filePath);
+    } catch (cleanupError) {
+      console.warn("No se pudo eliminar el archivo temporal:", cleanupError);
+    }
+
     return NextResponse.json(
-      { success: true, items, validation },
+      { 
+        success: true, 
+        data: {
+          items,
+          validation,
+          metadata: {
+            category,
+            id_convenio,
+            processedAt: new Date().toISOString(),
+            itemCount: items.length
+          }
+        }
+      },
       { status: 200 }
     );
-  } catch (error: any) {
-    console.error("Error en la previsualización:", error);
+  } catch (error) {
+    console.error("Error en el servidor:", error);
+    const errorMessage = error instanceof Error ? error.message : "Error desconocido";
     return NextResponse.json(
-      { error: "No se pudo previsualizar el archivo Excel", details: error.message },
-      { status: 400 }
+      { 
+        error: "Error al procesar el archivo", 
+        details: errorMessage,
+        success: false
+      },
+      { status: 500 }
     );
   }
 }

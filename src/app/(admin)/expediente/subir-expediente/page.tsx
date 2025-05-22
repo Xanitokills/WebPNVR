@@ -1,6 +1,42 @@
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { create } from "zustand";
+
+// Estado global con Zustand
+interface FileState {
+  filesByCategory: { [key: string]: File[] };
+  uploadStatusByCategory: { [key: string]: string };
+  errorsByCategory: { [key: string]: string[] };
+  completedCategories: { [key: string]: boolean };
+  setFilesByCategory: (category: string, files: File[]) => void;
+  setUploadStatusByCategory: (category: string, status: string) => void;
+  setErrorsByCategory: (category: string, errors: string[]) => void;
+  setCompletedCategories: (category: string, completed: boolean) => void;
+}
+
+const useFileStore = create<FileState>((set) => ({
+  filesByCategory: {},
+  uploadStatusByCategory: {},
+  errorsByCategory: {},
+  completedCategories: {},
+  setFilesByCategory: (category, files) =>
+    set((state) => ({
+      filesByCategory: { ...state.filesByCategory, [category]: files },
+    })),
+  setUploadStatusByCategory: (category, status) =>
+    set((state) => ({
+      uploadStatusByCategory: { ...state.uploadStatusByCategory, [category]: status },
+    })),
+  setErrorsByCategory: (category, errors) =>
+    set((state) => ({
+      errorsByCategory: { ...state.errorsByCategory, [category]: errors },
+    })),
+  setCompletedCategories: (category, completed) =>
+    set((state) => ({
+      completedCategories: { ...state.completedCategories, [category]: completed },
+    })),
+}));
 
 type Convenio = {
   id_convenio: number;
@@ -25,10 +61,6 @@ type Convenio = {
   ActualizadoEn: string;
 };
 
-type FileData = {
-  [key: string]: File[];
-};
-
 type BudgetItem = {
   Codigo: string;
   ItemPadre: string;
@@ -51,23 +83,34 @@ type ValidationReport = {
   isValid: boolean;
 };
 
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const ALLOWED_FILE_TYPES = [".xlsx", ".xls", ".pdf", ".doc", ".docx"];
+
 const SubirExpediente: React.FC = () => {
-  const [filesByCategory, setFilesByCategory] = useState<FileData>({});
-  const [expandedCategories, setExpandedCategories] = useState<{ [key: string]: boolean }>({});
-  const [uploadStatusByCategory, setUploadStatusByCategory] = useState<{ [key: string]: string }>({});
-  const [errorsByCategory, setErrorsByCategory] = useState<{ [key: string]: string[] }>({});
-  const [completedCategories, setCompletedCategories] = useState<{ [key: string]: boolean }>({});
+  const router = useRouter();
+  const {
+    filesByCategory,
+    uploadStatusByCategory,
+    errorsByCategory,
+    completedCategories,
+    setFilesByCategory,
+    setUploadStatusByCategory,
+    setErrorsByCategory,
+    setCompletedCategories,
+  } = useFileStore();
+
+  const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
   const [convenios, setConvenios] = useState<Convenio[]>([]);
   const [selectedConvenioId, setSelectedConvenioId] = useState<number | null>(null);
   const [loadingConvenios, setLoadingConvenios] = useState<boolean>(true);
   const [errorConvenios, setErrorConvenios] = useState<string>("");
   const [dragOverCategory, setDragOverCategory] = useState<string | null>(null);
-  const [previewData, setPreviewData] = useState<{ items: BudgetItem[]; validation: ValidationReport } | null>(null);
-  const [showModal, setShowModal] = useState(false);
-  const [currentCategory, setCurrentCategory] = useState<string | null>(null);
-  const router = useRouter();
-
-  const MAX_FILE_SIZE = 10 * 1024 * 1024;
+  const [previewDataByCategory, setPreviewDataByCategory] = useState<
+    Record<string, { items: BudgetItem[]; validation: ValidationReport } | null>
+  >({});
+  const [showPreviewByCategory, setShowPreviewByCategory] = useState<Record<string, boolean>>({});
+  const [showClearConfirm, setShowClearConfirm] = useState<string | null>(null);
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, { [key: string]: boolean }>>({});
 
   const categories = [
     "1. MEMORIA DESCRIPTIVA",
@@ -86,271 +129,249 @@ const SubirExpediente: React.FC = () => {
     (category) => completedCategories[category]
   );
 
+  const selectedConvenio = convenios.find((c) => c.id_convenio === selectedConvenioId);
+
   const fetchConvenios = useCallback(async () => {
     try {
       setLoadingConvenios(true);
-      const response = await fetch("http://localhost:3003/api/groconvenios/convenios");
+      const response = await fetch("/api/groconvenios/convenios");
+      if (!response.ok) throw new Error("Error al cargar los convenios");
       const data = await response.json();
-      if (response.ok) {
-        setConvenios(data);
-        setErrorConvenios("");
-        if (data.length > 0) setSelectedConvenioId(data[0].id_convenio);
-      } else {
-        setErrorConvenios(data.error || "Error al cargar los convenios.");
-      }
+      setConvenios(data);
+      setErrorConvenios("");
+      if (data.length > 0 && !selectedConvenioId) setSelectedConvenioId(data[0].id_convenio);
     } catch (err) {
-      setErrorConvenios("Error de conexión con el servidor.");
+      setErrorConvenios(err instanceof Error ? err.message : "Error desconocido");
     } finally {
       setLoadingConvenios(false);
     }
-  }, []);
+  }, [selectedConvenioId]);
 
   useEffect(() => {
     fetchConvenios();
   }, [fetchConvenios]);
 
   const toggleCategory = (category: string) => {
-    setExpandedCategories((prev) => ({
-      ...prev,
-      [category]: !prev[category],
-    }));
+    setExpandedCategories((prev) => ({ ...prev, [category]: !prev[category] }));
   };
 
   const handleFileChange = (category: string, files: File[]) => {
     const totalSize = files.reduce((sum, file) => sum + file.size, 0);
-
     if (totalSize > MAX_FILE_SIZE) {
-      setErrorsByCategory((prev) => ({
-        ...prev,
-        [category]: [
-          `El tamaño total de los archivos (${(totalSize / (1024 * 1024)).toFixed(2)} MB) excede el límite de 10 MB.`,
-        ],
-      }));
-      setFilesByCategory((prev) => ({
-        ...prev,
-        [category]: [],
-      }));
+      setErrorsByCategory(category, [
+        `El tamaño total de los archivos (${(totalSize / (1024 * 1024)).toFixed(2)} MB) excede el límite de ${MAX_FILE_SIZE / (1024 * 1024)} MB.`,
+      ]);
       return;
     }
 
-    setFilesByCategory((prev) => ({
-      ...prev,
-      [category]: files,
-    }));
-    setUploadStatusByCategory((prev) => ({
-      ...prev,
-      [category]: "",
-    }));
-    setErrorsByCategory((prev) => ({
-      ...prev,
-      [category]: [],
-    }));
+    const invalidFiles = files.filter(
+      (file) => !ALLOWED_FILE_TYPES.some((ext) => file.name.toLowerCase().endsWith(ext))
+    );
+    if (invalidFiles.length > 0) {
+      setErrorsByCategory(category, [
+        `Tipo de archivo no permitido: ${invalidFiles.map((f) => f.name).join(", ")}. Solo se permiten ${ALLOWED_FILE_TYPES.join(", ")}.`,
+      ]);
+      return;
+    }
+
+    const uniqueFiles: File[] = [];
+    const existingNames = new Set<string>();
+    for (const file of files) {
+      if (!existingNames.has(file.name)) {
+        uniqueFiles.push(file);
+        existingNames.add(file.name);
+      } else {
+        setErrorsByCategory(category, [
+          `Archivo duplicado detectado: ${file.name}. Por favor, selecciona archivos únicos.`,
+        ]);
+        return;
+      }
+    }
+
+    setFilesByCategory(category, uniqueFiles);
+    setUploadStatusByCategory(
+      category,
+      uniqueFiles.length > 0 ? `${uniqueFiles.length} archivo(s) seleccionado(s)` : ""
+    );
+    setErrorsByCategory(category, []);
   };
 
   const handleInputChange = (category: string, event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files) {
+    if (event.target.files && event.target.files.length > 0) {
       handleFileChange(category, Array.from(event.target.files));
     }
   };
 
   const handleDragOver = (category: string, event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
-    if (!completedCategories[category]) {
-      setDragOverCategory(category);
-    }
+    if (!completedCategories[category]) setDragOverCategory(category);
   };
 
-  const handleDragEnter = (category: string, event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    if (!completedCategories[category]) {
-      setDragOverCategory(category);
-    }
-  };
-
-  const handleDragLeave = (category: string, event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    if (dragOverCategory === category) {
-      setDragOverCategory(null);
-    }
+  const handleDragLeave = () => {
+    setDragOverCategory(null);
   };
 
   const handleDrop = (category: string, event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     setDragOverCategory(null);
-    if (!completedCategories[category] && event.dataTransfer.files) {
-      const droppedFiles = Array.from(event.dataTransfer.files).filter((file) =>
-        [".xlsx", ".xls", ".pdf", ".doc", ".docx"].some((ext) => file.name.toLowerCase().endsWith(ext))
-      );
-      if (droppedFiles.length > 0) {
-        handleFileChange(category, droppedFiles);
-      } else {
-        setErrorsByCategory((prev) => ({
-          ...prev,
-          [category]: ["Solo se permiten archivos .xlsx, .xls, .pdf, .doc, .docx."],
-        }));
-      }
+    if (!completedCategories[category] && event.dataTransfer.files.length > 0) {
+      handleFileChange(category, Array.from(event.dataTransfer.files));
     }
   };
 
   const handlePreview = async (category: string) => {
     const files = filesByCategory[category];
-    if (!files || files.length === 0 || !selectedConvenioId) {
-      setErrorsByCategory((prev) => ({
-        ...prev,
-        [category]: ["Por favor, selecciona un archivo y un convenio."],
-      }));
+    if (!files || files.length === 0) {
+      setErrorsByCategory(category, ["Por favor, selecciona al menos un archivo."]);
+      return;
+    }
+    if (!selectedConvenioId) {
+      setErrorsByCategory(category, ["Por favor, selecciona un convenio."]);
       return;
     }
 
     const formData = new FormData();
-    files.forEach((file, index) => {
-      formData.append(`file-${index}`, file);
-    });
+    files.forEach((file, index) => formData.append(`file-${index}`, file));
     formData.append("category", category);
     formData.append("id_convenio", selectedConvenioId.toString());
 
     try {
-      setUploadStatusByCategory((prev) => ({
-        ...prev,
-        [category]: "Validando...",
-      }));
-      const response = await fetch("/api/expediente/preview", {
-        method: "POST",
-        body: formData,
-      });
-
+      setUploadStatusByCategory(category, "Validando archivo...");
+      const response = await fetch("/api/expediente/preview", { method: "POST", body: formData });
       const result = await response.json();
-      if (response.ok) {
-        setPreviewData({ items: result.items, validation: result.validation });
-        setCurrentCategory(category);
-        setShowModal(true);
-        setUploadStatusByCategory((prev) => ({
-          ...prev,
-          [category]: "",
-        }));
-      } else {
-        setErrorsByCategory((prev) => ({
-          ...prev,
-          [category]: [result.error || "Error al previsualizar el archivo."],
-        }));
-        setUploadStatusByCategory((prev) => ({
-          ...prev,
-          [category]: "",
-        }));
+      if (!response.ok) {
+        const errorMessage = result.error || "Error al previsualizar el archivo";
+        setErrorsByCategory(category, [errorMessage]);
+        throw new Error(errorMessage);
       }
+      setPreviewDataByCategory((prev) => ({ ...prev, [category]: result.data }));
+      setShowPreviewByCategory((prev) => ({ ...prev, [category]: true }));
+      // Inicializar grupos expandidos basados en Level
+      const initialExpanded = result.data.items.reduce((acc, item) => {
+        if (item.Level < 2) {
+          acc[item.Descripción] = true;
+        }
+        return acc;
+      }, {} as { [key: string]: boolean });
+      setExpandedGroups((prev) => ({ ...prev, [category]: initialExpanded }));
     } catch (error) {
-      setErrorsByCategory((prev) => ({
-        ...prev,
-        [category]: ["Error de conexión al previsualizar el archivo."],
-      }));
-      setUploadStatusByCategory((prev) => ({
-        ...prev,
-        [category]: "",
-      }));
+      setErrorsByCategory(category, [error instanceof Error ? error.message : "Error desconocido"]);
+    } finally {
+      setUploadStatusByCategory(category, "");
     }
   };
 
   const handleConfirmUpload = async (category: string) => {
-    const files = filesByCategory[category];
-    if (!files || files.length === 0 || !selectedConvenioId) return;
+    if (!category || !filesByCategory[category]?.length || !selectedConvenioId) return;
 
     const formData = new FormData();
-    files.forEach((file, index) => {
-      formData.append(`file-${index}`, file);
-    });
+    filesByCategory[category].forEach((file, index) => formData.append(`file-${index}`, file));
     formData.append("category", category);
     formData.append("id_convenio", selectedConvenioId.toString());
 
     try {
-      setUploadStatusByCategory((prev) => ({
-        ...prev,
-        [category]: "Cargando...",
-      }));
-      const response = await fetch("/api/expediente/upload-excel", {
-        method: "POST",
-        body: formData,
-      });
-
+      setUploadStatusByCategory(category, "Subiendo archivo...");
+      const response = await fetch("/api/expediente/upload-excel", { method: "POST", body: formData });
       const result = await response.json();
-      if (response.ok) {
-        setUploadStatusByCategory((prev) => ({
-          ...prev,
-          [category]: "¡Archivos cargados exitosamente!",
-        }));
-        setErrorsByCategory((prev) => ({
-          ...prev,
-          [category]: [],
-        }));
-        setCompletedCategories((prev) => ({
-          ...prev,
-          [category]: true,
-        }));
-        setFilesByCategory((prev) => ({
-          ...prev,
-          [category]: [],
-        }));
-        setShowModal(false);
-        setPreviewData(null);
-        setCurrentCategory(null);
-      } else {
-        setUploadStatusByCategory((prev) => ({
-          ...prev,
-          [category]: "Error al cargar los archivos.",
-        }));
-        setErrorsByCategory((prev) => ({
-          ...prev,
-          [category]: result.errors || ["Error desconocido."],
-        }));
+      if (!response.ok) {
+        setErrorsByCategory(category, [result.error || "Error al subir los archivos"]);
+        setUploadStatusByCategory(category, "Error al subir archivos");
+        throw new Error(result.error || "Error desconocido");
       }
+      setCompletedCategories(category, true);
+      setFilesByCategory(category, []);
+      setUploadStatusByCategory(category, "¡Archivos subidos exitosamente!");
+      setPreviewDataByCategory((prev) => ({ ...prev, [category]: null }));
+      setShowPreviewByCategory((prev) => ({ ...prev, [category]: false }));
     } catch (error) {
-      setUploadStatusByCategory((prev) => ({
-        ...prev,
-        [category]: "Error al cargar los archivos.",
-      }));
-      setErrorsByCategory((prev) => ({
-        ...prev,
-        [category]: ["Error de conexión con el servidor."],
-      }));
+      setErrorsByCategory(category, [error instanceof Error ? error.message : "Error desconocido"]);
+      setUploadStatusByCategory(category, "Error al subir archivos");
     }
+  };
+
+  const handleClearFiles = (category: string) => {
+    setShowClearConfirm(category);
+  };
+
+  const confirmClearFiles = (category: string) => {
+    setFilesByCategory(category, []);
+    setUploadStatusByCategory(category, "");
+    setErrorsByCategory(category, []);
+    setPreviewDataByCategory((prev) => ({ ...prev, [category]: null }));
+    setShowPreviewByCategory((prev) => ({ ...prev, [category]: false }));
+    setShowClearConfirm(null);
   };
 
   const handleNavigate = () => {
     router.push("/expediente/ver-expediente");
   };
 
-  // Función para determinar el estilo de fondo según el nivel
-  const getRowBackgroundClass = (level: number) => {
-    switch (level) {
-      case 0:
-        return "bg-gray-100 dark:bg-gray-700";
-      case 1:
-        return "bg-gray-50 dark:bg-gray-600";
-      case 2:
-        return "bg-white dark:bg-gray-800";
-      default:
-        return "bg-white dark:bg-gray-800";
+  const togglePreview = (category: string) => {
+    setShowPreviewByCategory((prev) => ({ ...prev, [category]: !prev[category] }));
+  };
+
+  const toggleGroup = (category: string, groupDesc: string) => {
+    setExpandedGroups((prev) => ({
+      ...prev,
+      [category]: {
+        ...prev[category],
+        [groupDesc]: !prev[category]?.[groupDesc],
+      },
+    }));
+  };
+
+  const isItemVisible = (category: string, item: BudgetItem, index: number): boolean => {
+    if (item.Level === 0) return true;
+    if (item.Level === 1) {
+      const parentDesc = item.Parent;
+      return parentDesc ? expandedGroups[category]?.[parentDesc] !== false : true;
     }
+    if (item.Level === 2) {
+      const parentDesc = item.Parent;
+      if (!parentDesc) return true;
+      const parentItem = previewDataByCategory[category]?.items.find(i => i.Descripción === parentDesc);
+      if (!parentItem) return true;
+      const grandParentDesc = parentItem.Parent;
+      return expandedGroups[category]?.[parentDesc] !== false && (!grandParentDesc || expandedGroups[category]?.[grandParentDesc] !== false);
+    }
+    return true;
+  };
+
+  const formatNumber = (num: number) => {
+    if (num >= 1000000) return `${(num / 1000000).toFixed(2)}M`;
+    if (num >= 1000) return `${(num / 1000).toFixed(2)}K`;
+    return num.toFixed(2);
   };
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Subir Expediente</h1>
-
-      <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+      <h1 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">Subir Expediente</h1>
+      <div className="mb-6 bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+        <label htmlFor="convenio-select" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Selecciona un Convenio
         </label>
-        {loadingConvenios && <p className="text-gray-500">Cargando convenios...</p>}
-        {errorConvenios && <p className="text-red-500">{errorConvenios}</p>}
-        {!loadingConvenios && !errorConvenios && (
+        {loadingConvenios ? (
+          <div className="animate-pulse flex space-x-4">
+            <div className="flex-1 space-y-4 py-1">
+              <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded"></div>
+            </div>
+          </div>
+        ) : errorConvenios ? (
+          <div className="text-red-500 bg-red-50 dark:bg-red-900/20 p-3 rounded">
+            {errorConvenios}
+            <button onClick={fetchConvenios} className="ml-2 text-sm bg-red-100 dark:bg-red-900/50 px-2 py-1 rounded">
+              Reintentar
+            </button>
+          </div>
+        ) : (
           <select
+            id="convenio-select"
             value={selectedConvenioId || ""}
-            onChange={(e) => setSelectedConvenioId(parseInt(e.target.value) || null)}
-            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-500 focus:border-brand-500"
+            onChange={(e) => setSelectedConvenioId(Number(e.target.value) || null)}
+            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            aria-describedby="convenio-help"
           >
-            <option value="" disabled>
-              Selecciona un convenio
-            </option>
+            <option value="" disabled>Selecciona un convenio</option>
             {convenios.map((convenio) => (
               <option key={convenio.id_convenio} value={convenio.id_convenio}>
                 {convenio.NombreProyecto} (ID: {convenio.id_convenio})
@@ -358,220 +379,340 @@ const SubirExpediente: React.FC = () => {
             ))}
           </select>
         )}
-      </div>
-
-      <div className="mb-6">
-        <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-          Progreso: {Object.values(completedCategories).filter(Boolean).length} de {categories.length} categorías completadas
+        <p id="convenio-help" className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+          Selecciona el proyecto al que deseas asociar los archivos.
         </p>
-        {allCategoriesCompleted && (
-          <button
-            onClick={handleNavigate}
-            className="mt-2 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
-          >
-            Ver Expediente
-          </button>
-        )}
       </div>
-
+      <div className="mb-6 bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+        <div className="flex justify-between items-center mb-2">
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            Progreso: {Object.values(completedCategories).filter(Boolean).length} de {categories.length} categorías completadas
+          </span>
+          {allCategoriesCompleted && (
+            <button
+              onClick={handleNavigate}
+              className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-md transition-colors"
+              aria-label="Ver expediente completo"
+            >
+              Ver Expediente Completo
+            </button>
+          )}
+        </div>
+        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5" role="progressbar" aria-valuenow={Object.values(completedCategories).filter(Boolean).length} aria-valuemin={0} aria-valuemax={categories.length}>
+          <div
+            className="bg-blue-600 h-2.5 rounded-full"
+            style={{ width: `${(Object.values(completedCategories).filter(Boolean).length / categories.length) * 100}%` }}
+          ></div>
+        </div>
+      </div>
       <div className="space-y-4">
         {categories.map((category) => (
           <div
             key={category}
-            className={`rounded-lg shadow-md overflow-hidden ${
+            className={`rounded-lg shadow-md overflow-hidden transition-all duration-200 ${
               completedCategories[category]
-                ? "bg-green-50 dark:bg-green-900"
+                ? "border-l-4 border-green-500"
                 : filesByCategory[category]?.length > 0
-                ? "bg-gray-50 dark:bg-gray-800"
-                : "bg-red-50 dark:bg-red-900"
+                ? "border-l-4 border-blue-500"
+                : "border-l-4 border-red-500"
             }`}
           >
             <button
               onClick={() => toggleCategory(category)}
-              className={`w-full p-4 flex justify-between items-center text-left text-sm font-medium text-gray-700 dark:text-gray-300 ${
+              className={`w-full p-4 flex justify-between items-center text-left font-medium ${
                 completedCategories[category]
-                  ? "bg-green-100 dark:bg-green-800 hover:bg-green-200 dark:hover:bg-green-700"
+                  ? "bg-green-50 hover:bg-green-100 dark:bg-green-900/30 dark:hover:bg-green-900/50 text-green-800 dark:text-green-200"
                   : filesByCategory[category]?.length > 0
-                  ? "bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600"
-                  : "bg-red-100 dark:bg-red-800 hover:bg-red-200 dark:hover:bg-red-700"
+                  ? "bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 text-blue-800 dark:text-blue-200"
+                  : "bg-red-50 hover:bg-red-100 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-800 dark:text-red-200"
               }`}
+              aria-expanded={expandedCategories[category]}
+              aria-controls={`category-${category.replace(/\s+/g, "-")}`}
             >
               <span>{category}</span>
-              <span>{expandedCategories[category] ? "▼" : "▶"}</span>
+              <span className={`transform transition-transform ${expandedCategories[category] ? "rotate-90" : ""}`}>
+                ▶
+              </span>
             </button>
-
             {expandedCategories[category] && (
               <div
-                className={`p-4 border-2 border-dashed ${
+                id={`category-${category.replace(/\s+/g, "-")}`}
+                className={`p-4 border-2 border-dashed transition-colors ${
                   dragOverCategory === category
-                    ? "border-brand-500 bg-brand-50 dark:bg-brand-900"
-                    : "border-gray-300 dark:border-gray-600"
-                } transition-colors duration-200`}
+                    ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+                    : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800"
+                }`}
                 onDragOver={(e) => handleDragOver(category, e)}
-                onDragEnter={(e) => handleDragEnter(category, e)}
-                onDragLeave={(e) => handleDragLeave(category, e)}
+                onDragEnter={() => !completedCategories[category] && setDragOverCategory(category)}
+                onDragLeave={handleDragLeave}
                 onDrop={(e) => handleDrop(category, e)}
+                role="region"
+                aria-label={`Área de carga para ${category.split(".")[1].trim()}`}
               >
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-                  Arrastra y suelta archivos aquí o usa el botón para seleccionar
-                </p>
-
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Selecciona archivos (PDF, Excel, etc.) para {category}
-                  </label>
-                  <input
-                    type="file"
-                    accept=".xlsx, .xls, .pdf, .doc, .docx"
-                    multiple
-                    onChange={(e) => handleInputChange(category, e)}
-                    className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100"
-                    disabled={completedCategories[category]}
-                  />
+                <div className={`mb-4 p-4 rounded-lg text-center ${dragOverCategory === category ? "bg-blue-100 dark:bg-blue-900/30" : "bg-gray-50 dark:bg-gray-700"}`}>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Arrastra y suelta archivos aquí</p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500">Formatos permitidos: {ALLOWED_FILE_TYPES.join(", ")}</p>
                 </div>
-
+                <div className="mb-4">
+                  <label
+                    htmlFor={`file-input-${category.replace(/\s+/g, "-")}`}
+                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                  >
+                    Selecciona archivos para {category.split(".")[1].trim()}
+                  </label>
+                  <div className="flex items-center">
+                    <label className="flex-1 cursor-pointer">
+                      <span className="sr-only">Seleccionar archivos</span>
+                      <input
+                        id={`file-input-${category.replace(/\s+/g, "-")}`}
+                        type="file"
+                        accept={ALLOWED_FILE_TYPES.join(",")}
+                        multiple
+                        onChange={(e) => handleInputChange(category, e)}
+                        className="hidden"
+                        disabled={completedCategories[category]}
+                        aria-describedby={`file-help-${category.replace(/\s+/g, "-")}`}
+                      />
+                      <div className="px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+                        Seleccionar Archivos
+                      </div>
+                    </label>
+                    {filesByCategory[category]?.length > 0 && (
+                      <button
+                        onClick={() => handleClearFiles(category)}
+                        className="ml-2 px-3 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-md hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
+                        aria-label={`Limpiar archivos de ${category.split(".")[1].trim()}`}
+                      >
+                        Limpiar
+                      </button>
+                    )}
+                  </div>
+                  <p id={`file-help-${category.replace(/\s+/g, "-")}`} className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    Tamaño máximo: {(MAX_FILE_SIZE / (1024 * 1024))} MB
+                  </p>
+                </div>
                 {filesByCategory[category]?.length > 0 && (
                   <div className="mb-4">
-                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Archivos seleccionados ({filesByCategory[category].length}):
                     </p>
-                    <ul className="mt-1 text-sm text-gray-500 list-disc pl-5">
+                    <ul className="space-y-1">
                       {filesByCategory[category].map((file, index) => (
-                        <li key={index}>
-                          {file.name} ({(file.size / (1024 * 1024)).toFixed(2)} MB)
+                        <li key={index} className="flex justify-between items-center bg-gray-50 dark:bg-gray-700 p-2 rounded">
+                          <span className="text-sm text-gray-700 dark:text-gray-300 truncate max-w-xs">{file.name}</span>
+                          <span className="text-xs text-gray-500 dark:text-gray-400">{(file.size / (1024 * 1024)).toFixed(2)} MB</span>
                         </li>
                       ))}
                     </ul>
                   </div>
                 )}
-
-                <button
-                  onClick={() => handlePreview(category)}
-                  disabled={
-                    !filesByCategory[category]?.length ||
-                    uploadStatusByCategory[category] === "Validando..." ||
-                    !selectedConvenioId ||
-                    completedCategories[category]
-                  }
-                  className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:bg-gray-400 mr-2"
-                >
-                  {uploadStatusByCategory[category] === "Validando..."
-                    ? "Validando..."
-                    : "Previsualizar Datos"}
-                </button>
-
-                {uploadStatusByCategory[category] && (
-                  <p
-                    className={`mt-4 text-sm ${
-                      errorsByCategory[category]?.length > 0
-                        ? "text-red-500"
-                        : "text-green-500"
-                    }`}
+                <div className="flex space-x-2 mb-4">
+                  <button
+                    onClick={() => handlePreview(category)}
+                    disabled={
+                      !filesByCategory[category]?.length ||
+                      !selectedConvenioId ||
+                      completedCategories[category] ||
+                      uploadStatusByCategory[category]?.includes("Validando...")
+                    }
+                    className={`px-4 py-2 rounded-md flex-1 ${
+                      filesByCategory[category]?.length && selectedConvenioId && !completedCategories[category]
+                        ? "bg-blue-500 hover:bg-blue-600 text-white"
+                        : "bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+                    } transition-colors`}
+                    aria-label={`Previsualizar archivos de ${category.split(".")[1].trim()}`}
                   >
+                    {uploadStatusByCategory[category]?.includes("Validando...") ? (
+                      <span className="flex items-center justify-center">
+                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Validando...
+                      </span>
+                    ) : (
+                      "Previsualizar"
+                    )}
+                  </button>
+             {previewDataByCategory[category] && (
+                  <button
+                    onClick={() => togglePreview(category)}
+                    className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-md transition-colors"
+                    aria-label={showPreviewByCategory[category] ? `Ocultar previsualización de ${category.split(".")[1].trim()}` : `Mostrar previsualización de ${category.split(".")[1].trim()}`}
+                  >
+                    {showPreviewByCategory[category] ? "Ocultar" : "Mostrar"}
+                  </button>
+                )}
+                </div>
+                {uploadStatusByCategory[category] && (
+                  <p className={`mb-2 text-sm ${errorsByCategory[category]?.length ? "text-red-500" : "text-green-500"}`}>
                     {uploadStatusByCategory[category]}
                   </p>
                 )}
-                {errorsByCategory[category]?.length > 0 && (
-                  <ul className="mt-4 text-sm text-red-500 list-disc pl-5">
-                    {errorsByCategory[category].map((error, index) => (
-                      <li key={index}>{error}</li>
-                    ))}
-                  </ul>
+                {errorsByCategory[category]?.map((error, index) => (
+                  <p key={index} className="mb-2 text-sm text-red-500">{error}</p>
+                ))}
+                {previewDataByCategory[category] && (
+                  <div className={`${showPreviewByCategory[category] ? "block" : "hidden"} mt-4`}>
+                    {previewDataByCategory[category]?.validation.errors.length > 0 && (
+                      <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                        <h3 className="font-semibold text-red-600 dark:text-red-400 mb-2">Errores encontrados:</h3>
+                        <ul className="list-disc pl-5 space-y-1 text-red-600 dark:text-red-400">
+                          {previewDataByCategory[category]?.validation.errors.map((error, index) => (
+                            <li key={index}>{error}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {previewDataByCategory[category]?.validation.warnings.length > 0 && (
+                      <div className="mb-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                        <h3 className="font-semibold text-yellow-600 dark:text-yellow-400 mb-2">Advertencias:</h3>
+                        <ul className="list-disc pl-5 space-y-1 text-yellow-600 dark:text-yellow-400">
+                          {previewDataByCategory[category]?.validation.warnings.map((warning, index) => (
+                            <li key={index}>{warning}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {previewDataByCategory[category]?.items.length > 0 && (
+                      <>
+                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+                          <button
+                            onClick={() => setShowPreviewByCategory((prev) => ({ ...prev, [category]: !prev[category] }))}
+                            className="w-full p-4 flex justify-between items-center text-left text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600"
+                          >
+                            <span>Desglose del Presupuesto</span>
+                            <span>{showPreviewByCategory[category] ? "▼" : "▶"}</span>
+                          </button>
+                          {showPreviewByCategory[category] && (
+                            <div className="p-4">
+                              <div className="overflow-x-auto">
+                                <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                                  <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                                    <tr>
+                                      <th className="px-6 py-3"></th>
+                                      <th className="px-6 py-3">Código</th>
+                                      <th className="px-6 py-3">Descripción</th>
+                                      <th className="px-6 py-3">Unidad</th>
+                                      <th className="px-6 py-3">Cantidad</th>
+                                      <th className="px-6 py-3">P. Unitario</th>
+                                      <th className="px-6 py-3">Total</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {previewDataByCategory[category]?.items.map((item, index) => {
+                                      if (!isItemVisible(category, item, index)) return null;
+                                      const isGroup = item.Level < 2;
+                                      const indent = item.Level * 20;
+                                      const rowStyle = isGroup
+                                        ? item.Level === 0
+                                          ? 'bg-gray-200 dark:bg-gray-700 font-bold'
+                                          : 'bg-gray-100 dark:bg-gray-600 font-semibold'
+                                        : 'bg-white dark:bg-gray-800';
+                                      return (
+                                        <tr
+                                          key={`${category}-${index}`}
+                                          className={`border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 ${rowStyle}`}
+                                        >
+                                          <td className="px-2 py-4">
+                                            {isGroup && (
+                                              <button
+                                                onClick={() => toggleGroup(category, item.Descripción)}
+                                                className="text-gray-500 hover:text-gray-700"
+                                              >
+                                                {expandedGroups[category]?.[item.Descripción] ? "▼" : "▶"}
+                                              </button>
+                                            )}
+                                          </td>
+                                          <td className="px-6 py-4" style={{ paddingLeft: `${indent}px` }}>{item.Codigo}</td>
+                                          <td className="px-6 py-4" style={{ paddingLeft: `${indent + 10}px` }}>{item.Descripción}</td>
+                                          <td className="px-6 py-4">{isGroup ? '' : item.Unidad || ''}</td>
+                                          <td className="px-6 py-4">{isGroup ? '' : item.Cantidad ? item.Cantidad.toLocaleString() : ''}</td>
+                                          <td className="px-6 py-4">
+                                            {isGroup
+                                              ? ''
+                                              : item.PrecioUnitario.toLocaleString(undefined, {
+                                                  style: "currency",
+                                                  currency: selectedConvenio?.SimboloMonetario || "PEN",
+                                                })}
+                                          </td>
+                                          <td className="px-6 py-4">{formatNumber(item.CostoTotal)}</td>
+                                        </tr>
+                                      );
+                                    })}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                        <div className="mt-4 flex justify-end space-x-3">
+                          <button
+                            onClick={() => {
+                              setPreviewDataByCategory((prev) => ({ ...prev, [category]: null }));
+                              setShowPreviewByCategory((prev) => ({ ...prev, [category]: false }));
+                            }}
+                            className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                            aria-label="Cancelar subida"
+                          >
+                            Cancelar
+                          </button>
+                          <button
+                            onClick={() => handleConfirmUpload(category)}
+                            disabled={
+                              !previewDataByCategory[category]?.validation.isValid ||
+                              uploadStatusByCategory[category]?.includes("Subiendo...")
+                            }
+                            className={`px-4 py-2 rounded-md text-white ${
+                              previewDataByCategory[category]?.validation.isValid
+                                ? "bg-green-500 hover:bg-green-600"
+                                : "bg-gray-400 cursor-not-allowed"
+                            } transition-colors`}
+                            aria-label="Confirmar y subir archivos"
+                          >
+                            {uploadStatusByCategory[category]?.includes("Subiendo...") ? (
+                              <span className="flex items-center justify-center">
+                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Subiendo...
+                              </span>
+                            ) : (
+                              "Confirmar y Subir"
+                            )}
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
                 )}
               </div>
             )}
           </div>
         ))}
       </div>
-
-      {showModal && previewData && currentCategory && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-11/12 max-w-4xl max-h-[80vh] overflow-y-auto">
-            <h2 className="text-xl font-bold mb-4">Previsualización de Datos</h2>
-            <p className="mb-4">Por favor, revisa los datos antes de confirmar la carga.</p>
-
-            {previewData.validation.errors.length > 0 && (
-              <div className="mb-4">
-                <h3 className="font-semibold text-red-600">Errores:</h3>
-                <ul className="list-disc pl-5 text-red-600">
-                  {previewData.validation.errors.map((error, index) => (
-                    <li key={index}>{error}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            {previewData.validation.warnings.length > 0 && (
-              <div className="mb-4">
-                <h3 className="font-semibold text-yellow-600">Advertencias:</h3>
-                <ul className="list-disc pl-5 text-yellow-600">
-                  {previewData.validation.warnings.map((warning, index) => (
-                    <li key={index}>{warning}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            <div className="mb-4">
-              <h3 className="font-semibold">Datos Previsualizados:</h3>
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50 dark:bg-gray-700">
-                    <tr>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Código</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Item Padre</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Item Hijo</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Item Nieto</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Descripción</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Unidad</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Cantidad</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Precio Unitario</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Costo Total</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Nivel</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Padre</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Segmento</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {previewData.items.map((item, index) => (
-                      <tr key={index} className={getRowBackgroundClass(item.Level)}>
-                        <td className="px-4 py-2 whitespace-nowrap">{item.Codigo}</td>
-                        <td className="px-4 py-2 whitespace-nowrap">{item.ItemPadre || '-'}</td>
-                        <td className="px-4 py-2 whitespace-nowrap">{item.ItemHijo || '-'}</td>
-                        <td className="px-4 py-2 whitespace-nowrap">{item.ItemNieto || '-'}</td>
-                        <td className="px-4 py-2" style={{ paddingLeft: `${item.Level * 1.5}rem` }}>
-                          {item.Descripción}
-                        </td>
-                        <td className="px-4 py-2">{item.Unidad || '-'}</td>
-                        <td className="px-4 py-2">{item.Cantidad || '-'}</td>
-                        <td className="px-4 py-2">{item.PrecioUnitario || '-'}</td>
-                        <td className="px-4 py-2">{item.CostoTotal || '-'}</td>
-                        <td className="px-4 py-2">{item.Level}</td>
-                        <td className="px-4 py-2">{item.Parent || '-'}</td>
-                        <td className="px-4 py-2">{item.Segmento || '-'}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <div className="flex justify-end space-x-4 mt-4">
+      {showClearConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 max-w-md w-full">
+            <h2 className="text-lg font-bold text-gray-800 dark:text-white mb-4">Confirmar Limpieza</h2>
+            <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+              ¿Estás seguro de que deseas limpiar todos los archivos seleccionados para {showClearConfirm.split(".")[1].trim()}?
+            </p>
+            <div className="flex justify-end space-x-3">
               <button
-                onClick={() => {
-                  setShowModal(false);
-                  setPreviewData(null);
-                  setCurrentCategory(null);
-                }}
-                className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400"
+                onClick={() => setShowClearConfirm(null)}
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                aria-label="Cancelar limpieza"
               >
                 Cancelar
               </button>
               <button
-                onClick={() => handleConfirmUpload(currentCategory)}
-                className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
-                disabled={!previewData.validation.isValid}
+                onClick={() => confirmClearFiles(showClearConfirm)}
+                className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md transition-colors"
+                aria-label="Confirmar limpieza"
               >
-                Confirmar y Subir
+                Confirmar
               </button>
             </div>
           </div>
