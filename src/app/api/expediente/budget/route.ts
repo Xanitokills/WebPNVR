@@ -1,20 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import sql from 'mssql';
 
-// Importar dinámicamente xlsx para manejar módulos CommonJS
-const XLSX = await import('xlsx').then(module => module.default || module);
-
-if (!XLSX || !XLSX.read) {
-  console.error('Error: El módulo XLSX no se cargó correctamente');
-  throw new Error('El módulo XLSX no se cargó correctamente');
-}
-
-// Configuración de la base de datos
 const dbConfig = {
   user: process.env.DB_USER as string,
   password: process.env.DB_PASSWORD as string,
   server: process.env.DB_SERVER as string,
-  database: process.env.DB_NAME as string, // Read from .env instead of hardcoding 'PNVR2'
+  database: process.env.DB_NAME as string,
   options: {
     encrypt: false,
     trustServerCertificate: true,
@@ -28,115 +19,62 @@ interface BudgetItem {
   Metrado: number;
   PrecioUnitario: number;
   CostoTotal: number;
-  Category: string;
-  Level: number; // 0 for top-level, 1 for subgroup, 2 for sub-subgroup
-  Parent?: string; // Reference to the parent item's Descripción
+  Level: number;
+  Parent?: string;
+  CategoriaID?: number;
+  SubcategoriaID?: number;
+  NombreCategoria?: string;
+  NombreSubcategoria?: string;
+}
+
+interface Category {
+  name: string;
+  value: number;
+  codes: string[];
 }
 
 export async function GET(request: NextRequest) {
   let pool;
   try {
-    console.log('Iniciando solicitud GET /api/expediente/budget con id_convenio:', request.url);
     const { searchParams } = new URL(request.url);
     const id_convenio = searchParams.get('id_convenio');
 
     if (!id_convenio) {
-      console.log('Error: id_convenio no proporcionado');
-      return NextResponse.json(
-        { error: 'El id_convenio es requerido' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'El id_convenio es requerido' }, { status: 400 });
     }
 
-    console.log('Conectando a la base de datos con id_convenio:', id_convenio);
     pool = await sql.connect(dbConfig);
 
-    console.log('Ejecutando consulta SQL para obtener archivo Excel');
-    const result = await pool
+    // Obtener categorías
+    const categoriesResult = await pool.query(`
+      SELECT CategoriaID, NombreCategoria
+      FROM [dbo].[CategoriasPresupuesto]
+    `);
+
+    // Obtener subcategorías
+    const subcategoriesResult = await pool.query(`
+      SELECT SubcategoriaID, CategoriaID, NombreSubcategoria AS Descripción
+      FROM [dbo].[SubcategoriasPresupuesto]
+    `);
+
+    // Obtener ítems detallados
+    const itemsResult = await pool
       .request()
       .input('id_convenio', sql.Int, parseInt(id_convenio))
-      .input('category', sql.NVarChar, '3. METRADOS Y PRESUPUESTO')
       .query(`
-        SELECT 
-          NombreArchivo,
-          TipoArchivo,
-          RutaArchivo,
-          TamañoArchivo,
-          Descripcion,
-          FechaCarga,
-          CreadoEn,
-          ActualizadoEn
-        FROM [${process.env.DB_NAME}].[dbo].[ExpedienteTecnico]
-        WHERE id_convenio = @id_convenio
-          AND Categoria = @category
-          AND TipoArchivo = 'Excel'
+        SELECT ip.ItemPresupuestoID, ip.id_convenio, ip.CategoriaID, ip.SubcategoriaID, ip.CodigoItem, ip.Descripcion, ip.Unidad, ip.Cantidad AS Metrado, ip.PrecioUnitario, ip.CostoTotal, cp.NombreCategoria, sp.NombreSubcategoria
+        FROM [dbo].[ItemsPresupuesto] ip
+        LEFT JOIN [dbo].[CategoriasPresupuesto] cp ON ip.CategoriaID = cp.CategoriaID
+        LEFT JOIN [dbo].[SubcategoriasPresupuesto] sp ON ip.SubcategoriaID = sp.SubcategoriaID
+        WHERE ip.id_convenio = @id_convenio
+        ORDER BY ip.CodigoItem
       `);
 
-    if (result.recordset.length === 0) {
-      console.log('No se encontró un archivo Excel en la categoría "3. METRADOS Y PRESUPUESTO" para id_convenio:', id_convenio);
-      return NextResponse.json(
-        { error: 'No se encontró un archivo Excel en la categoría "3. METRADOS Y PRESUPUESTO"' },
-        { status: 404 }
-      );
+    if (itemsResult.recordset.length === 0) {
+      return NextResponse.json({ error: 'No se encontraron ítems de presupuesto para este convenio' }, { status: 404 });
     }
 
-    const file = result.recordset[0];
-    const fileUrl = `http://localhost:3003${file.RutaArchivo.replace(/^\/+/, '/')}`;
-    console.log('Archivo encontrado, URL generada:', fileUrl);
-
-    console.log('Iniciando fetch del archivo desde:', fileUrl);
-    const response = await fetch(fileUrl);
-    if (!response.ok) {
-      console.error('Error al obtener el archivo:', response.statusText);
-      throw new Error(`No se pudo obtener el archivo desde ${fileUrl}: ${response.statusText}`);
-    }
-    console.log('Archivo fetched exitosamente, convirtiendo a buffer');
-    const buffer = await response.arrayBuffer();
-
-    console.log('Parseando el archivo Excel con XLSX');
-    const workbook = XLSX.read(buffer, { type: 'buffer' });
-    const sheetName = workbook.SheetNames.find(name => name.toLowerCase() === 'presupuesto');
-    if (!sheetName) {
-      console.log('No se encontró la pestaña "PRESUPUESTO" en el archivo Excel');
-      return NextResponse.json(
-        { error: 'No se encontró la pestaña "PRESUPUESTO" en el archivo Excel' },
-        { status: 400 }
-      );
-    }
-
-    console.log('Hoja seleccionada:', sheetName);
-    const sheet = workbook.Sheets[sheetName];
-    const data = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-    console.log('Primeras 5 filas del archivo Excel:', data.slice(0, 5));
-
-    // Encontrar la fila de encabezados
-    let headerRowIndex = -1;
-    const expectedHeaders = ['Item', 'Descripción', 'Und.', 'Metrado', 'P.U.', 'Parcial'];
-    for (let i = 0; i < data.length; i++) {
-      const row = data[i] as string[];
-      console.log(`Verificando fila ${i}:`, row);
-      const itemIndex = row.findIndex((cell, idx) => idx <= 2 && cell?.toString().trim() === 'Item');
-      if (itemIndex !== -1) {
-        const headersSlice = [row[itemIndex]].concat(row.slice(3, 3 + expectedHeaders.length - 1));
-        console.log('Encabezados encontrados en la fila:', headersSlice);
-        if (headersSlice.length === expectedHeaders.length && 
-            expectedHeaders.every((header, idx) => headersSlice[idx]?.toString().trim() === header)) {
-          headerRowIndex = i;
-          console.log('Encabezados encontrados en la fila', i, 'en índice inicial', itemIndex);
-          break;
-        }
-      }
-    }
-
-    if (headerRowIndex === -1) {
-      console.log('No se encontraron los encabezados esperados:', expectedHeaders);
-      return NextResponse.json(
-        { error: 'Formato de archivo Excel inválido: faltan los encabezados requeridos' },
-        { status: 400 }
-      );
-    }
-
-    const categories = [
+    const categories: Category[] = [
       { name: 'Materials', value: 0, codes: ['201', '204', '205', '207', '210', '211', '213', '216', '217', '222', '231', '234', '237', '238', '240', '241', '251', '262', '264', '265', '267', '268', '270', '272', '276', '293', '294', '295', '296', '298', '299'] },
       { name: 'Labor', value: 0, codes: ['101'] },
       { name: 'Equipment', value: 0, codes: ['301'] },
@@ -144,99 +82,137 @@ export async function GET(request: NextRequest) {
     ];
 
     const items: BudgetItem[] = [];
-    const groupTotals: { [key: string]: number } = {}; // To store totals for groups
-    console.log('Procesando datos a partir de la fila', headerRowIndex + 1);
+    const groupTotals: { [key: string]: number } = {};
 
-    // First pass: Process items and calculate totals for groups
-    for (let i = headerRowIndex + 1; i < data.length; i++) {
-      const row = data[i] as any[];
-      const startIndex = row.findIndex((cell, idx) => idx >= 0 && cell?.toString().trim());
-      if (startIndex === -1) {
-        console.log('Saltando fila vacía:', row);
-        continue; // Saltar filas completamente vacías
-      }
-
-      const codigo = row[0]?.toString().trim() || 'N/A';
-      const slicedRow = row.slice(0, 8); // Take the first 8 columns to cover Item to Parcial
-      console.log('Procesando fila', i, 'con datos:', slicedRow);
-
-      // Determine level based on empty cells in B and C
-      let level = 0;
-      if (!row[1] && !row[2]) level = 0; // Top-level group (e.g., "OBRAS PROVISIONALES...")
-      else if (!row[2]) level = 1; // Subgroup (e.g., "TRABAJOS PRELIMINARES")
-      else level = 2; // Sub-subgroup (e.g., "CARTEL DE OBRA 4.00 X 2.50")
-
-      const partial = parseFloat(slicedRow[7]) || 0; // Parcial (CostoTotal) is in column H (index 7)
-      const category = categories.find(cat => cat.codes.some(prefix => codigo.startsWith(prefix)));
-      if (category && level === 2) category.value += partial; // Only add to categories for actual items (Level 2)
-
-      // Find the parent description for subgroups and sub-subgroups
-      let parent = null;
-      if (level > 0) {
-        for (let j = i - 1; j >= headerRowIndex + 1; j--) {
-          const prevRow = data[j] as any[];
-          const prevLevel = (!prevRow[1] && !prevRow[2]) ? 0 : (!prevRow[2] ? 1 : 2);
-          if (prevLevel < level) {
-            parent = prevRow[3]?.toString().trim() || null;
-            break;
-          }
-        }
-      }
-
-      // Update group totals
-      if (level === 2 && parent) {
-        let currentParent = parent;
-        while (currentParent) {
-          groupTotals[currentParent] = (groupTotals[currentParent] || 0) + partial;
-          // Find the parent's parent (for nested groups)
-          const parentIndex = items.findIndex(item => item.Descripción === currentParent);
-          if (parentIndex !== -1) {
-            currentParent = items[parentIndex].Parent || null;
-          } else {
-            currentParent = null;
-          }
-        }
-      }
-
-      // Add the item to the list
+    // Paso 1: Agregar categorías (nivel 0)
+    for (const category of categoriesResult.recordset) {
       items.push({
-        Codigo: codigo,
-        Descripción: slicedRow[3]?.toString().trim() || 'N/A',
-        Unidad: slicedRow[4]?.toString().trim() || 'N/A',
-        Metrado: parseFloat(slicedRow[5]) || 0,
-        PrecioUnitario: parseFloat(slicedRow[6]) || 0,
-        CostoTotal: partial,
-        Category: category ? category.name : 'Other',
-        Level: level,
-        Parent: parent,
+        Codigo: category.CategoriaID.toString(),
+        Descripción: category.NombreCategoria,
+        Unidad: '',
+        Metrado: 0,
+        PrecioUnitario: 0,
+        CostoTotal: 0,
+        Level: 0,
+        CategoriaID: category.CategoriaID,
+        NombreCategoria: category.NombreCategoria,
       });
     }
 
-    // Second pass: Update group rows with their aggregated totals
-    for (let item of items) {
-      if (item.Level < 2) {
-        item.CostoTotal = groupTotals[item.Descripción] || item.CostoTotal;
+    // Paso 2: Agregar subcategorías (nivel 1)
+    for (const subcategory of subcategoriesResult.recordset) {
+      const parentCategory = categoriesResult.recordset.find(cat => cat.CategoriaID === subcategory.CategoriaID)?.NombreCategoria;
+      items.push({
+        Codigo: subcategory.SubcategoriaID.toString(),
+        Descripción: subcategory.Descripción,
+        Unidad: '',
+        Metrado: 0,
+        PrecioUnitario: 0,
+        CostoTotal: 0,
+        Level: 1,
+        Parent: parentCategory,
+        SubcategoriaID: subcategory.SubcategoriaID,
+        CategoriaID: subcategory.CategoriaID,
+        NombreCategoria: parentCategory,
+        NombreSubcategoria: subcategory.Descripción,
+      });
+    }
+
+    // Paso 3: Procesar ítems detallados (nivel 2)
+    for (const row of itemsResult.recordset) {
+      const codigo = row.CodigoItem;
+      const parts = codigo?.split('.').map(Number) || [];
+      const level = parts.length - 1;
+      let parent: string | undefined;
+
+      if (level > 0) {
+        const parentParts = parts.slice(0, -1);
+        const parentCodigo = parentParts.join('.');
+        if (level === 2) {
+          const parentItem = itemsResult.recordset.find(item => item.CodigoItem === parentCodigo);
+          parent = parentItem?.NombreSubcategoria || parentItem?.NombreCategoria;
+        }
+      }
+
+      // Calcular CostoTotal solo para ítems de nivel 2 si tienen Metrado y PrecioUnitario
+      let cost = row.CostoTotal || 0;
+      if (level === 2 && row.Metrado && row.PrecioUnitario) {
+        cost = row.Metrado * row.PrecioUnitario;
+      }
+
+      const category = categories.find(cat => cat.codes.some(prefix => codigo?.startsWith(prefix) || ''));
+      if (category && level === 2) category.value += cost;
+
+      items.push({
+        Codigo: codigo || '',
+        Descripción: row.Descripcion,
+        Unidad: row.Unidad || '',
+        Metrado: row.Metrado || 0,
+        PrecioUnitario: row.PrecioUnitario || 0,
+        CostoTotal: cost,
+        Level: level,
+        Parent: parent,
+        CategoriaID: row.CategoriaID,
+        SubcategoriaID: row.SubcategoriaID,
+        NombreCategoria: row.NombreCategoria,
+        NombreSubcategoria: row.NombreSubcategoria,
+      });
+
+      // Sumar los costos para los ítems padres (nivel 0 y 1)
+      if (level === 2 && parent) {
+        let currentParent = parent;
+        while (currentParent) {
+          groupTotals[currentParent] = (groupTotals[currentParent] || 0) + cost;
+          const parentItem = items.find(item => item.Descripción === currentParent);
+          currentParent = parentItem?.Parent;
+        }
+        if (row.NombreCategoria) {
+          groupTotals[row.NombreCategoria] = (groupTotals[row.NombreCategoria] || 0) + cost;
+        }
       }
     }
 
-    console.log('Datos procesados, total de ítems:', items.length);
-    const budgetData = {
-      items,
-      categories,
-    };
+    // Paso 4: Actualizar CostoTotal para ítems de nivel 0 y 1 con la suma de sus hijos
+    for (let item of items) {
+      if (item.Level < 2) {
+        item.CostoTotal = groupTotals[item.Descripción] || item.CostoTotal;
+        item.Metrado = 0;
+        item.PrecioUnitario = 0;
+      }
+    }
 
-    console.log('Enviando respuesta JSON con éxito');
+    // Paso 5: Incluir ítems de resumen como FINANCIA PNVR
+    const summaryCategories = [
+      { CategoriaID: 51, Descripción: 'COSTO DIRECTO' },
+      { CategoriaID: 52, Descripción: 'COSTO INDIRECTO' },
+      { CategoriaID: 53, Descripción: 'COSTO TOTAL' },
+      { CategoriaID: 54, Descripción: 'APORTE' },
+      { CategoriaID: 55, Descripción: 'FINANCIA PNVR' },
+    ];
+
+    for (const summary of summaryCategories) {
+      const total = items
+        .filter(item => item.CategoriaID === summary.CategoriaID && item.Level === 0)
+        .reduce((sum, item) => sum + item.CostoTotal, 0);
+      items.push({
+        Codigo: summary.CategoriaID.toString(),
+        Descripción: summary.Descripción,
+        Unidad: '',
+        Metrado: 0,
+        PrecioUnitario: 0,
+        CostoTotal: total > 0 ? total : (itemsResult.recordset.find(item => item.CategoriaID === summary.CategoriaID)?.CostoTotal || 0),
+        Level: 0,
+        CategoriaID: summary.CategoriaID,
+        NombreCategoria: summary.Descripción,
+      });
+    }
+
+    const budgetData = { items, categories: categories.map(cat => ({ name: cat.name, value: cat.value })) };
+
     return NextResponse.json(budgetData, { status: 200 });
   } catch (error: any) {
-    console.error('Error en GET /api/expediente/budget:', error);
-    return NextResponse.json(
-      { error: 'No se pudo procesar los datos del presupuesto', details: error.message },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'No se pudo procesar los datos del presupuesto', details: error.message }, { status: 500 });
   } finally {
-    if (pool) {
-      console.log('Cerrando conexión a la base de datos');
-      await pool.close();
-    }
+    if (pool) await pool.close();
   }
 }

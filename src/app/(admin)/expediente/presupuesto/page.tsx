@@ -34,6 +34,8 @@ type BudgetItem = {
   CostoTotal: number;
   Level: number;
   Parent?: string;
+  CategoriaID?: number;
+  NombreCategoria?: string;
 };
 
 type BudgetData = {
@@ -50,7 +52,7 @@ const BudgetModule: React.FC = () => {
   const [loadingBudget, setLoadingBudget] = useState<boolean>(false);
   const [errorBudget, setErrorBudget] = useState<string>("");
   const [isTableExpanded, setIsTableExpanded] = useState<boolean>(true);
-  const [expandedGroups, setExpandedGroups] = useState<{ [key: string]: boolean }>({}); // Track expanded state by Descripción
+  const [expandedGroups, setExpandedGroups] = useState<{ [key: string]: boolean }>({});
 
   const fetchConvenios = useCallback(async () => {
     try {
@@ -77,9 +79,8 @@ const BudgetModule: React.FC = () => {
       const data = await response.json();
       if (response.ok) {
         setBudgetData(data);
-        // Initialize all groups as expanded
         const initialExpanded = data.items.reduce((acc, item) => {
-          if (item.Level < 2) { // Level 0 or 1 (groups)
+          if (item.Level < 2) {
             acc[item.Descripción] = true;
           }
           return acc;
@@ -114,15 +115,27 @@ const BudgetModule: React.FC = () => {
 
   const COLORS = ['#0088FE', '#FFBB28'];
 
-  const directCost = 1664640.73;
-  const indirectCost = 245465.41;
+  const directCost = budgetData.items
+    .filter(item => item.CategoriaID === 51 && item.Level === 0)
+    .reduce((sum, item) => sum + item.CostoTotal, 0);
+
+  const indirectCost = budgetData.items
+    .filter(item => item.CategoriaID === 52 && item.Level === 0)
+    .reduce((sum, item) => sum + item.CostoTotal, 0);
+
   const totalCost = directCost + indirectCost;
+
+  const freightCost = budgetData.categories
+    .filter(cat => cat.name === 'Freight')
+    .reduce((sum, cat) => sum + cat.value, 0);
+
+  const freightPercentage = totalCost > 0 ? (freightCost / totalCost) * 100 : 0;
+
   const costData = [
-    { name: 'Direct Cost', value: directCost },
-    { name: 'Indirect Cost', value: indirectCost }
+    { name: 'Costo Directo', value: directCost },
+    { name: 'Costo Indirecto', value: indirectCost },
   ];
 
-  // Toggle the expanded state of a group
   const toggleGroup = (groupDesc: string) => {
     setExpandedGroups(prev => ({
       ...prev,
@@ -130,16 +143,13 @@ const BudgetModule: React.FC = () => {
     }));
   };
 
-  // Check if an item should be visible based on its parent's expanded state
   const isItemVisible = (item: BudgetItem, index: number): boolean => {
-    if (item.Level === 0) return true; // Top-level groups are always visible
+    if (item.Level === 0) return true;
     if (item.Level === 1) {
-      // Find the parent (Level 0) and check if it's expanded
       const parentDesc = item.Parent;
       return parentDesc ? expandedGroups[parentDesc] !== false : true;
     }
     if (item.Level === 2) {
-      // Find the immediate parent (Level 1) and its parent (Level 0)
       const parentDesc = item.Parent;
       if (!parentDesc) return true;
       const parentItem = budgetData.items.find(i => i.Descripción === parentDesc);
@@ -149,6 +159,16 @@ const BudgetModule: React.FC = () => {
     }
     return true;
   };
+
+  // Agrupar ítems por NombreCategoria
+  const groupedItems = budgetData.items.reduce((acc, item) => {
+    const category = item.NombreCategoria || 'Sin Categoría';
+    if (!acc[category]) {
+      acc[category] = [];
+    }
+    acc[category].push(item);
+    return acc;
+  }, {} as { [key: string]: BudgetItem[] });
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
@@ -185,14 +205,12 @@ const BudgetModule: React.FC = () => {
           {!loadingBudget && !errorBudget && budgetData.items.length === 0 && (
             <p className="text-gray-500">No hay datos de presupuesto disponibles.</p>
           )}
-          {!loadingBudget && budgetData.items.length > 0 && (
+          {!loadingBudget && !errorBudget && budgetData.items.length > 0 && (
             <div className="space-y-6">
-              {console.log('Budget items:', budgetData.items)}
-
               <div>
                 <h2 className="text-xl font-semibold mb-2">Resumen</h2>
                 <p className="text-gray-700 dark:text-gray-300">
-                  El presupuesto total es S/. {formatNumber(totalCost)}, con S/. {formatNumber(directCost)} en costos directos y S/. {formatNumber(indirectCost)} en costos indirectos. Los costos de flete (S/. {formatNumber(269962.04)}) representan ~14.1% del presupuesto, debido al transporte por acémilas en las zonas rurales de Aguas de Nieve, Pucaloma y Utcuyacu.
+                  El presupuesto total es S/. {formatNumber(totalCost)}, con S/. {formatNumber(directCost)} en costos directos y S/. {formatNumber(indirectCost)} en costos indirectos. Los costos de flete (S/. {formatNumber(freightCost)}) representan ~{freightPercentage.toFixed(1)}% del presupuesto.
                 </p>
               </div>
 
@@ -210,58 +228,63 @@ const BudgetModule: React.FC = () => {
                       <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                         <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                           <tr>
-                            <th className="px-6 py-3"></th> 
+                            <th className="px-6 py-3"></th>
                             <th className="px-6 py-3">Código</th>
                             <th className="px-6 py-3">Descripción</th>
                             <th className="px-6 py-3">Unidad</th>
                             <th className="px-6 py-3">Metrado</th>
                             <th className="px-6 py-3">Precio Unitario (S/.)</th>
                             <th className="px-6 py-3">Costo Total (S/.)</th>
-                       
+                            <th className="px-6 py-3">Categoría</th>
                           </tr>
                         </thead>
                         <tbody>
-                          {budgetData.items.map((item, index) => {
-                            if (!('Level' in item)) {
-                              console.error('Invalid item structure at index', index, item);
-                              return null;
-                            }
-                            const isGroup = item.Level < 2;
-                            const indent = item.Level * 20;
-                            const rowStyle = isGroup
-                              ? item.Level === 0
-                                ? 'bg-gray-200 dark:bg-gray-700 font-bold'
-                                : 'bg-gray-100 dark:bg-gray-600 font-semibold'
-                              : 'bg-white dark:bg-gray-800';
-                            const isVisible = isItemVisible(item, index);
+                          {Object.entries(groupedItems).map(([category, categoryItems]) => (
+                            <React.Fragment key={category}>
+                              {categoryItems.map((item, index) => {
+                                if (!('Level' in item)) {
+                                  console.error('Estructura de ítem inválida en el índice', index, item);
+                                  return null;
+                                }
+                                const isGroup = item.Level < 2;
+                                const indent = item.Level * 20;
+                                const rowStyle = isGroup
+                                  ? item.Level === 0
+                                    ? 'bg-gray-200 dark:bg-gray-700 font-bold'
+                                    : 'bg-gray-100 dark:bg-gray-600 font-semibold'
+                                  : 'bg-white dark:bg-gray-800';
+                                const isVisible = isItemVisible(item, index);
 
-                            if (!isVisible) return null;
+                                if (!isVisible) return null;
 
-                            return (
-                              <tr
-                                key={index}
-                                className={`border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 ${rowStyle}`}
-                              >
-                                <td className="px-2 py-4">
-                                  {isGroup && (
-                                    <button
-                                      onClick={() => toggleGroup(item.Descripción)}
-                                      className="text-gray-500 hover:text-gray-700"
-                                    >
-                                      {expandedGroups[item.Descripción] ? "▼" : "▶"}
-                                    </button>
-                                  )}
-                                </td>
-                                <td className="px-6 py-4" style={{ paddingLeft: `${indent}px` }}>{item.Codigo}</td>
-                                <td className="px-6 py-4" style={{ paddingLeft: `${indent + 10}px` }}>{item.Descripción}</td>
-                                <td className="px-6 py-4">{isGroup ? '' : item.Unidad}</td>
-                                <td className="px-6 py-4">{isGroup ? '' : formatNumber(item.Metrado)}</td>
-                                <td className="px-6 py-4">{isGroup ? '' : formatNumber(item.PrecioUnitario)}</td>
-                                <td className="px-6 py-4">{formatNumber(item.CostoTotal)}</td>
-                          
-                              </tr>
-                            );
-                          })}
+                                return (
+                                  <tr
+                                    key={`${category}-${index}`}
+                                    className={`border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 ${rowStyle}`}
+                                  >
+                                    <td className="px-2 py-4">
+                                      {isGroup && (
+                                        <button
+                                          onClick={() => toggleGroup(item.Descripción)}
+                                          className="text-gray-500 hover:text-gray-700"
+                                        >
+                                          {expandedGroups[item.Descripción] ? "▼" : "▶"}
+                                        </button>
+                                      )}
+                                    </td>
+                                    <td className="px-6 py-4" style={{ paddingLeft: `${indent}px` }}>{item.Codigo}</td>
+                                      <td className="px-6 py-4">{item.NombreCategoria || ''}</td>
+                                    <td className="px-6 py-4" style={{ paddingLeft: `${indent + 10}px` }}>{item.Descripción}</td>
+                                    <td className="px-6 py-4">{isGroup ? '' : item.Unidad || ''}</td>
+                                    <td className="px-6 py-4">{isGroup ? '' : item.Metrado ? formatNumber(item.Metrado) : ''}</td>
+                                    <td className="px-6 py-4">{isGroup ? '' : item.PrecioUnitario ? formatNumber(item.PrecioUnitario) : ''}</td>
+                                    <td className="px-6 py-4">{formatNumber(item.CostoTotal)}</td>
+                                  
+                                  </tr>
+                                );
+                              })}
+                            </React.Fragment>
+                          ))}
                         </tbody>
                       </table>
                     </div>

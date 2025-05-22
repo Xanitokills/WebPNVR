@@ -1,4 +1,3 @@
-
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
@@ -30,6 +29,28 @@ type FileData = {
   [key: string]: File[];
 };
 
+type BudgetItem = {
+  Codigo: string;
+  ItemPadre: string;
+  ItemHijo: string;
+  ItemNieto: string;
+  Descripción: string;
+  Unidad: string;
+  Cantidad: number;
+  PrecioUnitario: number;
+  CostoTotal: number;
+  Category: string;
+  Level: number;
+  Parent?: string;
+  Segmento: string;
+};
+
+type ValidationReport = {
+  warnings: string[];
+  errors: string[];
+  isValid: boolean;
+};
+
 const SubirExpediente: React.FC = () => {
   const [filesByCategory, setFilesByCategory] = useState<FileData>({});
   const [expandedCategories, setExpandedCategories] = useState<{ [key: string]: boolean }>({});
@@ -41,12 +62,13 @@ const SubirExpediente: React.FC = () => {
   const [loadingConvenios, setLoadingConvenios] = useState<boolean>(true);
   const [errorConvenios, setErrorConvenios] = useState<string>("");
   const [dragOverCategory, setDragOverCategory] = useState<string | null>(null);
+  const [previewData, setPreviewData] = useState<{ items: BudgetItem[]; validation: ValidationReport } | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [currentCategory, setCurrentCategory] = useState<string | null>(null);
   const router = useRouter();
 
-  // Maximum allowed size: 10 MB
-  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB in bytes
+  const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
-  // List of categories
   const categories = [
     "1. MEMORIA DESCRIPTIVA",
     "2. MEMORIA DE CALCULO",
@@ -60,12 +82,10 @@ const SubirExpediente: React.FC = () => {
     "10. ANEXOS",
   ];
 
-  // Check if all categories are completed
   const allCategoriesCompleted = categories.every(
     (category) => completedCategories[category]
   );
 
-  // Fetch convenios from the API
   const fetchConvenios = useCallback(async () => {
     try {
       setLoadingConvenios(true);
@@ -89,7 +109,6 @@ const SubirExpediente: React.FC = () => {
     fetchConvenios();
   }, [fetchConvenios]);
 
-  // Toggle expand/collapse for a category
   const toggleCategory = (category: string) => {
     setExpandedCategories((prev) => ({
       ...prev,
@@ -97,7 +116,6 @@ const SubirExpediente: React.FC = () => {
     }));
   };
 
-  // Handle file selection for a category with size validation
   const handleFileChange = (category: string, files: File[]) => {
     const totalSize = files.reduce((sum, file) => sum + file.size, 0);
 
@@ -129,14 +147,12 @@ const SubirExpediente: React.FC = () => {
     }));
   };
 
-  // Handle file input change
   const handleInputChange = (category: string, event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
       handleFileChange(category, Array.from(event.target.files));
     }
   };
 
-  // Handle drag-and-drop events
   const handleDragOver = (category: string, event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     if (!completedCategories[category]) {
@@ -176,95 +192,150 @@ const SubirExpediente: React.FC = () => {
     }
   };
 
-  // Handle file upload for a category
-  const handleUpload = useCallback(
-    async (category: string) => {
-      const files = filesByCategory[category] || [];
-      if (files.length === 0) {
-        setErrorsByCategory((prev) => ({
-          ...prev,
-          [category]: ["Por favor, selecciona al menos un archivo."],
-        }));
-        return;
-      }
+  const handlePreview = async (category: string) => {
+    const files = filesByCategory[category];
+    if (!files || files.length === 0 || !selectedConvenioId) {
+      setErrorsByCategory((prev) => ({
+        ...prev,
+        [category]: ["Por favor, selecciona un archivo y un convenio."],
+      }));
+      return;
+    }
 
-      if (!selectedConvenioId) {
-        setErrorsByCategory((prev) => ({
-          ...prev,
-          [category]: ["Por favor, selecciona un convenio."],
-        }));
-        return;
-      }
+    const formData = new FormData();
+    files.forEach((file, index) => {
+      formData.append(`file-${index}`, file);
+    });
+    formData.append("category", category);
+    formData.append("id_convenio", selectedConvenioId.toString());
 
-      const formData = new FormData();
-      files.forEach((file, index) => {
-        formData.append(`file-${index}`, file);
+    try {
+      setUploadStatusByCategory((prev) => ({
+        ...prev,
+        [category]: "Validando...",
+      }));
+      const response = await fetch("/api/expediente/preview", {
+        method: "POST",
+        body: formData,
       });
-      formData.append("category", category);
-      formData.append("id_convenio", selectedConvenioId.toString());
 
-      try {
+      const result = await response.json();
+      if (response.ok) {
+        setPreviewData({ items: result.items, validation: result.validation });
+        setCurrentCategory(category);
+        setShowModal(true);
         setUploadStatusByCategory((prev) => ({
           ...prev,
-          [category]: "Cargando...",
+          [category]: "",
         }));
-        const response = await fetch("/api/expediente/upload-excel", {
-          method: "POST",
-          body: formData,
-        });
+      } else {
+        setErrorsByCategory((prev) => ({
+          ...prev,
+          [category]: [result.error || "Error al previsualizar el archivo."],
+        }));
+        setUploadStatusByCategory((prev) => ({
+          ...prev,
+          [category]: "",
+        }));
+      }
+    } catch (error) {
+      setErrorsByCategory((prev) => ({
+        ...prev,
+        [category]: ["Error de conexión al previsualizar el archivo."],
+      }));
+      setUploadStatusByCategory((prev) => ({
+        ...prev,
+        [category]: "",
+      }));
+    }
+  };
 
-        const result = await response.json();
-        if (response.ok) {
-          setUploadStatusByCategory((prev) => ({
-            ...prev,
-            [category]: "¡Archivos cargados exitosamente!",
-          }));
-          setErrorsByCategory((prev) => ({
-            ...prev,
-            [category]: [],
-          }));
-          setCompletedCategories((prev) => ({
-            ...prev,
-            [category]: true,
-          }));
-          setFilesByCategory((prev) => ({
-            ...prev,
-            [category]: [],
-          }));
-        } else {
-          setUploadStatusByCategory((prev) => ({
-            ...prev,
-            [category]: "Error al cargar los archivos.",
-          }));
-          setErrorsByCategory((prev) => ({
-            ...prev,
-            [category]: result.errors || ["Error desconocido."],
-          }));
-        }
-      } catch (error) {
+  const handleConfirmUpload = async (category: string) => {
+    const files = filesByCategory[category];
+    if (!files || files.length === 0 || !selectedConvenioId) return;
+
+    const formData = new FormData();
+    files.forEach((file, index) => {
+      formData.append(`file-${index}`, file);
+    });
+    formData.append("category", category);
+    formData.append("id_convenio", selectedConvenioId.toString());
+
+    try {
+      setUploadStatusByCategory((prev) => ({
+        ...prev,
+        [category]: "Cargando...",
+      }));
+      const response = await fetch("/api/expediente/upload-excel", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        setUploadStatusByCategory((prev) => ({
+          ...prev,
+          [category]: "¡Archivos cargados exitosamente!",
+        }));
+        setErrorsByCategory((prev) => ({
+          ...prev,
+          [category]: [],
+        }));
+        setCompletedCategories((prev) => ({
+          ...prev,
+          [category]: true,
+        }));
+        setFilesByCategory((prev) => ({
+          ...prev,
+          [category]: [],
+        }));
+        setShowModal(false);
+        setPreviewData(null);
+        setCurrentCategory(null);
+      } else {
         setUploadStatusByCategory((prev) => ({
           ...prev,
           [category]: "Error al cargar los archivos.",
         }));
         setErrorsByCategory((prev) => ({
           ...prev,
-          [category]: ["Error de conexión con el servidor."],
+          [category]: result.errors || ["Error desconocido."],
         }));
       }
-    },
-    [filesByCategory, selectedConvenioId]
-  );
+    } catch (error) {
+      setUploadStatusByCategory((prev) => ({
+        ...prev,
+        [category]: "Error al cargar los archivos.",
+      }));
+      setErrorsByCategory((prev) => ({
+        ...prev,
+        [category]: ["Error de conexión con el servidor."],
+      }));
+    }
+  };
 
-  // Handle navigation to ver-expediente
   const handleNavigate = () => {
     router.push("/expediente/ver-expediente");
+  };
+
+  // Función para determinar el estilo de fondo según el nivel
+  const getRowBackgroundClass = (level: number) => {
+    switch (level) {
+      case 0:
+        return "bg-gray-100 dark:bg-gray-700";
+      case 1:
+        return "bg-gray-50 dark:bg-gray-600";
+      case 2:
+        return "bg-white dark:bg-gray-800";
+      default:
+        return "bg-white dark:bg-gray-800";
+    }
   };
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">Subir Expediente</h1>
 
-      {/* Convenio Dropdown */}
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
           Selecciona un Convenio
@@ -289,7 +360,6 @@ const SubirExpediente: React.FC = () => {
         )}
       </div>
 
-      {/* Completion Status */}
       <div className="mb-6">
         <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
           Progreso: {Object.values(completedCategories).filter(Boolean).length} de {categories.length} categorías completadas
@@ -316,7 +386,6 @@ const SubirExpediente: React.FC = () => {
                 : "bg-red-50 dark:bg-red-900"
             }`}
           >
-            {/* Category Header */}
             <button
               onClick={() => toggleCategory(category)}
               className={`w-full p-4 flex justify-between items-center text-left text-sm font-medium text-gray-700 dark:text-gray-300 ${
@@ -331,7 +400,6 @@ const SubirExpediente: React.FC = () => {
               <span>{expandedCategories[category] ? "▼" : "▶"}</span>
             </button>
 
-            {/* Category Content (Expandable) */}
             {expandedCategories[category] && (
               <div
                 className={`p-4 border-2 border-dashed ${
@@ -344,12 +412,10 @@ const SubirExpediente: React.FC = () => {
                 onDragLeave={(e) => handleDragLeave(category, e)}
                 onDrop={(e) => handleDrop(category, e)}
               >
-                {/* Drag-and-Drop Instructions */}
                 <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
                   Arrastra y suelta archivos aquí o usa el botón para seleccionar
                 </p>
 
-                {/* File Input */}
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     Selecciona archivos (PDF, Excel, etc.) para {category}
@@ -364,7 +430,6 @@ const SubirExpediente: React.FC = () => {
                   />
                 </div>
 
-                {/* Display Selected Files */}
                 {filesByCategory[category]?.length > 0 && (
                   <div className="mb-4">
                     <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -380,23 +445,21 @@ const SubirExpediente: React.FC = () => {
                   </div>
                 )}
 
-                {/* Upload Button */}
                 <button
-                  onClick={() => handleUpload(category)}
+                  onClick={() => handlePreview(category)}
                   disabled={
                     !filesByCategory[category]?.length ||
-                    uploadStatusByCategory[category] === "Cargando..." ||
+                    uploadStatusByCategory[category] === "Validando..." ||
                     !selectedConvenioId ||
                     completedCategories[category]
                   }
-                  className="px-4 py-2 bg-brand-500 text-white rounded-md hover:bg-brand-600 disabled:bg-gray-400"
+                  className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:bg-gray-400 mr-2"
                 >
-                  {uploadStatusByCategory[category] === "Cargando..."
-                    ? "Cargando..."
-                    : "Subir Archivos"}
+                  {uploadStatusByCategory[category] === "Validando..."
+                    ? "Validando..."
+                    : "Previsualizar Datos"}
                 </button>
 
-                {/* Status and Errors */}
                 {uploadStatusByCategory[category] && (
                   <p
                     className={`mt-4 text-sm ${
@@ -420,6 +483,100 @@ const SubirExpediente: React.FC = () => {
           </div>
         ))}
       </div>
+
+      {showModal && previewData && currentCategory && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-11/12 max-w-4xl max-h-[80vh] overflow-y-auto">
+            <h2 className="text-xl font-bold mb-4">Previsualización de Datos</h2>
+            <p className="mb-4">Por favor, revisa los datos antes de confirmar la carga.</p>
+
+            {previewData.validation.errors.length > 0 && (
+              <div className="mb-4">
+                <h3 className="font-semibold text-red-600">Errores:</h3>
+                <ul className="list-disc pl-5 text-red-600">
+                  {previewData.validation.errors.map((error, index) => (
+                    <li key={index}>{error}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {previewData.validation.warnings.length > 0 && (
+              <div className="mb-4">
+                <h3 className="font-semibold text-yellow-600">Advertencias:</h3>
+                <ul className="list-disc pl-5 text-yellow-600">
+                  {previewData.validation.warnings.map((warning, index) => (
+                    <li key={index}>{warning}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            <div className="mb-4">
+              <h3 className="font-semibold">Datos Previsualizados:</h3>
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50 dark:bg-gray-700">
+                    <tr>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Código</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Item Padre</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Item Hijo</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Item Nieto</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Descripción</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Unidad</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Cantidad</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Precio Unitario</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Costo Total</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Nivel</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Padre</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Segmento</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {previewData.items.map((item, index) => (
+                      <tr key={index} className={getRowBackgroundClass(item.Level)}>
+                        <td className="px-4 py-2 whitespace-nowrap">{item.Codigo}</td>
+                        <td className="px-4 py-2 whitespace-nowrap">{item.ItemPadre || '-'}</td>
+                        <td className="px-4 py-2 whitespace-nowrap">{item.ItemHijo || '-'}</td>
+                        <td className="px-4 py-2 whitespace-nowrap">{item.ItemNieto || '-'}</td>
+                        <td className="px-4 py-2" style={{ paddingLeft: `${item.Level * 1.5}rem` }}>
+                          {item.Descripción}
+                        </td>
+                        <td className="px-4 py-2">{item.Unidad || '-'}</td>
+                        <td className="px-4 py-2">{item.Cantidad || '-'}</td>
+                        <td className="px-4 py-2">{item.PrecioUnitario || '-'}</td>
+                        <td className="px-4 py-2">{item.CostoTotal || '-'}</td>
+                        <td className="px-4 py-2">{item.Level}</td>
+                        <td className="px-4 py-2">{item.Parent || '-'}</td>
+                        <td className="px-4 py-2">{item.Segmento || '-'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-4 mt-4">
+              <button
+                onClick={() => {
+                  setShowModal(false);
+                  setPreviewData(null);
+                  setCurrentCategory(null);
+                }}
+                className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => handleConfirmUpload(currentCategory)}
+                className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+                disabled={!previewData.validation.isValid}
+              >
+                Confirmar y Subir
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

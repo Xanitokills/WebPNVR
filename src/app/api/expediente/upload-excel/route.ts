@@ -15,19 +15,21 @@ interface BudgetItem {
   Codigo: string;
   Descripción: string;
   Unidad: string;
-  Cantidad: number; // Maps to 'Metrado' in Excel
+  Cantidad: number;
   PrecioUnitario: number;
   CostoTotal: number;
   Category: string;
   Level: number;
   Parent?: string;
+  CategoriaID?: number;
+  SubcategoriaID?: number;
 }
 
 const variablesRequeridas = {
   DB_USER: process.env.DB_USER,
   DB_PASSWORD: process.env.DB_PASSWORD,
   DB_SERVER: process.env.DB_SERVER,
-  DB_NAME: process.env.DB_NAME, // Add DB_NAME to required variables
+  DB_NAME: process.env.DB_NAME,
 };
 
 const variablesFaltantes = Object.entries(variablesRequeridas)
@@ -42,12 +44,14 @@ const configuracion = {
   user: variablesRequeridas.DB_USER as string,
   password: variablesRequeridas.DB_PASSWORD as string,
   server: variablesRequeridas.DB_SERVER as string,
-  database: variablesRequeridas.DB_NAME as string, // Use DB_NAME from .env (RuralHousingProgram)
+  database: variablesRequeridas.DB_NAME as string,
   options: {
     encrypt: false,
     trustServerCertificate: true,
   },
 };
+
+// ... (importaciones y definiciones previas permanecen iguales)
 
 async function parseExcelFile(filePath: string): Promise<{ items: BudgetItem[] }> {
   console.log('Leyendo archivo Excel desde:', filePath);
@@ -63,32 +67,24 @@ async function parseExcelFile(filePath: string): Promise<{ items: BudgetItem[] }
 
   console.log('Hoja seleccionada:', sheetName);
   const sheet = workbook.Sheets[sheetName];
-  const data = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+  const data = XLSX.utils.sheet_to_json(sheet, { header: 1 }) as any[][];
   console.log('Primeras 5 filas del archivo Excel:', data.slice(0, 5));
 
-  // Encontrar la fila de encabezados
-  let headerRowIndex = -1;
-  const expectedHeaders = ['Item', 'Descripción', 'Und.', 'Metrado', 'P.U.', 'Parcial'];
-  for (let i = 0; i < data.length; i++) {
-    const row = data[i] as string[];
-    console.log(`Verificando fila ${i}:`, row);
-    const itemIndex = row.findIndex((cell, idx) => idx <= 2 && cell?.toString().trim() === 'Item');
-    if (itemIndex !== -1) {
-      const headersSlice = [row[itemIndex]].concat(row.slice(3, 3 + expectedHeaders.length - 1));
-      console.log('Encabezados encontrados en la fila:', headersSlice);
-      if (headersSlice.length === expectedHeaders.length &&
-          expectedHeaders.every((header, idx) => headersSlice[idx]?.toString().trim() === header)) {
-        headerRowIndex = i;
-        console.log('Encabezados encontrados en la fila', i, 'en índice inicial', itemIndex);
-        break;
-      }
-    }
+  // Forzar la fila de encabezados a la fila 15
+  const headerRowIndex = 14; // Fila 15 (índice 14 en base 0)
+  if (data[headerRowIndex].length < 6 || !data[headerRowIndex][0]?.toString().trim().startsWith('Item')) {
+    console.log('Encabezados no encontrados en la fila 15:', data[headerRowIndex]);
+    throw new Error('Formato de archivo Excel inválido: los encabezados no se encuentran en la fila 15');
   }
 
-  if (headerRowIndex === -1) {
-    console.log('No se encontraron los encabezados esperados:', expectedHeaders);
-    throw new Error('Formato de archivo Excel inválido: faltan los encabezados requeridos');
+  const expectedHeaders = ['Item', 'Descripción', 'Und.', 'Metrado', 'P.U.', 'Parcial'];
+  const headers = data[headerRowIndex].slice(0, 6).map(h => h?.toString().trim());
+  if (!expectedHeaders.every((header, idx) => headers[idx] === header)) {
+    console.log('Encabezados esperados no coinciden:', expectedHeaders, 'Encontrados:', headers);
+    throw new Error('Formato de archivo Excel inválido: los encabezados no coinciden');
   }
+
+  console.log('Encabezados encontrados en la fila', headerRowIndex + 1, ':', headers);
 
   const categories = [
     { name: 'Materials', value: 0, codes: ['201', '204', '205', '207', '210', '211', '213', '216', '217', '222', '231', '234', '237', '238', '240', '241', '251', '262', '264', '265', '267', '268', '270', '272', '276', '293', '294', '295', '296', '298', '299'] },
@@ -99,39 +95,70 @@ async function parseExcelFile(filePath: string): Promise<{ items: BudgetItem[] }
 
   const items: BudgetItem[] = [];
   const groupTotals: { [key: string]: number } = {};
-  console.log('Procesando datos a partir de la fila', headerRowIndex + 1);
+  let lastLevel0Parent: string | null = null;
+  let lastLevel1Parent: string | null = null;
+
+  console.log('Procesando datos a partir de la fila', headerRowIndex + 2);
 
   for (let i = headerRowIndex + 1; i < data.length; i++) {
     const row = data[i] as any[];
     const startIndex = row.findIndex((cell, idx) => idx >= 0 && cell?.toString().trim());
-    if (startIndex === -1) {
-      console.log('Saltando fila vacía:', row);
+    if (startIndex === -1 || !row[0]) {
+      console.log('Saltando fila vacía o sin código:', row);
       continue;
     }
 
     const codigo = row[0]?.toString().trim() || 'N/A';
-    const slicedRow = row.slice(0, 8);
-    console.log('Procesando fila', i, 'con datos:', slicedRow);
+    const slicedRow = row.slice(0, 6);
+    console.log('Procesando fila', i + 1, 'con datos:', slicedRow);
 
-    let level = 0;
-    if (!row[1] && !row[2]) level = 0;
-    else if (!row[2]) level = 1;
-    else level = 2;
+    // Determinar el nivel basado en el número de puntos en el código
+    const levelMatch = codigo.match(/\./g)?.length || 0;
+    const level = levelMatch === 0 ? 0 : levelMatch === 1 ? 1 : 2;
+    const unidad = slicedRow[2]?.toString().trim() || '';
+    const metrado = parseFloat(slicedRow[3]) || 0;
+    const precioUnitario = parseFloat(slicedRow[4]) || 0;
+    const descripcion = slicedRow[1]?.toString().trim() || 'N/A';
+    const partial = parseFloat(slicedRow[5]) || 0;
 
-    const partial = parseFloat(slicedRow[7]) || 0;
+    if (!descripcion || descripcion === 'N/A') {
+      console.log(`Fila ${i + 1}: Descripción vacía para el código ${codigo}, saltando...`);
+      continue;
+    }
+
+    console.log(`Ítem: ${descripcion}, Código: ${codigo}, Nivel: ${level}, Unidad: ${unidad}, Metrado: ${metrado}, PrecioUnitario: ${precioUnitario}`);
+
     const category = categories.find(cat => cat.codes.some(prefix => codigo.startsWith(prefix)));
     if (category && level === 2) category.value += partial;
 
-    let parent = null;
+    let parent: string | null = null;
     if (level > 0) {
       for (let j = i - 1; j >= headerRowIndex + 1; j--) {
         const prevRow = data[j] as any[];
-        const prevLevel = (!prevRow[1] && !prevRow[2]) ? 0 : (!prevRow[2] ? 1 : 2);
-        if (prevLevel < level) {
-          parent = prevRow[3]?.toString().trim() || null;
+        const prevCodigo = prevRow[0]?.toString().trim() || 'N/A';
+        const prevLevel = prevCodigo.match(/\./g)?.length || 0;
+        if (prevLevel === level - 1 && prevRow[1]) {
+          parent = prevRow[1]?.toString().trim() || null;
           break;
         }
       }
+
+      if (!parent) {
+        if (level === 1 && lastLevel0Parent) {
+          parent = lastLevel0Parent;
+        } else if (level === 2 && lastLevel1Parent) {
+          parent = lastLevel1Parent;
+        } else if (lastLevel0Parent) {
+          parent = lastLevel0Parent;
+        }
+      }
+    }
+
+    if (level === 0) {
+      lastLevel0Parent = descripcion;
+      lastLevel1Parent = null;
+    } else if (level === 1) {
+      lastLevel1Parent = descripcion;
     }
 
     if (level === 2 && parent) {
@@ -149,10 +176,10 @@ async function parseExcelFile(filePath: string): Promise<{ items: BudgetItem[] }
 
     items.push({
       Codigo: codigo,
-      Descripción: slicedRow[3]?.toString().trim() || 'N/A',
-      Unidad: slicedRow[4]?.toString().trim() || 'N/A',
-      Cantidad: parseFloat(slicedRow[5]) || 0,
-      PrecioUnitario: parseFloat(slicedRow[6]) || 0,
+      Descripción: descripcion,
+      Unidad: unidad,
+      Cantidad: metrado,
+      PrecioUnitario: precioUnitario,
       CostoTotal: partial,
       Category: category ? category.name : 'Other',
       Level: level,
@@ -166,15 +193,16 @@ async function parseExcelFile(filePath: string): Promise<{ items: BudgetItem[] }
     }
   }
 
-  console.log('Datos procesados, total de ítems:', items.length);
+  console.log('Datos procesados, total de ítems:', items.length, 'Lista de ítems:', items);
   return { items };
 }
+
+// ... (el resto del archivo permanece igual)
 
 export async function POST(request: NextRequest) {
   let pool;
 
   try {
-    // Parse form data
     const formData = await request.formData();
     const category = formData.get("category") as string;
     const id_convenio = formData.get("id_convenio") as string;
@@ -186,10 +214,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Connect to SQL Server
     pool = await sql.connect(configuracion);
 
-    // Verify if the convenio exists
     const convenioCheck = await pool
       .request()
       .input('id_convenio', sql.Int, parseInt(id_convenio))
@@ -213,7 +239,6 @@ export async function POST(request: NextRequest) {
         const fileName = file.name;
         const fileExtension = fileName.split(".").pop()?.toLowerCase();
 
-        // Validate file type (Word, Excel, PDF only)
         const allowedTypes = ["doc", "docx", "xlsx", "xls", "pdf"];
         if (!fileExtension || !allowedTypes.includes(fileExtension)) {
           return NextResponse.json(
@@ -228,18 +253,15 @@ export async function POST(request: NextRequest) {
             : fileExtension === "xlsx" || fileExtension === "xls"
             ? "Excel"
             : "Word";
-        const fileSize = file.size / 1024; // Convert to KB
+        const fileSize = file.size / 1024;
 
-        // Define the file path for storage
         const categoryFolder = category.replace(/[^a-zA-Z0-9]/g, "_");
         const uploadDir = path.join(process.cwd(), "public", "Expedientes", categoryFolder);
         const filePath = path.join(uploadDir, fileName);
         const relativeFilePath = `/Expedientes/${categoryFolder}/${fileName}`;
 
-        // Create directory if it doesn't exist
         await fs.mkdir(uploadDir, { recursive: true });
 
-        // Save the file to the filesystem
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
         await fs.writeFile(filePath, buffer);
@@ -248,7 +270,6 @@ export async function POST(request: NextRequest) {
 
         const description = `Archivo subido para ${category}`;
 
-        // Insert into ExpedienteTecnico table
         await pool
           .request()
           .input("ID_Convenio", sql.Int, parseInt(id_convenio))
@@ -265,79 +286,126 @@ export async function POST(request: NextRequest) {
             VALUES (@id_convenio, @NombreArchivo, @TipoArchivo, @RutaArchivo, @TamañoArchivo, @Descripcion, @Categoria, @FechaCarga)
           `);
 
-        // If the file is Excel and category is "3. METRADOS Y PRESUPUESTO", parse and insert into ItemsPresupuesto
         if (fileType === "Excel" && category === "3. METRADOS Y PRESUPUESTO" && !excelParsed) {
           try {
             const { items } = await parseExcelFile(filePath);
 
-            // Start a transaction for consistency
             const transaction = new sql.Transaction(pool);
             await transaction.begin();
 
             try {
-              // Insert categories (Level 0) into CategoriasPresupuesto
               const categoryMap: { [key: string]: number } = {};
+              const subcategoryMap: { [key: string]: number } = {};
+
               for (const item of items) {
                 if (item.Level === 0) {
+                  if (!item.Descripción) continue;
                   const categoryResult = await transaction
                     .request()
                     .input('CodigoCategoria', sql.NVarChar, item.Codigo)
                     .input('NombreCategoria', sql.NVarChar, item.Descripción)
                     .query(`
-                      INSERT INTO [${process.env.DB_NAME}].[dbo].[CategoriasPresupuesto] (CodigoCategoria, NombreCategoria)
+                      INSERT INTO [${process.env.DB_NAME}].[dbo].[CategoriasPresupuesto] (CodigoCategoria, NombreCategoria, CreadoEn)
                       OUTPUT INSERTED.CategoriaID
-                      VALUES (@CodigoCategoria, @NombreCategoria)
+                      VALUES (@CodigoCategoria, @NombreCategoria, GETDATE())
                     `);
                   categoryMap[item.Descripción] = categoryResult.recordset[0].CategoriaID;
+                  item.CategoriaID = categoryMap[item.Descripción];
                   console.log(`Categoría insertada: ${item.Descripción} con CategoriaID: ${categoryMap[item.Descripción]}`);
                 }
               }
 
-              // Insert items into ItemsPresupuesto
               for (const item of items) {
-                let categoriaID = null;
-                if (item.Level > 0 && item.Parent) {
+                if (item.Level === 1) {
+                  if (!item.Descripción) continue;
+                  let categoriaID = null;
+                  if (item.Parent && categoryMap[item.Parent]) {
+                    categoriaID = categoryMap[item.Parent];
+                  } else {
+                    const lastCategory = Object.values(categoryMap).pop();
+                    categoriaID = lastCategory || null;
+                  }
+
+                  if (!categoriaID) continue;
+
+                  const subcategoryResult = await transaction
+                    .request()
+                    .input('CategoriaID', sql.Int, categoriaID)
+                    .input('CodigoSubcategoria', sql.NVarChar, item.Codigo)
+                    .input('NombreSubcategoria', sql.NVarChar, item.Descripción)
+                    .query(`
+                      INSERT INTO [${process.env.DB_NAME}].[dbo].[SubcategoriasPresupuesto] (CategoriaID, CodigoSubcategoria, NombreSubcategoria, CreadoEn)
+                      OUTPUT INSERTED.SubcategoriaID
+                      VALUES (@CategoriaID, @CodigoSubcategoria, @NombreSubcategoria, GETDATE())
+                    `);
+                  subcategoryMap[item.Descripción] = subcategoryResult.recordset[0].SubcategoriaID;
+                  item.SubcategoriaID = subcategoryMap[item.Descripción];
+                  console.log(`Subcategoría insertada: ${item.Descripción} con SubcategoriaID: ${subcategoryMap[item.Descripción]}`);
+                }
+              }
+
+              for (const item of items) {
+                if (item.Level === 2) {
+                  if (!item.Descripción) continue;
+                  let categoriaID = null;
+                  let subcategoriaID = null;
+
                   let currentParent = item.Parent;
                   while (currentParent) {
-                    if (categoryMap[currentParent]) {
+                    if (subcategoryMap[currentParent]) {
+                      subcategoriaID = subcategoryMap[currentParent];
+                      const parentSubcategory = items.find(i => i.Descripción === currentParent && i.Level === 1);
+                      if (parentSubcategory && parentSubcategory.Parent) {
+                        categoriaID = categoryMap[parentSubcategory.Parent];
+                      }
+                      break;
+                    } else if (categoryMap[currentParent]) {
                       categoriaID = categoryMap[currentParent];
                       break;
                     }
                     const parentItem = items.find(i => i.Descripción === currentParent);
                     currentParent = parentItem?.Parent || null;
                   }
-                } else if (item.Level === 0) {
-                  categoriaID = categoryMap[item.Descripción];
-                }
 
-                await transaction
-                  .request()
-                  .input('Id_Convenio', sql.Int, parseInt(id_convenio))
-                  .input('CategoriaID', sql.Int, categoriaID)
-                  .input('CodigoItem', sql.NVarChar, item.Codigo)
-                  .input('Descripcion', sql.NVarChar, item.Descripción)
-                  .input('Unidad', sql.NVarChar, item.Unidad === 'N/A' ? null : item.Unidad)
-                  .input('Cantidad', sql.Decimal(18, 4), item.Cantidad)
-                  .input('PrecioUnitario', sql.Decimal(18, 2), item.PrecioUnitario)
-                  .input('CostoTotal', sql.Decimal(18, 2), item.CostoTotal)
-                  .query(`
-                    INSERT INTO [${process.env.DB_NAME}].[dbo].[ItemsPresupuesto] (
-                      Id_Convenio, CategoriaID, CodigoItem, Descripcion, Unidad, Cantidad, PrecioUnitario, CostoTotal
-                    )
-                    VALUES (
-                      @Id_Convenio, @CategoriaID, @CodigoItem, @Descripcion, @Unidad, @Cantidad, @PrecioUnitario, @CostoTotal
-                    )
-                  `);
-                console.log(`Ítem insertado: ${item.Descripción} para Id_Convenio: ${id_convenio}`);
+                  if (!categoriaID) {
+                    const lastCategory = Object.values(categoryMap).pop();
+                    categoriaID = lastCategory || null;
+                    if (!categoriaID) continue;
+                  }
+
+                  await transaction
+                    .request()
+                    .input('Id_Convenio', sql.Int, parseInt(id_convenio))
+                    .input('CategoriaID', sql.Int, categoriaID)
+                    .input('SubcategoriaID', sql.Int, subcategoriaID || null)
+                    .input('CodigoItem', sql.NVarChar, item.Codigo)
+                    .input('Descripcion', sql.NVarChar, item.Descripción)
+                    .input('Unidad', sql.NVarChar, item.Unidad === '' ? null : item.Unidad)
+                    .input('Cantidad', sql.Decimal(18, 4), item.Cantidad || null)
+                    .input('PrecioUnitario', sql.Decimal(18, 2), item.PrecioUnitario || null)
+                    .input('CostoTotal', sql.Decimal(18, 2), item.CostoTotal || null)
+                    .query(`
+                      INSERT INTO [${process.env.DB_NAME}].[dbo].[ItemsPresupuesto] (
+                        Id_Convenio, CategoriaID, SubcategoriaID, CodigoItem, Descripcion, Unidad, Cantidad, PrecioUnitario, CostoTotal, CreadoEn
+                      )
+                      VALUES (
+                        @Id_Convenio, @CategoriaID, @SubcategoriaID, @CodigoItem, @Descripcion, @Unidad, @Cantidad, @PrecioUnitario, @CostoTotal, GETDATE()
+                      )
+                    `);
+                  console.log(`Ítem insertado: ${item.Descripción} para Id_Convenio: ${id_convenio}`);
+                }
               }
 
               await transaction.commit();
               console.log('Transacción completada con éxito');
-              excelParsed = true; // Prevent parsing multiple Excel files in the same request
+              excelParsed = true;
             } catch (error: any) {
               await transaction.rollback();
-              console.error('Error al insertar datos del Excel:', error);
-              throw error;
+              console.error('Error al insertar datos del Excel. Detalle:', error.message);
+              return NextResponse.json(
+                { error: 'Error en la transacción', details: error.message },
+                { status: 500 }
+              );
             }
           } catch (error: any) {
             console.error('Error al parsear el archivo Excel:', error);
