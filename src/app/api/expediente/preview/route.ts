@@ -12,7 +12,7 @@ interface BudgetItem {
   ItemNieto: string;
   Descripción: string;
   Unidad: string;
-  Cantidad: number;
+  Metrado: number; // Renombrado de Cantidad a Metrado para mayor claridad
   PrecioUnitario: number;
   CostoTotal: number;
   Category: string;
@@ -72,8 +72,6 @@ function normalizeHeader(header: string): string {
   return header.toLowerCase().replace(/\s+/g, "").replace(/\./g, "");
 }
 
-// [Otras importaciones e interfaces permanecen iguales]
-
 /**
  * Busca la fila de encabezados en los datos del Excel, enfocándose en la fila 15 y aceptando 2 celdas vacías después de 'Item'.
  * @param data - Matriz de datos del Excel.
@@ -131,8 +129,6 @@ function findHeaderRow(data: unknown[][]): { rowIndex: number; headers: { [key: 
   return { rowIndex: targetRowIndex, headers: foundHeaders };
 }
 
-// [Resto del código (parseBudgetItem, parseExcelFile, POST) permanece igual]
-
 /**
  * Procesa un archivo Excel y extrae ítems de presupuesto.
  * @param workbook - Workbook de XLSX.
@@ -167,6 +163,9 @@ function parseExcelFile(workbook: XLSX.WorkBook): { items: BudgetItem[]; validat
 
     if (!itemStr && !description) continue; // Ignorar filas completamente vacías
 
+    // Imprimir valor crudo de Metrado para depuración
+    console.log(`Fila ${i + 1} - Valor crudo de Metrado:`, quantityStr);
+
     const itemParts = itemStr.split(" - ").filter(part => part.trim());
     const level = itemParts.length - 1;
     const code = itemStr;
@@ -181,7 +180,7 @@ function parseExcelFile(workbook: XLSX.WorkBook): { items: BudgetItem[]; validat
       ItemNieto: level > 2 ? itemParts.slice(-1).join(" - ") : "",
       Descripción: description,
       Unidad: unit,
-      Cantidad: quantity,
+      Metrado: quantity, // Renombrado de Cantidad a Metrado
       PrecioUnitario: precioUnitario,
       CostoTotal: parcial,
       Category: "METRADOS Y PRESUPUESTO", // Categoría fija
@@ -257,6 +256,14 @@ export async function POST(request: NextRequest) {
     const workbook = XLSX.read(fileBuffer, { type: "buffer" });
 
     const { items, validation } = parseExcelFile(workbook);
+    
+    // Imprimir los datos en la consola del servidor
+    console.log("Datos procesados del archivo Excel:", {
+      items: items,
+      validation: validation,
+      category: category,
+      id_convenio: id_convenio
+    });
     
     // Eliminar el archivo temporal
     try {

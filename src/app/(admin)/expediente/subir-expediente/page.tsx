@@ -68,7 +68,7 @@ type BudgetItem = {
   ItemNieto: string;
   Descripción: string;
   Unidad: string;
-  Cantidad: number;
+  Metrado: number;
   PrecioUnitario: number;
   CostoTotal: number;
   Category: string;
@@ -137,6 +137,7 @@ const SubirExpediente: React.FC = () => {
       const response = await fetch("/api/groconvenios/convenios");
       if (!response.ok) throw new Error("Error al cargar los convenios");
       const data = await response.json();
+      console.log("Convenios cargados:", data);
       setConvenios(data);
       setErrorConvenios("");
       if (data.length > 0 && !selectedConvenioId) setSelectedConvenioId(data[0].id_convenio);
@@ -237,15 +238,29 @@ const SubirExpediente: React.FC = () => {
 
     try {
       setUploadStatusByCategory(category, "Validando archivo...");
+      console.log(`Enviando solicitud para previsualizar categoría: ${category}, id_convenio: ${selectedConvenioId}`);
       const response = await fetch("/api/expediente/preview", { method: "POST", body: formData });
       const result = await response.json();
+      console.log(`Respuesta del backend para categoría ${category}:`, result);
+
       if (!response.ok) {
         const errorMessage = result.error || "Error al previsualizar el archivo";
         setErrorsByCategory(category, [errorMessage]);
         throw new Error(errorMessage);
       }
-      setPreviewDataByCategory((prev) => ({ ...prev, [category]: result.data }));
-      setShowPreviewByCategory((prev) => ({ ...prev, [category]: true }));
+
+      setPreviewDataByCategory((prev) => {
+        const updatedData = { ...prev, [category]: result.data };
+        console.log(`Estado actualizado de previewDataByCategory para categoría ${category}:`, updatedData[category]);
+        return updatedData;
+      });
+
+      setShowPreviewByCategory((prev) => {
+        const updatedShowPreview = { ...prev, [category]: true };
+        console.log(`Estado actualizado de showPreviewByCategory para categoría ${category}:`, updatedShowPreview[category]);
+        return updatedShowPreview;
+      });
+
       // Inicializar grupos expandidos basados en Level
       const initialExpanded = result.data.items.reduce((acc, item) => {
         if (item.Level < 2) {
@@ -253,8 +268,13 @@ const SubirExpediente: React.FC = () => {
         }
         return acc;
       }, {} as { [key: string]: boolean });
-      setExpandedGroups((prev) => ({ ...prev, [category]: initialExpanded }));
+      setExpandedGroups((prev) => {
+        const updatedExpandedGroups = { ...prev, [category]: initialExpanded };
+        console.log(`Estado actualizado de expandedGroups para categoría ${category}:`, updatedExpandedGroups[category]);
+        return updatedExpandedGroups;
+      });
     } catch (error) {
+      console.error(`Error al previsualizar para categoría ${category}:`, error);
       setErrorsByCategory(category, [error instanceof Error ? error.message : "Error desconocido"]);
     } finally {
       setUploadStatusByCategory(category, "");
@@ -304,10 +324,6 @@ const SubirExpediente: React.FC = () => {
 
   const handleNavigate = () => {
     router.push("/expediente/ver-expediente");
-  };
-
-  const togglePreview = (category: string) => {
-    setShowPreviewByCategory((prev) => ({ ...prev, [category]: !prev[category] }));
   };
 
   const toggleGroup = (category: string, groupDesc: string) => {
@@ -534,15 +550,6 @@ const SubirExpediente: React.FC = () => {
                       "Previsualizar"
                     )}
                   </button>
-             {previewDataByCategory[category] && (
-                  <button
-                    onClick={() => togglePreview(category)}
-                    className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-md transition-colors"
-                    aria-label={showPreviewByCategory[category] ? `Ocultar previsualización de ${category.split(".")[1].trim()}` : `Mostrar previsualización de ${category.split(".")[1].trim()}`}
-                  >
-                    {showPreviewByCategory[category] ? "Ocultar" : "Mostrar"}
-                  </button>
-                )}
                 </div>
                 {uploadStatusByCategory[category] && (
                   <p className={`mb-2 text-sm ${errorsByCategory[category]?.length ? "text-red-500" : "text-green-500"}`}>
@@ -552,8 +559,10 @@ const SubirExpediente: React.FC = () => {
                 {errorsByCategory[category]?.map((error, index) => (
                   <p key={index} className="mb-2 text-sm text-red-500">{error}</p>
                 ))}
+                {console.log(`Verificando si hay datos para categoría ${category}:`, previewDataByCategory[category])}
                 {previewDataByCategory[category] && (
-                  <div className={`${showPreviewByCategory[category] ? "block" : "hidden"} mt-4`}>
+                  <div className="mt-4">
+                    {console.log(`showPreviewByCategory para categoría ${category}:`, showPreviewByCategory[category])}
                     {previewDataByCategory[category]?.validation.errors.length > 0 && (
                       <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
                         <h3 className="font-semibold text-red-600 dark:text-red-400 mb-2">Errores encontrados:</h3>
@@ -574,11 +583,16 @@ const SubirExpediente: React.FC = () => {
                         </ul>
                       </div>
                     )}
-                    {previewDataByCategory[category]?.items.length > 0 && (
+                    {console.log(`Número de ítems para categoría ${category}:`, previewDataByCategory[category]?.items?.length)}
+                    {Array.isArray(previewDataByCategory[category]?.items) && previewDataByCategory[category]?.items.length > 0 ? (
                       <>
                         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
                           <button
-                            onClick={() => setShowPreviewByCategory((prev) => ({ ...prev, [category]: !prev[category] }))}
+                            onClick={() => setShowPreviewByCategory((prev) => {
+                              const newValue = { ...prev, [category]: !prev[category] };
+                              console.log(`Nuevo valor de showPreviewByCategory para categoría ${category}:`, newValue[category]);
+                              return newValue;
+                            })}
                             className="w-full p-4 flex justify-between items-center text-left text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600"
                           >
                             <span>Desglose del Presupuesto</span>
@@ -587,21 +601,25 @@ const SubirExpediente: React.FC = () => {
                           {showPreviewByCategory[category] && (
                             <div className="p-4">
                               <div className="overflow-x-auto">
+                                {console.log(`Datos para renderizar tabla en categoría ${category}:`, previewDataByCategory[category]?.items)}
                                 <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                                   <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                                     <tr>
                                       <th className="px-6 py-3"></th>
-                                      <th className="px-6 py-3">Código</th>
+                                      <th className="px-6 py-3">Item</th>
                                       <th className="px-6 py-3">Descripción</th>
-                                      <th className="px-6 py-3">Unidad</th>
-                                      <th className="px-6 py-3">Cantidad</th>
-                                      <th className="px-6 py-3">P. Unitario</th>
-                                      <th className="px-6 py-3">Total</th>
+                                      <th className="px-6 py-3">Und.</th>
+                                      <th className="px-6 py-3">Metrado</th>
+                                      <th className="px-6 py-3">P.U.</th>
+                                      <th className="px-6 py-3">Parcial</th>
                                     </tr>
                                   </thead>
                                   <tbody>
                                     {previewDataByCategory[category]?.items.map((item, index) => {
-                                      if (!isItemVisible(category, item, index)) return null;
+                                      const isVisible = isItemVisible(category, item, index);
+                                      console.log(`Ítem ${index} en categoría ${category}:`, item, `Es visible: ${isVisible}`);
+                                      console.log(`Valores para ítem ${index}: Unidad=${item.Unidad}, Metrado=${item.Metrado}, PrecioUnitario=${item.PrecioUnitario}`);
+                                      if (!isVisible) return null;
                                       const isGroup = item.Level < 2;
                                       const indent = item.Level * 20;
                                       const rowStyle = isGroup
@@ -624,24 +642,35 @@ const SubirExpediente: React.FC = () => {
                                               </button>
                                             )}
                                           </td>
-                                          <td className="px-6 py-4" style={{ paddingLeft: `${indent}px` }}>{item.Codigo}</td>
-                                          <td className="px-6 py-4" style={{ paddingLeft: `${indent + 10}px` }}>{item.Descripción}</td>
-                                          <td className="px-6 py-4">{isGroup ? '' : item.Unidad || ''}</td>
-                                          <td className="px-6 py-4">{isGroup ? '' : item.Cantidad ? item.Cantidad.toLocaleString() : ''}</td>
+                                          <td className="px-6 py-4" style={{ paddingLeft: `${indent}px` }}>
+                                            {item.Codigo || '-'}
+                                          </td>
+                                          <td className="px-6 py-4" style={{ paddingLeft: `${indent + 10}px` }}>
+                                            {item.Descripción?.trim() || '-'}
+                                          </td>
+                                          <td className="px-6 py-4">{item.Unidad || '-'}</td>
                                           <td className="px-6 py-4">
-                                            {isGroup
-                                              ? ''
-                                              : item.PrecioUnitario.toLocaleString(undefined, {
+                                            {item.Metrado ? item.Metrado.toLocaleString() : '-'}
+                                          </td>
+                                          <td className="px-6 py-4">
+                                            {item.PrecioUnitario
+                                              ? item.PrecioUnitario.toLocaleString(undefined, {
                                                   style: "currency",
                                                   currency: selectedConvenio?.SimboloMonetario || "PEN",
-                                                })}
+                                                })
+                                              : '-'}
                                           </td>
-                                          <td className="px-6 py-4">{formatNumber(item.CostoTotal)}</td>
+                                          <td className="px-6 py-4">{item.CostoTotal ? formatNumber(item.CostoTotal) : '-'}</td>
                                         </tr>
                                       );
                                     })}
                                   </tbody>
                                 </table>
+                                {previewDataByCategory[category]?.items.length === 0 && (
+                                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                                    No hay ítems visibles en la tabla.
+                                  </p>
+                                )}
                               </div>
                             </div>
                           )}
@@ -684,6 +713,8 @@ const SubirExpediente: React.FC = () => {
                           </button>
                         </div>
                       </>
+                    ) : (
+                      <p className="text-sm text-gray-500 dark:text-gray-400">No hay ítems para mostrar.</p>
                     )}
                   </div>
                 )}
