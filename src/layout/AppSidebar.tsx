@@ -40,7 +40,7 @@ const navItems: NavItem[] = [
     name: "Convocatorias",
     icon: <TableIcon />,
     subItems: [
-      { name: "Crear Convocatorias", path: "/crear-convocatoria", pro: false },
+      { name: "Crear Convocatorias", path: "/convocatoria/crear-convocatoria", pro: false },
       { name: "Ver Convocatorias", path: "/ver-convocatoria", pro: false },
       { name: "Administrar Parámetros", path: "/administrar-parametros", pro: false },
     ],

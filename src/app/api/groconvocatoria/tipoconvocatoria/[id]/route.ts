@@ -1,10 +1,47 @@
 import { NextRequest, NextResponse } from "next/server";
 import sql from "mssql";
 
+// Configuración compartida para las variables de entorno
+const getDbConfig = () => {
+  const requiredVars = {
+    DB_USER: process.env.DB_USER,
+    DB_PASSWORD: process.env.DB_PASSWORD,
+    DB_SERVER: process.env.DB_SERVER,
+    DB_NAME: process.env.DB_NAME,
+  };
+
+  const missingVars = Object.entries(requiredVars)
+    .filter(([, value]) => !value)
+    .map(([key]) => key);
+
+  if (missingVars.length > 0) {
+    throw new Error(`Faltan las siguientes variables de entorno: ${missingVars.join(", ")}`);
+  }
+
+  return {
+    user: requiredVars.DB_USER as string,
+    password: requiredVars.DB_PASSWORD as string,
+    server: requiredVars.DB_SERVER as string,
+    database: requiredVars.DB_NAME as string,
+    options: {
+      encrypt: false,
+      trustServerCertificate: true,
+    },
+  };
+};
+
 export async function PUT(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   const params = await context.params;
   const id = parseInt(params.id);
   const body = await request.json();
+
+  // Validar que el ID sea válido
+  if (isNaN(id) || id <= 0) {
+    return NextResponse.json(
+      { error: "El ID debe ser un número entero positivo" },
+      { status: 400 }
+    );
+  }
 
   // Validar que estado sea un número entero si está presente
   if (body.estado !== undefined && !Number.isInteger(body.estado)) {
@@ -28,36 +65,9 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
     );
   }
 
-  const variablesRequeridas = {
-    DB_USER: process.env.DB_USER,
-    DB_PASSWORD: process.env.DB_PASSWORD,
-    DB_SERVER: process.env.DB_SERVER,
-  };
-
-  const variablesFaltantes = Object.entries(variablesRequeridas)
-    .filter(([, valor]) => !valor)
-    .map(([clave]) => clave);
-
-  if (variablesFaltantes.length > 0) {
-    return NextResponse.json(
-      { error: `Faltan las siguientes variables de entorno: ${variablesFaltantes.join(", ")}` },
-      { status: 500 }
-    );
-  }
-
-  const configuracion = {
-    user: variablesRequeridas.DB_USER as string,
-    password: variablesRequeridas.DB_PASSWORD as string,
-    server: variablesRequeridas.DB_SERVER as string,
-    database: "PNVR",
-    options: {
-      encrypt: false,
-      trustServerCertificate: true,
-    },
-  };
-
   try {
-    const pool = await sql.connect(configuracion);
+    const config = getDbConfig();
+    const pool = await sql.connect(config);
     const requestQuery = pool.request()
       .input("id_tipo", sql.Int, id)
       .input("descripcion", sql.Text, body.descripcion)
@@ -69,7 +79,7 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
     }
 
     const query = `
-      UPDATE [PNVR].[dbo].[Tipo_Convocatoria]
+      UPDATE [dbo].[Tipo_Convocatoria]
       SET descripcion = @descripcion,
           nombre = @nombre
       ${body.estado !== undefined ? ", estado = @estado" : ""}
@@ -91,8 +101,9 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
     return NextResponse.json(updatedRecord);
   } catch (error) {
     console.error("Error en la consulta PUT:", error);
+    const errorMessage = error instanceof Error ? error.message : "Error desconocido";
     return NextResponse.json(
-      { error: "No se pudo actualizar el registro", details: error.message },
+      { error: "No se pudo actualizar el registro", details: errorMessage },
       { status: 500 }
     );
   }
@@ -102,44 +113,20 @@ export async function DELETE(request: NextRequest, context: { params: Promise<{ 
   const params = await context.params;
   const id = parseInt(params.id);
 
-  if (isNaN(id)) {
-    return NextResponse.json({ error: "ID inválido" }, { status: 400 });
-  }
-
-  const variablesRequeridas = {
-    DB_USER: process.env.DB_USER,
-    DB_PASSWORD: process.env.DB_PASSWORD,
-    DB_SERVER: process.env.DB_SERVER,
-  };
-
-  const variablesFaltantes = Object.entries(variablesRequeridas)
-    .filter(([, valor]) => !valor)
-    .map(([clave]) => clave);
-
-  if (variablesFaltantes.length > 0) {
+  if (isNaN(id) || id <= 0) {
     return NextResponse.json(
-      { error: `Faltan las siguientes variables de entorno: ${variablesFaltantes.join(", ")}` },
-      { status: 500 }
+      { error: "El ID debe ser un número entero positivo" },
+      { status: 400 }
     );
   }
 
-  const configuracion = {
-    user: variablesRequeridas.DB_USER as string,
-    password: variablesRequeridas.DB_PASSWORD as string,
-    server: variablesRequeridas.DB_SERVER as string,
-    database: "PNVR",
-    options: {
-      encrypt: false,
-      trustServerCertificate: true,
-    },
-  };
-
   try {
-    const pool = await sql.connect(configuracion);
+    const config = getDbConfig();
+    const pool = await sql.connect(config);
     const result = await pool
       .request()
       .input("id", sql.Int, id)
-      .query("DELETE FROM [PNVR].[dbo].[Tipo_Convocatoria] WHERE id_tipo = @id");
+      .query("DELETE FROM [dbo].[Tipo_Convocatoria] WHERE id_tipo = @id");
 
     if (result.rowsAffected[0] === 0) {
       return NextResponse.json({ error: "Registro no encontrado" }, { status: 404 });

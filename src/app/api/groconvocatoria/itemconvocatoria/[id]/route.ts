@@ -1,6 +1,35 @@
 import { NextRequest, NextResponse } from "next/server";
 import sql from "mssql";
 
+// Configuración compartida para las variables de entorno
+const getDbConfig = () => {
+  const requiredVars = {
+    DB_USER: process.env.DB_USER,
+    DB_PASSWORD: process.env.DB_PASSWORD,
+    DB_SERVER: process.env.DB_SERVER,
+    DB_NAME: process.env.DB_NAME,
+  };
+
+  const missingVars = Object.entries(requiredVars)
+    .filter(([, value]) => !value)
+    .map(([key]) => key);
+
+  if (missingVars.length > 0) {
+    throw new Error(`Faltan las siguientes variables de entorno: ${missingVars.join(", ")}`);
+  }
+
+  return {
+    user: requiredVars.DB_USER as string,
+    password: requiredVars.DB_PASSWORD as string,
+    server: requiredVars.DB_SERVER as string,
+    database: requiredVars.DB_NAME as string,
+    options: {
+      encrypt: false,
+      trustServerCertificate: true,
+    },
+  };
+};
+
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   const id = parseInt(params.id);
   if (!Number.isInteger(id) || id <= 0) {
@@ -52,47 +81,20 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     );
   }
 
-  const variablesRequeridas = {
-    DB_USER: process.env.DB_USER,
-    DB_PASSWORD: process.env.DB_PASSWORD,
-    DB_SERVER: process.env.DB_SERVER,
-  };
-
-  const variablesFaltantes = Object.entries(variablesRequeridas)
-    .filter(([, valor]) => !valor)
-    .map(([clave]) => clave);
-
-  if (variablesFaltantes.length > 0) {
-    return NextResponse.json(
-      { error: `Faltan las siguientes variables de entorno: ${variablesFaltantes.join(", ")}` },
-      { status: 500 }
-    );
-  }
-
-  const configuracion = {
-    user: variablesRequeridas.DB_USER as string,
-    password: variablesRequeridas.DB_PASSWORD as string,
-    server: variablesRequeridas.DB_SERVER as string,
-    database: "PNVR",
-    options: {
-      encrypt: false,
-      trustServerCertificate: true,
-    },
-  };
-
   try {
-    const pool = await sql.connect(configuracion);
+    const config = getDbConfig();
+    const pool = await sql.connect(config);
     const requestQuery = pool.request()
       .input("id_item_convocatoria", sql.Int, id)
       .input("descripcion", sql.NVarChar(500), body.descripcion)
       .input("cantidad", sql.Int, body.cantidad)
       .input("id_unidad_medida", sql.Int, body.id_unidad_medida)
       .input("precio_referencial", sql.Decimal(18, 2), body.precio_referencial)
-      .input("especificaciones_tecnicas", sql.NVarChar(sql.MAX), body.especificaciones_tecnicas || null)
+      .input("especificaciones_tecnicas", sql.NVarChar(sql.MAX), body.especificaciones_tecnicas ?? null)
       .input("id_convocatoria", sql.Int, body.id_convocatoria);
 
     const query = `
-      UPDATE [PNVR].[dbo].[item_convocatoria]
+      UPDATE [dbo].[item_convocatoria]
       SET
         descripcion = @descripcion,
         cantidad = @cantidad,
@@ -140,40 +142,13 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     );
   }
 
-  const variablesRequeridas = {
-    DB_USER: process.env.DB_USER,
-    DB_PASSWORD: process.env.DB_PASSWORD,
-    DB_SERVER: process.env.DB_SERVER,
-  };
-
-  const variablesFaltantes = Object.entries(variablesRequeridas)
-    .filter(([, valor]) => !valor)
-    .map(([clave]) => clave);
-
-  if (variablesFaltantes.length > 0) {
-    return NextResponse.json(
-      { error: `Faltan las siguientes variables de entorno: ${variablesFaltantes.join(", ")}` },
-      { status: 500 }
-    );
-  }
-
-  const configuracion = {
-    user: variablesRequeridas.DB_USER as string,
-    password: variablesRequeridas.DB_PASSWORD as string,
-    server: variablesRequeridas.DB_SERVER as string,
-    database: "PNVR",
-    options: {
-      encrypt: false,
-      trustServerCertificate: true,
-    },
-  };
-
   try {
-    const pool = await sql.connect(configuracion);
+    const config = getDbConfig();
+    const pool = await sql.connect(config);
     const requestQuery = pool.request().input("id_item_convocatoria", sql.Int, id);
 
     const query = `
-      DELETE FROM [PNVR].[dbo].[item_convocatoria]
+      DELETE FROM [dbo].[item_convocatoria]
       OUTPUT DELETED.id_item_convocatoria
       WHERE id_item_convocatoria = @id_item_convocatoria
     `;
