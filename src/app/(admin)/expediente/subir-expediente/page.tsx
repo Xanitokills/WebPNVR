@@ -63,18 +63,15 @@ type Convenio = {
 
 type BudgetItem = {
   Codigo: string;
-  ItemPadre: string;
-  ItemHijo: string;
-  ItemNieto: string;
   Descripción: string;
   Unidad: string;
-  Metrado: number;
-  PrecioUnitario: number;
+  Metrado: number | null;
+  PrecioUnitario: number | null;
   CostoTotal: number;
   Category: string;
   Level: number;
-  Parent?: string;
-  Segmento: string;
+  Categoria: string;
+  Subcategoria: string;
 };
 
 type ValidationReport = {
@@ -338,18 +335,43 @@ const SubirExpediente: React.FC = () => {
 
   const isItemVisible = (category: string, item: BudgetItem, index: number): boolean => {
     if (item.Level === 0) return true;
+
+    // Encontrar el índice del ítem padre (nivel 0 o 1) buscando hacia atrás
+    let parentDesc = "";
+    for (let i = index - 1; i >= 0; i--) {
+      const prevItem = previewDataByCategory[category]?.items[i];
+      if (!prevItem) continue;
+      if (prevItem.Level < item.Level) {
+        parentDesc = prevItem.Descripción;
+        break;
+      }
+    }
+
     if (item.Level === 1) {
-      const parentDesc = item.Parent;
       return parentDesc ? expandedGroups[category]?.[parentDesc] !== false : true;
     }
+
     if (item.Level === 2) {
-      const parentDesc = item.Parent;
-      if (!parentDesc) return true;
-      const parentItem = previewDataByCategory[category]?.items.find(i => i.Descripción === parentDesc);
-      if (!parentItem) return true;
-      const grandParentDesc = parentItem.Parent;
+      let grandParentDesc = "";
+      for (let i = index - 1; i >= 0; i--) {
+        const prevItem = previewDataByCategory[category]?.items[i];
+        if (!prevItem) continue;
+        if (prevItem.Level === 1) {
+          parentDesc = prevItem.Descripción;
+          for (let j = i - 1; j >= 0; j--) {
+            const grandParentItem = previewDataByCategory[category]?.items[j];
+            if (!grandParentItem) continue;
+            if (grandParentItem.Level === 0) {
+              grandParentDesc = grandParentItem.Descripción;
+              break;
+            }
+          }
+          break;
+        }
+      }
       return expandedGroups[category]?.[parentDesc] !== false && (!grandParentDesc || expandedGroups[category]?.[grandParentDesc] !== false);
     }
+
     return true;
   };
 
@@ -360,7 +382,7 @@ const SubirExpediente: React.FC = () => {
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="p-6 max-w-7xl mx-auto">
       <h1 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">Subir Expediente</h1>
       <div className="mb-6 bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
         <label htmlFor="convenio-select" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -559,10 +581,8 @@ const SubirExpediente: React.FC = () => {
                 {errorsByCategory[category]?.map((error, index) => (
                   <p key={index} className="mb-2 text-sm text-red-500">{error}</p>
                 ))}
-                {console.log(`Verificando si hay datos para categoría ${category}:`, previewDataByCategory[category])}
                 {previewDataByCategory[category] && (
                   <div className="mt-4">
-                    {console.log(`showPreviewByCategory para categoría ${category}:`, showPreviewByCategory[category])}
                     {previewDataByCategory[category]?.validation.errors.length > 0 && (
                       <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
                         <h3 className="font-semibold text-red-600 dark:text-red-400 mb-2">Errores encontrados:</h3>
@@ -583,14 +603,12 @@ const SubirExpediente: React.FC = () => {
                         </ul>
                       </div>
                     )}
-                    {console.log(`Número de ítems para categoría ${category}:`, previewDataByCategory[category]?.items?.length)}
                     {Array.isArray(previewDataByCategory[category]?.items) && previewDataByCategory[category]?.items.length > 0 ? (
                       <>
                         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
                           <button
                             onClick={() => setShowPreviewByCategory((prev) => {
                               const newValue = { ...prev, [category]: !prev[category] };
-                              console.log(`Nuevo valor de showPreviewByCategory para categoría ${category}:`, newValue[category]);
                               return newValue;
                             })}
                             className="w-full p-4 flex justify-between items-center text-left text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600"
@@ -601,12 +619,13 @@ const SubirExpediente: React.FC = () => {
                           {showPreviewByCategory[category] && (
                             <div className="p-4">
                               <div className="overflow-x-auto">
-                                {console.log(`Datos para renderizar tabla en categoría ${category}:`, previewDataByCategory[category]?.items)}
                                 <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                                   <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                                     <tr>
                                       <th className="px-6 py-3"></th>
                                       <th className="px-6 py-3">Item</th>
+                                      <th className="px-6 py-3">Categoría</th>
+                                      <th className="px-6 py-3">Subcategoría</th>
                                       <th className="px-6 py-3">Descripción</th>
                                       <th className="px-6 py-3">Und.</th>
                                       <th className="px-6 py-3">Metrado</th>
@@ -617,8 +636,6 @@ const SubirExpediente: React.FC = () => {
                                   <tbody>
                                     {previewDataByCategory[category]?.items.map((item, index) => {
                                       const isVisible = isItemVisible(category, item, index);
-                                      console.log(`Ítem ${index} en categoría ${category}:`, item, `Es visible: ${isVisible}`);
-                                      console.log(`Valores para ítem ${index}: Unidad=${item.Unidad}, Metrado=${item.Metrado}, PrecioUnitario=${item.PrecioUnitario}`);
                                       if (!isVisible) return null;
                                       const isGroup = item.Level < 2;
                                       const indent = item.Level * 20;
@@ -645,6 +662,8 @@ const SubirExpediente: React.FC = () => {
                                           <td className="px-6 py-4" style={{ paddingLeft: `${indent}px` }}>
                                             {item.Codigo || '-'}
                                           </td>
+                                          <td className="px-6 py-4">{item.Categoria || '-'}</td>
+                                          <td className="px-6 py-4">{item.Subcategoria || '-'}</td>
                                           <td className="px-6 py-4" style={{ paddingLeft: `${indent + 10}px` }}>
                                             {item.Descripción?.trim() || '-'}
                                           </td>
