@@ -24,6 +24,12 @@ interface EstadoConvocatoria {
   estado: string;
 }
 
+interface Convenio {
+  id_convenio: number; // Adjust this interface based on the actual API response structure
+  nombre: string;     // Add more fields as needed (e.g., nombre, descripcion, etc.)
+  // Add other fields returned by the API if applicable
+}
+
 const CrearConvocatoria = () => {
   const [formData, setFormData] = useState({
     id_convenio: "",
@@ -53,6 +59,7 @@ const CrearConvocatoria = () => {
   const [itemsConvocatoria, setItemsConvocatoria] = useState<ItemConvocatoria[]>([]);
   const [tiposConvocatoria, setTiposConvocatoria] = useState<TipoConvocatoria[]>([]);
   const [estadosConvocatoria, setEstadosConvocatoria] = useState<EstadoConvocatoria[]>([]);
+  const [convenios, setConvenios] = useState<Convenio[]>([]); // New state for convenios
   const [message, setMessage] = useState<string | null>(null);
   const [dateError, setDateError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -60,18 +67,21 @@ const CrearConvocatoria = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [itemsResponse, tiposResponse, estadosResponse] = await Promise.all([
+        const [itemsResponse, tiposResponse, estadosResponse, conveniosResponse] = await Promise.all([
           fetch("/api/groconvocatoria/itemconvocatoria"),
           fetch("/api/groconvocatoria/tipoconvocatoria"),
           fetch("/api/estadoconvocatoria"),
+          fetch("/api/groconvenios/convenios"), 
         ]);
         if (!itemsResponse.ok) throw new Error("Error al obtener ítems de convocatoria");
         if (!tiposResponse.ok) throw new Error("Error al obtener tipos de convocatoria");
         if (!estadosResponse.ok) throw new Error("Error al obtener estados de convocatoria");
+        if (!conveniosResponse.ok) throw new Error("Error al obtener convenios");
 
         const items = await itemsResponse.json();
         const tipos = await tiposResponse.json();
         const estados = await estadosResponse.json();
+        const conveniosData = await conveniosResponse.json();
 
         // Check for duplicates in itemsConvocatoria
         const itemIds = items.map((item: ItemConvocatoria) => item.id_item_convocatoria);
@@ -94,9 +104,17 @@ const CrearConvocatoria = () => {
           console.warn("Duplicate id_estado values found:", duplicateEstados);
         }
 
+        // Check for duplicates in convenios (assuming id_convenio is the unique identifier)
+        const convenioIds = conveniosData.map((convenio: Convenio) => convenio.id_convenio);
+        const duplicateConvenios = convenioIds.filter((id: number, index: number) => convenioIds.indexOf(id) !== index);
+        if (duplicateConvenios.length > 0) {
+          console.warn("Duplicate id_convenio values found:", duplicateConvenios);
+        }
+
         setItemsConvocatoria(items);
         setTiposConvocatoria(tipos);
         setEstadosConvocatoria(estados);
+        setConvenios(conveniosData); // Set the convenios data
         setLoading(false);
       } catch (error) {
         setMessage("Error al cargar los datos iniciales: " + (error instanceof Error ? error.message : "Error desconocido"));
@@ -202,7 +220,7 @@ const CrearConvocatoria = () => {
     try {
       // Validar campos requeridos
       const requiredFields = [
-        { field: "id_convenio", value: formData.id_convenio.trim(), label: "ID Convenio" },
+        { field: "id_convenio", value: formData.id_convenio, label: "ID Convenio" }, // Changed to validate the selected value
         { field: "id_tipo", value: formData.id_tipo, label: "Tipo de Convocatoria" },
         { field: "codigo_seace", value: formData.codigo_seace.trim(), label: "Código SEACE" },
         { field: "titulo", value: formData.titulo.trim(), label: "Título" },
@@ -367,14 +385,20 @@ const CrearConvocatoria = () => {
             {/* Column 1: Basic Information */}
             <div>
               <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2">ID Convenio</label>
-              <input
-                type="text"
+              <select
                 name="id_convenio"
                 value={formData.id_convenio}
                 onChange={handleInputChange}
                 className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 shadow-sm"
                 required
-              />
+              >
+                <option value="">Seleccione un convenio</option>
+                {convenios.map((convenio, index) => (
+                  <option key={`${convenio.id_convenio}-${index}`} value={convenio.id_convenio}>
+                    {convenio.nombre || `Convenio ${convenio.id_convenio}`} {/* Adjust display text based on API response */}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="block text-gray-700 dark:text-gray-300 font-medium mb-2">Tipo de Convocatoria</label>
