@@ -52,7 +52,9 @@ export async function GET() {
 
   try {
     const pool = await sql.connect(getDbConfig(envVars));
-    const result = await pool.request().query(`
+    
+    // Consulta principal para obtener los convenios
+    const conveniosResult = await pool.request().query(`
       SELECT 
         c.[id_convenio],
         c.[cod_ugt],
@@ -127,7 +129,53 @@ export async function GET() {
       LEFT JOIN [${envVars.DB_NAME}].[dbo].[Provincia] p ON c.[id_Provincia] = p.[id_Provincia]
       LEFT JOIN [${envVars.DB_NAME}].[dbo].[Departamento] d ON c.[id_Departamento] = d.[id_Departamento]
     `);
-    return NextResponse.json(result.recordset);
+
+    const convenios = conveniosResult.recordset;
+
+    // Consulta para obtener el personal asignado a cada convenio
+    const personalResult = await pool.request().query(`
+      SELECT 
+        cp.id_convenio,
+        p.id_personal,
+        p.nombre,
+        p.apellido_paterno,
+        p.apellido_materno,
+        ca.descripcion AS cargo,
+        cp.fecha_inicio,
+        cp.fecha_fin
+      FROM [${envVars.DB_NAME}].[dbo].[convenio_personal] cp
+      JOIN [${envVars.DB_NAME}].[dbo].[personal] p ON cp.id_personal = p.id_personal
+      JOIN [${envVars.DB_NAME}].[dbo].[cargo] ca ON cp.id_cargo = ca.id_cargo
+      WHERE (cp.fecha_fin IS NULL OR cp.fecha_fin >= GETDATE())
+        AND cp.fecha_inicio <= GETDATE()
+    `);
+
+    const personal = personalResult.recordset;
+
+    // Agrupar el personal por id_convenio
+    const personalByConvenio = personal.reduce((acc, item) => {
+      if (!acc[item.id_convenio]) {
+        acc[item.id_convenio] = [];
+      }
+      acc[item.id_convenio].push({
+        id_personal: item.id_personal,
+        nombre: item.nombre,
+        apellido_paterno: item.apellido_paterno,
+        apellido_materno: item.apellido_materno,
+        cargo: item.cargo,
+        fecha_inicio: item.fecha_inicio,
+        fecha_fin: item.fecha_fin,
+      });
+      return acc;
+    }, {});
+
+    // Combinar los datos de convenios con el personal asignado
+    const result = convenios.map((convenio) => ({
+      ...convenio,
+      personal_asignado: personalByConvenio[convenio.id_convenio] || [],
+    }));
+
+    return NextResponse.json(result);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
