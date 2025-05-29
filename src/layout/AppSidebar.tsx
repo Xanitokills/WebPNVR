@@ -32,7 +32,7 @@ const navItems: NavItem[] = [
     subItems: [
       { name: "Personal", path: "/personal", pro: false },
       { name: "Ver Convenios", path: "/convenios/convenios", pro: false },
-      { name: "Administrar Parámetros",  path: "/parametros", pro: false },
+      { name: "Administrar Parámetros",  path: "/convenios/parametros", pro: false },
     ],
   },
 

@@ -1,11 +1,11 @@
--- CreaciÛn de la base de datos
+-- CreaciÔøΩn de la base de datos
 
 
 
 -- Tabla: Tipo_Convocatoria
 CREATE TABLE Tipo_Convocatoria (
     id_tipo INT PRIMARY KEY identity,
-    nombre VARCHAR(50) NOT NULL, -- Ej: Bienes, Servicios, ConsultorÌa
+    nombre VARCHAR(50) NOT NULL, -- Ej: Bienes, Servicios, ConsultorÔøΩa
     descripcion TEXT
 );
 
@@ -32,7 +32,7 @@ CREATE TABLE Item_Convocatoria (
     id_item INT PRIMARY KEY identity,
     id_convocatoria INT NOT NULL,
     descripcion TEXT NOT NULL,
-    tipo_material VARCHAR(100), -- Ej: Material de oficina, Equipo mÈdico
+    tipo_material VARCHAR(100), -- Ej: Material de oficina, Equipo mÔøΩdico
     cantidad INT NOT NULL,
     unidad_medida VARCHAR(50), -- Ej: Unidades, Litros, Horas
     precio_referencial DECIMAL(15, 2),
@@ -77,12 +77,12 @@ CREATE TABLE Adjudicacion (
     FOREIGN KEY (id_oferta) REFERENCES Oferta(id_oferta)
 );
 
--- Tabla: Documento (actualizada para soportar m˙ltiples formatos)
+-- Tabla: Documento (actualizada para soportar mÔøΩltiples formatos)
 CREATE TABLE Documento (
     id_documento INT PRIMARY KEY identity,
     id_convocatoria INT NOT NULL,
     nombre VARCHAR(255) NOT NULL,
-    tipo VARCHAR(50) NOT NULL, -- Ej: Bases, Formato, TÈrminos de Referencia
+    tipo VARCHAR(50) NOT NULL, -- Ej: Bases, Formato, TÔøΩrminos de Referencia
     formato VARCHAR(10) NOT NULL, -- Ej: pdf, xlsx, xls
     ruta_archivo VARCHAR(255) NOT NULL, -- Ruta en el servidor
     fecha_subida DATETIME2 NOT NULL DEFAULT GETDATE(),
@@ -94,13 +94,13 @@ CREATE TABLE Documento (
 CREATE TABLE Estado_Convocatoria2 (
     id_estado INT PRIMARY KEY identity,
     id_convocatoria INT NOT NULL,
-    estado VARCHAR(50) NOT NULL, -- Ej: Publicada, En evaluaciÛn, Adjudicada
+    estado VARCHAR(50) NOT NULL, -- Ej: Publicada, En evaluaciÔøΩn, Adjudicada
     fecha_cambio DATETIME2 NOT NULL DEFAULT GETDATE(),
     comentarios TEXT,
     FOREIGN KEY (id_convocatoria) REFERENCES Convocatoria(id_convocatoria)
 );
 
--- Õndices para optimizar consultas
+-- ÔøΩndices para optimizar consultas
 CREATE INDEX idx_convocatoria_convenio ON Convocatoria(id_convenio);
 CREATE INDEX idx_convocatoria_fecha ON Convocatoria(fecha_publicacion);
 CREATE INDEX idx_oferta_convocatoria ON Oferta(id_convocatoria);
@@ -114,7 +114,7 @@ CREATE TABLE Documento (
     id_documento INT PRIMARY KEY IDENTITY,
     id_convocatoria INT NOT NULL,
     nombre VARCHAR(255) NOT NULL,
-    tipo VARCHAR(50) NOT NULL, -- Ej: Bases, Formato, TÈrminos de Referencia
+    tipo VARCHAR(50) NOT NULL, -- Ej: Bases, Formato, TÔøΩrminos de Referencia
     formato VARCHAR(10) NOT NULL, -- Ej: pdf, xlsx, xls
     ruta_archivo VARCHAR(255) NOT NULL, -- Ruta en el servidor
     version INT NOT NULL DEFAULT 1, -- Para rastrear versiones de bases
@@ -144,30 +144,30 @@ CREATE TABLE Validacion_Bases (
 -- Inserciones en Convenio (requerida por Convocatoria)
 INSERT INTO Convenio (codigo_convenio, nombre, descripcion, fecha_inicio, fecha_fin, created_at)
 VALUES 
-    ('CONV-2025-001', 'Convenio Equipamiento MÈdico', 'Convenio para adquisiciÛn de equipos mÈdicos en hospitales', '2025-01-01', '2025-12-31', CURRENT_TIMESTAMP),
+    ('CONV-2025-001', 'Convenio Equipamiento MÔøΩdico', 'Convenio para adquisiciÔøΩn de equipos mÔøΩdicos en hospitales', '2025-01-01', '2025-12-31', CURRENT_TIMESTAMP),
     ('CONV-2025-002', 'Convenio Material Educativo', 'Convenio para suministro de materiales educativos', '2025-02-01', '2025-11-30', CURRENT_TIMESTAMP);
 
 -- Inserciones en Tipo_Convocatoria
 INSERT INTO Tipo_Convocatoria (nombre, descripcion)
 VALUES 
-    ('Bienes', 'AdquisiciÛn de bienes tangibles como equipos o materiales'),
-   ( 'Servicios', 'ContrataciÛn de servicios como mantenimiento o consultorÌa');
+    ('Bienes', 'AdquisiciÔøΩn de bienes tangibles como equipos o materiales'),
+   ( 'Servicios', 'ContrataciÔøΩn de servicios como mantenimiento o consultorÔøΩa');
 
 -- Inserciones en Convocatoria
 INSERT INTO Convocatoria (
     id_convenio, id_tipo, codigo_seace, titulo, descripcion, presupuesto, fecha_publicacion, fecha_limite_ofertas, fecha_estimada_adjudicacion, duracion_contrato
 ) VALUES 
-    ('CONV001', 1, 'SEACE-2025-001', 'AdquisiciÛn de Equipos MÈdicos', 'Compra de ventiladores y monitores para hospitales p˙blicos.', 1500000.00, '2025-06-01', '2025-06-15', '2025-06-20', 90),
-    ('CONV001', 1, 'SEACE-2025-002', 'Suministro de Materiales Educativos', 'AdquisiciÛn de cuadernos y l·pices para escuelas.', 500000.00, '2025-07-01', '2025-07-10', '2025-07-15', 60);
+    ('CONV001', 1, 'SEACE-2025-001', 'AdquisiciÔøΩn de Equipos MÔøΩdicos', 'Compra de ventiladores y monitores para hospitales pÔøΩblicos.', 1500000.00, '2025-06-01', '2025-06-15', '2025-06-20', 90),
+    ('CONV001', 1, 'SEACE-2025-002', 'Suministro de Materiales Educativos', 'AdquisiciÔøΩn de cuadernos y lÔøΩpices para escuelas.', 500000.00, '2025-07-01', '2025-07-10', '2025-07-15', 60);
 
 -- Inserciones en Item_Convocatoria
 INSERT INTO Item_Convocatoria (
     id_convocatoria, descripcion, tipo_material, cantidad, unidad_medida, precio_referencial, especificaciones_tecnicas
 ) VALUES 
-    (2, 'Ventiladores mec·nicos para UCI', 'Equipo mÈdico', 50, 'Unidades', 25000.00, 'Ventiladores con ventilaciÛn invasiva y no invasiva, certificaciÛn ISO.'),
-    (2, 'Monitores de signos vitales', 'Equipo mÈdico', 30, 'Unidades', 15000.00, 'Monitores con pantalla LED, ECG, SpO2, presiÛn arterial.'),
+    (2, 'Ventiladores mecÔøΩnicos para UCI', 'Equipo mÔøΩdico', 50, 'Unidades', 25000.00, 'Ventiladores con ventilaciÔøΩn invasiva y no invasiva, certificaciÔøΩn ISO.'),
+    (2, 'Monitores de signos vitales', 'Equipo mÔøΩdico', 30, 'Unidades', 15000.00, 'Monitores con pantalla LED, ECG, SpO2, presiÔøΩn arterial.'),
     (3, 'Cuadernos de 100 hojas', 'Material educativo', 10000, 'Unidades', 5.00, 'Cuadernos A4, tapa dura, rayados.'),
-    (3, 'L·pices HB', 'Material educativo', 20000, 'Unidades', 0.50, 'L·pices de grafito HB con borrador.');
+    (3, 'LÔøΩpices HB', 'Material educativo', 20000, 'Unidades', 0.50, 'LÔøΩpices de grafito HB con borrador.');
 
 -- Inserciones en Postor
 INSERT INTO Postor (ruc, razon_social, direccion, correo, telefono, created_at)
@@ -180,24 +180,24 @@ VALUES
 INSERT INTO Oferta (
     id_convocatoria, id_postor, monto_propuesto, fecha_presentacion, observaciones
 ) VALUES 
-    (2, 1, 1450000.00, '2025-06-10 10:00:00', 'Incluye capacitaciÛn para personal mÈdico.'),
-    (2, 3, 1480000.00, '2025-06-12 15:00:00', 'GarantÌa extendida de 2 aÒos.'),
-    (3, 2, 490000.00, '2025-07-08 09:00:00', 'Entrega en 30 dÌas.'),
+    (2, 1, 1450000.00, '2025-06-10 10:00:00', 'Incluye capacitaciÔøΩn para personal mÔøΩdico.'),
+    (2, 3, 1480000.00, '2025-06-12 15:00:00', 'GarantÔøΩa extendida de 2 aÔøΩos.'),
+    (3, 2, 490000.00, '2025-07-08 09:00:00', 'Entrega en 30 dÔøΩas.'),
     (3, 1, 495000.00, '2025-07-09 14:00:00', 'Incluye transporte a nivel nacional.');
 
 -- Inserciones en Adjudicacion
 INSERT INTO Adjudicacion (
     id_convocatoria, id_postor, id_oferta, monto_adjudicado, fecha_adjudicacion, comentarios
 ) VALUES 
-    (2, 1, 1, 1450000.00, '2025-06-20', 'Adjudicado por mejor oferta econÛmica y tÈcnica.'),
+    (2, 1, 1, 1450000.00, '2025-06-20', 'Adjudicado por mejor oferta econÔøΩmica y tÔøΩcnica.'),
     (3, 2, 3, 490000.00, '2025-07-15', 'Cumple con plazos y especificaciones.');
 
 -- Inserciones en Documento
 INSERT INTO Documento (
     id_convocatoria, nombre, tipo, formato, ruta_archivo, version, fecha_subida
 ) VALUES 
-    (3, 'Bases Equipos MÈdicos', 'Bases', 'pdf', '/archivos/conv_001_bases.pdf', 1, '2025-05-25 08:00:00'),
-    (3, 'Formato Oferta MÈdica', 'Formato', 'xlsx', '/archivos/conv_001_formato.xlsx', 1, '2025-05-25 08:30:00'),
+    (3, 'Bases Equipos MÔøΩdicos', 'Bases', 'pdf', '/archivos/conv_001_bases.pdf', 1, '2025-05-25 08:00:00'),
+    (3, 'Formato Oferta MÔøΩdica', 'Formato', 'xlsx', '/archivos/conv_001_formato.xlsx', 1, '2025-05-25 08:30:00'),
     (2, 'Bases Material Educativo', 'Bases', 'pdf', '/archivos/conv_002_bases.pdf', 1, '2025-06-20 09:00:00'),
     (2, 'Formato Oferta Educativa', 'Formato', 'xlsx', '/archivos/conv_002_formato.xlsx', 1, '2025-06-20 09:30:00');
 
@@ -211,23 +211,23 @@ INSERT INTO Validacion_Bases (
     (2, 'Residente', 'Aprobado', 'residente_001', '2025-05-25 08:00:00', 'Bases generadas correctamente.'),
     (2, 'Supervisor', 'Aprobado', 'supervisor_001', '2025-05-26 10:00:00', 'Especificaciones claras.'),
     (2, 'Monitor', 'Aprobado', 'monitor_001', '2025-05-27 12:00:00', 'Cumple normativa.'),
-    (2, 'Representante', 'Aprobado', 'representante_001', '2025-05-28 15:00:00', 'Listo para publicaciÛn.'),
+    (2, 'Representante', 'Aprobado', 'representante_001', '2025-05-28 15:00:00', 'Listo para publicaciÔøΩn.'),
     -- Validaciones para Documento 3 (Bases Convocatoria 2)
     (3, 'Residente', 'Aprobado', 'residente_002', '2025-06-20 09:00:00', 'Bases completas.'),
     (3, 'Supervisor', 'Aprobado', 'supervisor_002', '2025-06-21 11:00:00', 'Sin observaciones.'),
     (3, 'Monitor', 'Aprobado', 'monitor_002', '2025-06-22 14:00:00', 'Alineado con SEACE.'),
-    (3, 'Representante', 'Aprobado', 'representante_002', '2025-06-23 16:00:00', 'Aprobado para publicaciÛn.');
+    (3, 'Representante', 'Aprobado', 'representante_002', '2025-06-23 16:00:00', 'Aprobado para publicaciÔøΩn.');
 
 -- Inserciones en Estado_Convocatoria
 INSERT INTO Estado_Convocatoria2 (
     id_convocatoria, estado, fecha_cambio, comentarios
 ) VALUES 
     (3, 'Publicada', '2025-06-01 09:00:00', 'Convocatoria publicada en SEACE.'),
-    (3, 'En evaluaciÛn', '2025-06-16 09:00:00', 'EvaluaciÛn de ofertas en curso.'),
-    (3, 'Adjudicada', '2025-06-20 15:00:00', 'AdjudicaciÛn completada.'),
+    (3, 'En evaluaciÔøΩn', '2025-06-16 09:00:00', 'EvaluaciÔøΩn de ofertas en curso.'),
+    (3, 'Adjudicada', '2025-06-20 15:00:00', 'AdjudicaciÔøΩn completada.'),
     (2, 'Publicada', '2025-07-01 09:00:00', 'Convocatoria publicada.'),
-    (2, 'En evaluaciÛn', '2025-07-11 09:00:00', 'RevisiÛn de ofertas.'),
-    (2, 'Adjudicada', '2025-07-15 15:00:00', 'AdjudicaciÛn finalizada.');
+    (2, 'En evaluaciÔøΩn', '2025-07-11 09:00:00', 'RevisiÔøΩn de ofertas.'),
+    (2, 'Adjudicada', '2025-07-15 15:00:00', 'AdjudicaciÔøΩn finalizada.');
 
 
 	
@@ -352,8 +352,8 @@ alter table personal
    INSERT INTO Tipo_unidad_medida (nombre, abreviatura, descripcion, activo)
 VALUES 
     ('Metro', 'm', 'Unidad de longitud para medir distancias en obras', 1),
-    ('Metro cuadrado', 'm≤', 'Unidad de ·rea para superficies en construcciÛn', 1),
-    ('Metro c˙bico', 'm≥', 'Unidad de volumen para materiales como concreto', 1),
+    ('Metro cuadrado', 'mÔøΩ', 'Unidad de ÔøΩrea para superficies en construcciÔøΩn', 1),
+    ('Metro cÔøΩbico', 'mÔøΩ', 'Unidad de volumen para materiales como concreto', 1),
     ('Kilogramo', 'kg', 'Unidad de masa para materiales como acero', 1),
     ('Unidad', 'u', 'Unidad para conteo de elementos individuales', 1);
 
@@ -364,7 +364,7 @@ VALUES
 
 	INSERT INTO Item_Convocatoria2 (descripcion,id_tipo_item_convocatoria, id_tipo_Unidad_Medida)
 VALUES 
-    ('Cemento Portland Tipo IP 42 kg', 1,5);        -- Metro c˙bico para concreto
+    ('Cemento Portland Tipo IP 42 kg', 1,5);        -- Metro cÔøΩbico para concreto
 
 
 
@@ -431,10 +431,10 @@ ADD CONSTRAINT FKtipo_item_convocatoria
 
 
 INSERT INTO Item_Convocatoria (  descripcion, cantidad, id_unidad_medida, precio_referencial, especificaciones_tecnicas,id_convocatoria) VALUES 
-    ( 'Ventiladores mec·nicos para UCI',  50, 5, 25000.00, 'Ventiladores con ventilaciÛn invasiva y no invasiva, certificaciÛn ISO.',2),
-    ('Monitores de signos vitales',  30, 5, 15000.00, 'Monitores con pantalla LED, ECG, SpO2, presiÛn arterial.',2),
+    ( 'Ventiladores mecÔøΩnicos para UCI',  50, 5, 25000.00, 'Ventiladores con ventilaciÔøΩn invasiva y no invasiva, certificaciÔøΩn ISO.',2),
+    ('Monitores de signos vitales',  30, 5, 15000.00, 'Monitores con pantalla LED, ECG, SpO2, presiÔøΩn arterial.',2),
     ( 'Cuadernos de 100 hojas',  10000, 5, 5.00, 'Cuadernos A4, tapa dura, rayados.',2),
-    ('L·pices HB',  20000, 5, 0.50, 'L·pices de grafito HB con borrador.',2);
+    ('LÔøΩpices HB',  20000, 5, 0.50, 'LÔøΩpices de grafito HB con borrador.',2);
 
 
 	ALTER TABLE Convocatoria
@@ -497,7 +497,7 @@ set id_convocatoria_documento = 1
 
 -- Base de datos: RuralHousingProgram
 
--- Tabla para almacenar informaciÛn general del proyecto
+-- Tabla para almacenar informaciÔøΩn general del proyecto
 CREATE TABLE Convenio (
     ConvenioId INT PRIMARY KEY IDENTITY(1,1),
     NombreProyecto NVARCHAR(500) NOT NULL, -- Ej: "MEJORAMIENTO DE VIVIENDA RURAL..."
@@ -531,7 +531,7 @@ CREATE TABLE Beneficiarios (
     FOREIGN KEY (ConvenioId) REFERENCES Convenio(ConvenioId)
 );
 
--- Tabla para categorÌas de presupuesto (ej: Obras Provisionales, Movimiento de Tierras)
+-- Tabla para categorÔøΩas de presupuesto (ej: Obras Provisionales, Movimiento de Tierras)
 CREATE TABLE CategoriasPresupuesto (
     CategoriaID INT PRIMARY KEY IDENTITY(1,1),
     CodigoCategoria NVARCHAR(50), -- Ej: '1.0.0', '2.0.0'
@@ -540,7 +540,7 @@ CREATE TABLE CategoriasPresupuesto (
     ActualizadoEn DATETIME DEFAULT GETDATE()
 );
 
--- Tabla para Ìtems de presupuesto
+-- Tabla para ÔøΩtems de presupuesto
 CREATE TABLE ItemsPresupuesto (
     ItemPresupuestoID INT PRIMARY KEY IDENTITY(1,1),
     ConvenioId INT,
@@ -554,7 +554,7 @@ CREATE TABLE ItemsPresupuesto (
     ReferenciaPlano NVARCHAR(50), -- Ej: A-01, E-01
     Eje NVARCHAR(50), -- Ej: EJE 1, EJE A
     Detalle NVARCHAR(255), -- Ej: Cartel de obra
-    NumeroVeces INT, -- Ej: 1 (N∫ Veces)
+    NumeroVeces INT, -- Ej: 1 (NÔøΩ Veces)
     Largo DECIMAL(18,4), -- Ej: 7.83
     Ancho DECIMAL(18,4), -- Ej: 6.8
     Alto DECIMAL(18,4), -- Ej: 0.27
@@ -568,7 +568,7 @@ CREATE TABLE ItemsPresupuesto (
     FOREIGN KEY (CategoriaID) REFERENCES CategoriasPresupuesto(CategoriaID)
 );
 
--- Tabla para insumos (RelaciÛn de Insumos Total)
+-- Tabla para insumos (RelaciÔøΩn de Insumos Total)
 CREATE TABLE Insumos (
     InsumoID INT PRIMARY KEY IDENTITY(1,1),
     ConvenioId INT,
@@ -623,7 +623,7 @@ CREATE TABLE Equipos (
     ConvenioId INT,
     Codigo NVARCHAR(50), -- Ej: 301010006
     Descripcion NVARCHAR(255), -- Ej: HERRAMIENTAS MANUALES
-    Unidad NVARCHAR(50), -- Ej: %mo, hm, dÌa
+    Unidad NVARCHAR(50), -- Ej: %mo, hm, dÔøΩa
     Cantidad DECIMAL(18,4), -- Ej: 1
     PrecioUnitario DECIMAL(18,2), -- Ej: 13695.45
     CostoTotal DECIMAL(18,2), -- Ej: 13695.45
@@ -648,11 +648,11 @@ CREATE TABLE Fletes (
     FOREIGN KEY (ConvenioId) REFERENCES Convenio(ConvenioId)
 );
 
--- Tabla para autorizaciÛn de Ìtems de costo
+-- Tabla para autorizaciÔøΩn de ÔøΩtems de costo
 CREATE TABLE Autorizaciones (
     AutorizacionID INT PRIMARY KEY IDENTITY(1,1),
-    ItemPresupuestoID INT NULL, -- Puede ser nulo si la autorizaciÛn es para otro tipo de Ìtem
-    InsumoID INT NULL, -- RelaciÛn con insumos, si aplica
+    ItemPresupuestoID INT NULL, -- Puede ser nulo si la autorizaciÔøΩn es para otro tipo de ÔøΩtem
+    InsumoID INT NULL, -- RelaciÔøΩn con insumos, si aplica
     Estado NVARCHAR(50), -- Ej: Pendiente, Aprobado, Rechazado
     AutorizadorID INT, -- ID del usuario que autoriza
     Comentario NVARCHAR(500), -- Observaciones del autorizador
@@ -669,22 +669,22 @@ CREATE TABLE Usuarios (
     Nombre NVARCHAR(255),
     Rol NVARCHAR(50), -- Ej: Administrador, Autorizador, Proyectista
     Email NVARCHAR(255),
-    ContraseÒa NVARCHAR(255), -- Hasheada para seguridad
+    ContraseÔøΩa NVARCHAR(255), -- Hasheada para seguridad
     CreadoEn DATETIME DEFAULT GETDATE(),
     ActualizadoEn DATETIME DEFAULT GETDATE()
 );
 
 
--- Tabla para almacenar informaciÛn del expediente tÈcnico (archivos Excel, PDF, etc.)
+-- Tabla para almacenar informaciÔøΩn del expediente tÔøΩcnico (archivos Excel, PDF, etc.)
 CREATE TABLE ExpedienteTecnico (
     ExpedienteID INT PRIMARY KEY IDENTITY(1,1),
-    ConvenioId INT, -- RelaciÛn con la tabla Convenio
+    ConvenioId INT, -- RelaciÔøΩn con la tabla Convenio
     NombreArchivo NVARCHAR(255) NOT NULL, -- Ej: "Presupuesto_Proyecto.xlsx", "Plano_A-01.pdf"
     TipoArchivo NVARCHAR(50), -- Ej: "Excel", "PDF", "Word"
     RutaArchivo NVARCHAR(500), -- Ruta o URL donde se almacena el archivo (ej: "C:\Archivos\Expedientes\Presupuesto_Proyecto.xlsx")
-    TamaÒoArchivo DECIMAL(18,2), -- TamaÒo del archivo en KB o MB
-    Descripcion NVARCHAR(500), -- DescripciÛn del contenido del archivo
-    FechaCarga DATETIME DEFAULT GETDATE(), -- Fecha en que se subiÛ el archivo
+    TamaÔøΩoArchivo DECIMAL(18,2), -- TamaÔøΩo del archivo en KB o MB
+    Descripcion NVARCHAR(500), -- DescripciÔøΩn del contenido del archivo
+    FechaCarga DATETIME DEFAULT GETDATE(), -- Fecha en que se subiÔøΩ el archivo
     CreadoEn DATETIME DEFAULT GETDATE(),
     ActualizadoEn DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (ConvenioId) REFERENCES Convenio(ConvenioId)
@@ -702,25 +702,25 @@ ADD Categoria NVARCHAR(255); -- Ej: "1. MEMORIA DESCRIPTIVA"
 
 
 
-INSERT INTO ExpedienteTecnico (ConvenioId, NombreArchivo, TipoArchivo, RutaArchivo, TamaÒoArchivo, Descripcion, Categoria, FechaCarga)
+INSERT INTO ExpedienteTecnico (ConvenioId, NombreArchivo, TipoArchivo, RutaArchivo, TamaÔøΩoArchivo, Descripcion, Categoria, FechaCarga)
 VALUES 
     -- 1. MEMORIA DESCRIPTIVA
     (1, 'Memoria_Descriptiva.pdf', 'PDF', '/Expedientes/1_MEMORIA_DESCRIPTIVA/Memoria_Descriptiva.pdf', 2048.30, 'Memoria descriptiva del proyecto', '1. MEMORIA DESCRIPTIVA', '2025-03-26'),
     -- 2. MEMORIA DE CALCULO
-    (1, 'Calculo_Estructural.xlsx', 'Excel', '/Expedientes/2_MEMORIA_DE_CALCULO/Calculo_Estructural.xlsx', 1536.20, 'C·lculos estructurales', '2. MEMORIA DE CALCULO', '2025-03-26'),
+    (1, 'Calculo_Estructural.xlsx', 'Excel', '/Expedientes/2_MEMORIA_DE_CALCULO/Calculo_Estructural.xlsx', 1536.20, 'CÔøΩlculos estructurales', '2. MEMORIA DE CALCULO', '2025-03-26'),
     -- 3. METRADOS Y PRESUPUESTO
     (1, 'Presupuesto_Detallado.xlsx', 'Excel', '/Expedientes/3_METRADOS_Y_PRESUPUESTO/Presupuesto_Detallado.xlsx', 1024.50, 'Presupuesto y metrados', '3. METRADOS Y PRESUPUESTO', '2025-03-26'),
     (1, 'Metrados.pdf', 'PDF', '/Expedientes/3_METRADOS_Y_PRESUPUESTO/Metrados.pdf', 512.75, 'Metrados detallados', '3. METRADOS Y PRESUPUESTO', '2025-03-26'),
     -- 4. ACU
-    (1, 'Analisis_Costos.pdf', 'PDF', '/Expedientes/4_ACU/Analisis_Costos.pdf', 768.10, 'An·lisis de costos unitarios', '4. ACU', '2025-03-26'),
+    (1, 'Analisis_Costos.pdf', 'PDF', '/Expedientes/4_ACU/Analisis_Costos.pdf', 768.10, 'AnÔøΩlisis de costos unitarios', '4. ACU', '2025-03-26'),
     -- 5. CUADRO COMPARATIVO
     (1, 'Cuadro_Comparativo.xlsx', 'Excel', '/Expedientes/5_CUADRO_COMPARATIVO/Cuadro_Comparativo.xlsx', 896.40, 'Cuadro comparativo de costos', '5. CUADRO COMPARATIVO', '2025-03-26'),
     -- 6. CRONOGRAMA GANTT
-    (1, 'Cronograma_Gantt.pdf', 'PDF', '/Expedientes/6_CRONOGRAMA_GANTT/Cronograma_Gantt.pdf', 640.25, 'Cronograma de ejecuciÛn Gantt', '6. CRONOGRAMA GANTT', '2025-03-26'),
+    (1, 'Cronograma_Gantt.pdf', 'PDF', '/Expedientes/6_CRONOGRAMA_GANTT/Cronograma_Gantt.pdf', 640.25, 'Cronograma de ejecuciÔøΩn Gantt', '6. CRONOGRAMA GANTT', '2025-03-26'),
     -- 7. ESPECIFICACIONES TECNICAS
-    (1, 'Especificaciones_Tecnicas.pdf', 'PDF', '/Expedientes/7_ESPECIFICACIONES_TECNICAS/Especificaciones_Tecnicas.pdf', 1280.60, 'Especificaciones tÈcnicas del proyecto', '7. ESPECIFICACIONES TECNICAS', '2025-03-26'),
+    (1, 'Especificaciones_Tecnicas.pdf', 'PDF', '/Expedientes/7_ESPECIFICACIONES_TECNICAS/Especificaciones_Tecnicas.pdf', 1280.60, 'Especificaciones tÔøΩcnicas del proyecto', '7. ESPECIFICACIONES TECNICAS', '2025-03-26'),
     -- 8. PLANOS
-    (1, 'Plano_A-01.pdf', 'PDF', '/Expedientes/8_PLANOS/Plano_A-01.pdf', 512.75, 'Plano arquitectÛnico principal', '8. PLANOS', '2025-03-26'),
+    (1, 'Plano_A-01.pdf', 'PDF', '/Expedientes/8_PLANOS/Plano_A-01.pdf', 512.75, 'Plano arquitectÔøΩnico principal', '8. PLANOS', '2025-03-26'),
     (1, 'Plano_E-01.pdf', 'PDF', '/Expedientes/8_PLANOS/Plano_E-01.pdf', 512.75, 'Plano estructural', '8. PLANOS', '2025-03-26'),
     -- 9. ESTUDIOS BASICOS
     (1, 'Estudio_Suelos.pdf', 'PDF', '/Expedientes/9_ESTUDIOS_BASICOS/Estudio_Suelos.pdf', 1792.80, 'Estudio de suelos', '9. ESTUDIOS BASICOS', '2025-03-26'),
@@ -734,10 +734,10 @@ GO
 
 INSERT INTO Convenio (NombreProyecto, Localidad, Distrito, Provincia, Departamento, Entidad, Programa, Proyectista, Evaluador, PresupuestoBase, PresupuestoFinanciamiento, AporteBeneficiario, SimboloMonetario, IGV, PlazoEjecucionMeses, PlazoEjecucionDias, NumeroBeneficiarios)
 VALUES 
-    ('CONSTRUCCION DE PUENTE PEATONAL', 'CASCAS - LA ESPERANZA', 'GRAN CHIM⁄', 'SANCHEZ CARRION', 'LA LIBERTAD', 'GOBIERNO REGIONAL LA LIBERTAD', 'PROGRAMA NACIONAL DE INFRAESTRUCTURA', 'ING. MARIA ISABEL RAMOS FLORES', 'ING. CARLOS ALBERTO P…REZ L”PEZ', 1500000.50, 1350000.45, 150000.05, 'S/.', 0.18, 4, 120, 30),
+    ('CONSTRUCCION DE PUENTE PEATONAL', 'CASCAS - LA ESPERANZA', 'GRAN CHIMÔøΩ', 'SANCHEZ CARRION', 'LA LIBERTAD', 'GOBIERNO REGIONAL LA LIBERTAD', 'PROGRAMA NACIONAL DE INFRAESTRUCTURA', 'ING. MARIA ISABEL RAMOS FLORES', 'ING. CARLOS ALBERTO PÔøΩREZ LÔøΩPEZ', 1500000.50, 1350000.45, 150000.05, 'S/.', 0.18, 4, 120, 30),
     ('MEJORAMIENTO DE CENTRO DE SALUD', 'HUANCAYO - EL TAMBO', 'HUANCAYO', 'HUANCAYO', 'JUNIN', 'MINISTERIO DE SALUD', 'PROGRAMA NACIONAL DE SALUD', 'ING. JUAN PABLO GONZALES TORRES', 'MED. ANA LUCIA RAMIREZ VARGAS', 3000000.75, 2700000.68, 300000.07, 'S/.', 0.18, 6, 180, 50),
     ('INSTALACION DE SISTEMA DE AGUA', 'CHIMBOTE - COISHCO', 'SANTA', 'SANTA', 'ANCASH', 'GOBIERNO REGIONAL ANCASH', 'PROGRAMA NACIONAL DE AGUA Y SANEAMIENTO', 'ING. LUISA FERNANDA CASTRO MEJIA', 'ING. PEDRO ANTONIO SALAS ORTEGA', 2500000.90, 2250000.81, 250000.09, 'S/.', 0.18, 5, 150, 45),
-    ('REHABILITACION DE CARRETERA RURAL', 'ABANCAY - COTARUSE', 'ABANCAY', 'ABANCAY', 'APURIMAC', 'MINISTERIO DE TRANSPORTES', 'PROGRAMA NACIONAL DE INFRAESTRUCTURA', 'ING. RAFAEL EDUARDO QUISPE PUMA', 'ING. SOFIA DEL CARMEN HUAMANÕ TORRES', 4000000.25, 3600000.23, 400000.02, 'S/.', 0.18, 7, 210, 60),
+    ('REHABILITACION DE CARRETERA RURAL', 'ABANCAY - COTARUSE', 'ABANCAY', 'ABANCAY', 'APURIMAC', 'MINISTERIO DE TRANSPORTES', 'PROGRAMA NACIONAL DE INFRAESTRUCTURA', 'ING. RAFAEL EDUARDO QUISPE PUMA', 'ING. SOFIA DEL CARMEN HUAMANÔøΩ TORRES', 4000000.25, 3600000.23, 400000.02, 'S/.', 0.18, 7, 210, 60),
     ('CONSTRUCCION DE ESCUELA PRIMARIA', 'AREQUIPA - PAUCARPATA', 'AREQUIPA', 'AREQUIPA', 'AREQUIPA', 'MINISTERIO DE EDUCACION', 'PROGRAMA NACIONAL DE EDUCACION', 'ING. JORGE LUIS MAMANI CHAVEZ', 'ARQ. MARIA ELENA SALAZAR PIZARRO', 1800000.60, 1620000.54, 180000.06, 'S/.', 0.18, 4, 120, 35);
 GO
 3. METRADOS Y PRESUPUESTO
@@ -819,7 +819,7 @@ INSERT INTO Equipos (
     ConvenioId, Codigo, Descripcion, Unidad, Cantidad, PrecioUnitario, CostoTotal
 ) VALUES
 (1, '301010006', 'HERRAMIENTAS MANUALES', '%mo', 1, 13695.45, 13695.45),
-(1, '301010007', 'MEZCLADORA DE CONCRETO', 'dÌa', 210, 150.00, 31500.00);
+(1, '301010007', 'MEZCLADORA DE CONCRETO', 'dÔøΩa', 210, 150.00, 31500.00);
 
 -- Insert sample freight into Fletes
 INSERT INTO Fletes (
@@ -872,3 +872,213 @@ WHERE ConvenioId = 1
 	select * from ManoObra
 	select * from Equipos
 	select * from Fletes
+
+
+---
+
+	INSERT INTO CategoriasPresupuesto (CodigoCategoria, NombreCategoria) VALUES
+('01.', 'OBRAS PROVISIONALES, TRABAJOS PRELIMINARES, SEGURIDAD Y SALUD'),
+('02.', 'MOVIMIENTO DE TIERRAS'),
+('03.', 'OBRAS DE CONCRETO SIMPLE'),
+('04.', 'OBRAS DE CONCRETO ARMADO'),
+('05.', 'ESTRUCTURA MET√ÅLICA'),
+('06.', 'COBERTURA'),
+('07.', 'CIELO RASOS'),
+('08.', 'MUROS Y TABIQUES DE ALBA√ëILERIA'),
+('09.', 'REVOQUES ENLUCIDOS Y MOLDURAS'),
+('10.', 'PISOS Y PAVIMENTOS'),
+('11.', 'ZOCALOS Y CONTRAZOCALOS'),
+('12.', 'PUERTAS Y VENTANAS'),
+('13.', 'PINTURAS'),
+('14.', 'INSTALACIONES SANITARIAS'),
+('15.', 'INSTALACIONES ELECTRICAS'),
+('16.', 'MITIGACION DE IMPACTO AMBIENTAL'),
+('17.', 'FLETE Y TRANSPORTE'),
+('18.', 'COSTO DIRECTO'),
+('19.', 'COSTO INDIRECTO'),
+('20.', 'COSTO TOTAL'),
+('21.', 'APORTE'),
+('22.', 'FINANCIA PNVR');
+
+
+
+INSERT INTO SubcategoriasPresupuesto (CategoriaID,CodigoSubcategoria,NombreSubcategoria) VALUES
+(1,'01.01.',    'TRABAJOS PRELIMINARES'),
+(1,'01.02.',    'TRAZO NIVELES Y REPLANTEO PRELIMINAR'),
+(1,'01.03.',    'SEGURIDAD Y SALUD'),
+
+(1,'02.01.',    'EXCAVACIONES'),
+(1,'03.01.',    'CIMIENTOS'),
+(1,'01.01.',    'CONCRETO '),
+(1,'01.01.',    'ENCOFRADO Y DESENCOFRADO'),
+(1,'01.01.',    'ACERO CORRUGADO'),
+(1,'01.01.',    'TIJERAL Y RETICULARES'),
+(1,'01.01.',    'MUROS Y TABIQUES'),
+(1,'01.01.',    'TARRAJEO VESTIDURAS Y DERRAMES'),
+(1,'01.01.',    'PISOS'),
+(1,'01.01.',    'VEREDAS'),
+(1,'01.01.',    'ZOCALOS'),
+(1,'01.01.',    'PUERTA'),
+(1,'01.01.',    'VENTANAS'),
+(1,'01.01.',    'PINTURA EN INTERIORES (CIELO RASO)'),
+(1,'01.01.',    'PINTURA DE COLUMNAS'),
+(1,'01.01.','PINTURA DE VIGAS Y DINTELES  INTERIOR Y EXTERIOR'),
+(1,'01.01.','PINTURA ESMALTE EN ZOCALOS'),
+(1,'01.01.','CANALETA DE PLANCHA GALVANIZADA SEG√öN DISE√ëO e=0.30mm'),
+(1,'01.01.','MONTANTE DE DRENAJE PLUVIAL PVC 3" '),
+(1,'01.01.','DADO DE CONCRETO PARA PROTECCION DE TUBERIA PLUVIAL'),
+(1,'01.01.','INSTALACIONES ELECTRICAS EN MODULO'),
+(1,'01.01.','MITIGACION DEL IMPACTO AMBIENTAL (APORTE)'),
+(1,'01.01.','LIMPIEZA FINAL DE OBRA (APORTE)'),
+(1,'01.01.','   TRABAJOS PRELIMINARES'),
+
+(1,'01.01.','FLETE Y TRANSPORTE DE MATERIALES'),
+(1,'01.01.','FLETE Y TRANSPORTE DE AGREGADO Y PIEDRA'),
+
+---
+
+
+select * from CategoriasPresupuesto
+	select * from SubcategoriasPresupuesto
+	select * from ItemsPresupuesto
+
+
+    	SELECT * FROM GeovisorV52025 WHERE YEAR(fecha_hora) = 2024 AND nro_conv = '1082-2104-2023-090-PUN/VMVU/PNVR' AND MONTH(fecha_hora)= 09
+
+	SELECT * FROM GeovisorV52025  WHERE YEAR(fecha_hora) = 2024 AND nro_conv = '1082-0905-2023-037-HCA/VMVU/PNVR' AND DUPLICADO1 IS NOT NULL
+
+	SELECT * FROM GeovisorV52025  WHERE url_foto= 'https://pnvr.vivienda.gob.pe/supervisores/get_img_app2019super44xid/{021D876F-391F-4A40-AF83-7B2952FB7C06}'
+	SELECT * FROM GeovisorV52025  WHERE objectid= '591024'
+	
+
+
+
+
+INSERT INTO Tipo_Convocatoria (nombre, descripcion)
+VALUES 
+    ('Bienes', 'Adquisici?n de bienes tangibles como equipos o materiales'),
+   ( 'Servicios', 'Contrataci?n de servicios como mantenimiento o consultor?a');
+
+   INSERT INTO Convocatoria (
+    id_convenio, id_tipo, codigo_seace, titulo, descripcion, presupuesto, fecha_publicacion, fecha_limite_ofertas, fecha_estimada_adjudicacion, duracion_contrato,vigencia
+) VALUES 
+    (1, 1, 'SEACE-2025-001', 'Adquisici?n de Equipos M?dicos', 'Compra de ventiladores y monitores para hospitales p?blicos.', 1500000.00, '2025-06-01', '2025-06-15', '2025-06-20', 90,1),
+    (1, 1, 'SEACE-2025-002', 'Suministro de Materiales Educativos', 'Adquisici?n de cuadernos y l?pices para escuelas.', 500000.00, '2025-07-01', '2025-07-10', '2025-07-15', 60,1);
+
+
+
+   INSERT INTO Tipo_unidad_medida (nombre, abreviatura, descripcion, activo)
+VALUES 
+    ('Metro', 'm', 'Unidad de longitud para medir distancias en obras', 1),
+    ('Metro cuadrado', 'm2', 'Unidad de ?rea para superficies en construcci?n', 1),
+    ('Metro cubico', 'm3', 'Unidad de volumen para materiales como concreto', 1),
+    ('Kilogramo', 'kg', 'Unidad de masa para materiales como acero', 1),
+    ('Unidad', 'u', 'Unidad para conteo de elementos individuales', 1);
+
+
+
+		INSERT INTO Item_Convocatoria (
+    id_convocatoria, descripcion, cantidad, id_unidad_medida, precio_referencial, especificaciones_tecnicas
+) VALUES 
+    (2, 'Ventiladores mec√°nicos para UCI',  50, 5, 25000.00, 'Ventiladores con ventilaci√≥n invasiva y no invasiva, certificaci√≥n ISO.'),
+    (2, 'Monitores de signos vitales',  30, 5, 15000.00, 'Monitores con pantalla LED, ECG, SpO2, presi?n arterial.'),
+    (3, 'Cuadernos de 100 hojas',  10000, 5, 5.00, 'Cuadernos A4, tapa dura, rayados.'),
+    (3, 'L√°pices HB',  20000, 5, 0.50, 'L√°pices de grafito HB con borrador.');
+	select  * from Convocatoria
+
+	select * from Tipo_unidad_medida
+	select * from Item_convocatoria
+
+	select * from ExpedienteTecnico
+
+	select * from CategoriasPresupuesto
+	select * from SubcategoriasPresupuesto
+	select * from ItemsPresupuesto
+	
+	CREATE TABLE CategoriasPresupuesto (
+    CategoriaID INT PRIMARY KEY IDENTITY(1,1),
+    CodigoCategoria NVARCHAR(50), -- Ej: '1.0.0', '2.0.0'
+    NombreCategoria NVARCHAR(255) NOT NULL, -- Ej: OBRAS PROVISIONALES
+    CreadoEn DATETIME DEFAULT GETDATE(),
+    ActualizadoEn DATETIME DEFAULT GETDATE()
+);
+	CREATE TABLE SubcategoriasPresupuesto (
+    SubCategoriaID INT PRIMARY KEY IDENTITY(1,1),
+    CategoriaID INT, -- Ej: '1.0.0', '2.0.0'
+	CodigoSubCategoria varchar(20),
+    NombreSubCategoria NVARCHAR(255) NOT NULL, -- Ej: OBRAS PROVISIONALES
+    CreadoEn DATETIME DEFAULT GETDATE(),
+    ActualizadoEn DATETIME DEFAULT GETDATE()
+	FOREIGN KEY (CategoriaID) REFERENCES CategoriasPresupuesto(CategoriaID)
+);
+
+
+CREATE TABLE ItemsPresupuesto (
+    ItemPresupuestoID INT PRIMARY KEY IDENTITY(1,1),
+    CategoriaID INT,
+	SubCategoriaID INT,
+    CodigoItem NVARCHAR(50), -- Ej: '1.1.1', '4.3.1'
+    Descripcion NVARCHAR(500), -- Ej: CARTEL DE OBRA 4.00 X 2.50
+    Unidad NVARCHAR(50), -- Ej: m2, m3, kg, und
+    Cantidad DECIMAL(18,4), -- Ej: 53.24
+    PrecioUnitario DECIMAL(18,2), -- Calculado si necesario
+    CostoTotal DECIMAL(18,2), -- Ej: 2236.25
+    ReferenciaPlano NVARCHAR(50), -- Ej: A-01, E-01
+    Eje NVARCHAR(50), -- Ej: EJE 1, EJE A
+    Detalle NVARCHAR(255), -- Ej: Cartel de obra
+    NumeroVeces INT, -- Ej: 1 (NÔøΩ Veces)
+    Largo DECIMAL(18,4), -- Ej: 7.83
+    Ancho DECIMAL(18,4), -- Ej: 6.8
+    Alto DECIMAL(18,4), -- Ej: 0.27
+    Area DECIMAL(18,4), -- Ej: 53.244
+    CantidadPorVivienda DECIMAL(18,4), -- Ej: 53.24
+    NumeroViviendas INT, -- Ej: 42
+    MetradoTotal DECIMAL(18,4), -- Ej: 2236.248
+    CreadoEn DATETIME DEFAULT GETDATE(),
+    ActualizadoEn DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY (SubCategoriaID) REFERENCES SubcategoriasPresupuesto(SubCategoriaID),
+    FOREIGN KEY (CategoriaID) REFERENCES CategoriasPresupuesto(CategoriaID)
+);
+
+
+
+
+INSERT INTO SubcategoriasPresupuesto (CategoriaID,CodigoSubcategoria,NombreSubcategoria) VALUES
+(1,'01.01.','   TRABAJOS PRELIMINARES'),
+(1,'01.01.','   TRABAJOS PRELIMINARES'),
+(1,'01.01.','   TRABAJOS PRELIMINARES'),
+(1,'01.01.','   TRABAJOS PRELIMINARES'),
+(1,'01.01.','   TRABAJOS PRELIMINARES'),
+(1,'01.01.','   TRABAJOS PRELIMINARES'),
+(1,'01.01.','   TRABAJOS PRELIMINARES'),
+(1,'01.01.','   TRABAJOS PRELIMINARES'),
+(1,'01.01.','   TRABAJOS PRELIMINARES'),
+(1,'01.01.','   TRABAJOS PRELIMINARES'),
+(1,'01.01.','   TRABAJOS PRELIMINARES'),
+(1,'01.01.','   TRABAJOS PRELIMINARES'),
+(1,'01.01.','   TRABAJOS PRELIMINARES'),
+(1,'01.01.','   TRABAJOS PRELIMINARES'),
+(1,'01.01.','   TRABAJOS PRELIMINARES'),
+(1,'01.01.','   TRABAJOS PRELIMINARES'),
+(1,'01.01.','   TRABAJOS PRELIMINARES'),
+(1,'01.01.','   TRABAJOS PRELIMINARES'),
+(1,'01.01.','   TRABAJOS PRELIMINARES'),
+(1,'01.01.','   TRABAJOS PRELIMINARES'),
+(1,'01.01.','   TRABAJOS PRELIMINARES'),
+(1,'01.01.','   TRABAJOS PRELIMINARES'),
+(1,'01.01.','   TRABAJOS PRELIMINARES'),
+(1,'01.01.','   TRABAJOS PRELIMINARES'),
+(1,'01.01.','   TRABAJOS PRELIMINARES'),
+(1,'01.01.','   TRABAJOS PRELIMINARES'),
+(1,'01.01.','   TRABAJOS PRELIMINARES'),
+(1,'01.01.','   TRABAJOS PRELIMINARES'),
+
+----
+29/05
+
+select * from convenios
+select * from grupo
+
+
+
+

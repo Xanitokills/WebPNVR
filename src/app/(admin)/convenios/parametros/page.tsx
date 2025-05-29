@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import TableAdmin from "../../../components/TableAdmin";
+import TableAdmin from "../../../../components/TableAdmin";
 
 interface Grupo {
   id_grupo: number;
@@ -36,9 +36,9 @@ const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState("grupo");
 
   const tabs = [
-    { id: "grupo", label: "Grupos", apiUrl: "grupo", component: (
+    { id: "grupo", label: "Grupos", apiUrl: "groconvenios/grupo", component: (
       <TableAdmin<Grupo>
-        apiUrl="grupo"
+        apiUrl="groconvenios/grupo"
         entityName="Grupo"
         fields={[
           { key: "nombre", label: "Nombre del grupo" },
@@ -56,9 +56,9 @@ const AdminDashboard = () => {
         ]}
       />
     )},
-    { id: "tipometa", label: "Tipos Meta", apiUrl: "tipometa", component: (
+    { id: "tipometa", label: "Tipos Meta", apiUrl: "groconvenios/tipometa", component: (
       <TableAdmin<Tipometa>
-        apiUrl="tipometa"
+        apiUrl="groconvenios/tipometa"
         entityName="TipoMeta"
         fields={[
           { key: "descripcion", label: "Descripción del tipo de meta" },
@@ -80,9 +80,9 @@ const AdminDashboard = () => {
         ]}
       />
     )},
-    { id: "tipointervencion", label: "Tipos Intervención", apiUrl: "tipointervencion", component: (
+    { id: "tipointervencion", label: "Tipos Intervención", apiUrl: "groconvenios/tipointervencion", component: (
       <TableAdmin<TipoIntervencion>
-        apiUrl="tipointervencion"
+        apiUrl="groconvenios/tipointervencion"
         entityName="Tipo Intervención"
         fields={[
           { key: "descripcion", label: "Descripción del tipo de intervención" },
@@ -104,9 +104,9 @@ const AdminDashboard = () => {
         ]}
       />
     )},
-    { id: "tipomaterial", label: "Tipos Material", apiUrl: "tipomaterial", component: (
+    { id: "tipomaterial", label: "Tipos Material", apiUrl: "groconvenios/tipomaterial", component: (
       <TableAdmin<TipoMaterial>
-        apiUrl="tipomaterial"
+        apiUrl="groconvenios/tipomaterial"
         entityName="Tipo Material"
         fields={[{ key: "descripcion", label: "Descripción del tipo de material" },
           { key: "estado", label: "Estado", type: "select", options: [
@@ -127,9 +127,9 @@ const AdminDashboard = () => {
         ]}
       />
     )},
-    { id: "tipofenomeno", label: "Tipos Fenómeno", apiUrl: "tipofenomeno", component: (
+    { id: "tipofenomeno", label: "Tipos Fenómeno", apiUrl: "groconvenios/tipofenomeno", component: (
       <TableAdmin<TipoFenomeno>
-        apiUrl="tipofenomeno"
+        apiUrl="groconvenios/tipofenomeno"
         entityName="TipoFenomeno"
         fields={[
           { key: "descripcion", label: "Descripción del tipo de fenómeno" },
