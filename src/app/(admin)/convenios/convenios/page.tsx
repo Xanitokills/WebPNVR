@@ -707,397 +707,401 @@ const VerConvenios = () => {
       </div>
 
       {editModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-2xl max-w-3xl w-full overflow-y-auto max-h-[90vh]">
-            <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">
-              Editar Convenio
-            </h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Código UGT</label>
-                <input
-                  type="text"
-                  value={formData.cod_ugt}
-                  onChange={(e) => setFormData({ ...formData, cod_ugt: e.target.value })}
-                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Código Convenio</label>
-                <input
-                  type="text"
-                  value={formData.cod_Convenio}
-                  onChange={(e) => setFormData({ ...formData, cod_Convenio: e.target.value })}
-                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Nombre Convenio</label>
-                <input
-                  type="text"
-                  value={formData.nombre_Convenio}
-                  onChange={(e) => setFormData({ ...formData, nombre_Convenio: e.target.value })}
-                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">ID Grupo</label>
-                <input
-                  type="number"
-                  value={formData.id_grupo}
-                  onChange={(e) => setFormData({ ...formData, id_grupo: e.target.value })}
-                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">ID Tipo Intervención</label>
-                <input
-                  type="number"
-                  value={formData.id_tipo_intervencion}
-                  onChange={(e) => setFormData({ ...formData, id_tipo_intervencion: e.target.value })}
-                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">ID Programa Presupuestal</label>
-                <input
-                  type="number"
-                  value={formData.id_programa_presupuestal}
-                  onChange={(e) => setFormData({ ...formData, id_programa_presupuestal: e.target.value })}
-                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">ID Tipo Fenómeno</label>
-                <input
-                  type="number"
-                  value={formData.id_tipo_fenomeno}
-                  onChange={(e) => setFormData({ ...formData, id_tipo_fenomeno: e.target.value })}
-                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">ID Tipo Material</label>
-                <input
-                  type="number"
-                  value={formData.id_tipo_material}
-                  onChange={(e) => setFormData({ ...formData, id_tipo_material: e.target.value })}
-                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">ID Estado</label>
-                <input
-                  type="number"
-                  value={formData.id_estado}
-                  onChange={(e) => setFormData({ ...formData, id_estado: e.target.value })}
-                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">ID Sub Estado</label>
-                <input
-                  type="number"
-                  value={formData.id_sub_estado}
-                  onChange={(e) => setFormData({ ...formData, id_sub_estado: e.target.value })}
-                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">ID Priorización</label>
-                <input
-                  type="number"
-                  value={formData.id_priorizacion}
-                  onChange={(e) => setFormData({ ...formData, id_priorizacion: e.target.value })}
-                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">ID Tipo Meta</label>
-                <input
-                  type="number"
-                  value={formData.id_tipo_meta}
-                  onChange={(e) => setFormData({ ...formData, id_tipo_meta: e.target.value })}
-                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">ID Localidad</label>
-                <input
-                  type="number"
-                  value={formData.id_Localidad}
-                  onChange={(e) => setFormData({ ...formData, id_Localidad: e.target.value })}
-                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">ID Distrito</label>
-                <input
-                  type="number"
-                  value={formData.id_Distrito}
-                  onChange={(e) => setFormData({ ...formData, id_Distrito: e.target.value })}
-                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">ID Provincia</label>
-                <input
-                  type="number"
-                  value={formData.id_Provincia}
-                  onChange={(e) => setFormData({ ...formData, id_Provincia: e.target.value })}
-                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">ID Departamento</label>
-                <input
-                  type="number"
-                  value={formData.id_Departamento}
-                  onChange={(e) => setFormData({ ...formData, id_Departamento: e.target.value })}
-                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Fecha Convenios</label>
-                <input
-                  type="date"
-                  value={formData.fecha_Convenios}
-                  onChange={(e) => setFormData({ ...formData, fecha_Convenios: e.target.value })}
-                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Fecha Transferencia</label>
-                <input
-                  type="date"
-                  value={formData.fecha_transferencia}
-                  onChange={(e) => setFormData({ ...formData, fecha_transferencia: e.target.value })}
-                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Fecha Límite Inicio</label>
-                <input
-                  type="date"
-                  value={formData.fecha_limite_inicio}
-                  onChange={(e) => setFormData({ ...formData, fecha_limite_inicio: e.target.value })}
-                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Fecha Inicio</label>
-                <input
-                  type="date"
-                  value={formData.fecha_inicio}
-                  onChange={(e) => setFormData({ ...formData, fecha_inicio: e.target.value })}
-                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Plazo Ejecución</label>
-                <input
-                  type="number"
-                  value={formData.plazo_ejecucion}
-                  onChange={(e) => setFormData({ ...formData, plazo_ejecucion: e.target.value })}
-                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Días Paralizados</label>
-                <input
-                  type="number"
-                  value={formData.dias_paralizados}
-                  onChange={(e) => setFormData({ ...formData, dias_paralizados: e.target.value })}
-                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Días Ampliación</label>
-                <input
-                  type="number"
-                  value={formData.dias_ampliacion}
-                  onChange={(e) => setFormData({ ...formData, dias_ampliacion: e.target.value })}
-                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Fecha Término</label>
-                <input
-                  type="date"
-                  value={formData.fecha_termino}
-                  onChange={(e) => setFormData({ ...formData, fecha_termino: e.target.value })}
-                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Fecha Acta Término</label>
-                <input
-                  type="date"
-                  value={formData.fecha_acta_termino}
-                  onChange={(e) => setFormData({ ...formData, fecha_acta_termino: e.target.value })}
-                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Motivo Atraso</label>
-                <input
-                  type="text"
-                  value={formData.motivo_atraso}
-                  onChange={(e) => setFormData({ ...formData, motivo_atraso: e.target.value })}
-                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Acción Mitigación</label>
-                <input
-                  type="text"
-                  value={formData.accion_mitigacion}
-                  onChange={(e) => setFormData({ ...formData, accion_mitigacion: e.target.value })}
-                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Fecha Inicio Estimada</label>
-                <input
-                  type="date"
-                  value={formData.fecha_inicio_estimada}
-                  onChange={(e) => setFormData({ ...formData, fecha_inicio_estimada: e.target.value })}
-                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Fecha Término Estimada</label>
-                <input
-                  type="date"
-                  value={formData.fecha_termino_estimada}
-                  onChange={(e) => setFormData({ ...formData, fecha_termino_estimada: e.target.value })}
-                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Año Intervención</label>
-                <input
-                  type="number"
-                  value={formData.anio_intervencion}
-                  onChange={(e) => setFormData({ ...formData, anio_intervencion: e.target.value })}
-                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Entidad</label>
-                <input
-                  type="text"
-                  value={formData.Entidad}
-                  onChange={(e) => setFormData({ ...formData, Entidad: e.target.value })}
-                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Programa</label>
-                <input
-                  type="text"
-                  value={formData.Programa}
-                  onChange={(e) => setFormData({ ...formData, Programa: e.target.value })}
-                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Proyectista</label>
-                <input
-                  type="text"
-                  value={formData.Proyectista}
-                  onChange={(e) => setFormData({ ...formData, Proyectista: e.target.value })}
-                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Evaluador</label>
-                <input
-                  type="text"
-                  value={formData.Evaluador}
-                  onChange={(e) => setFormData({ ...formData, Evaluador: e.target.value })}
-                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Presupuesto Base</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={formData.PresupuestoBase}
-                  onChange={(e) => setFormData({ ...formData, PresupuestoBase: e.target.value })}
-                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Presupuesto Financiamiento</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={formData.PresupuestoFinanciamiento}
-                  onChange={(e) => setFormData({ ...formData, PresupuestoFinanciamiento: e.target.value })}
-                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Aporte Beneficiario</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={formData.AporteBeneficiario}
-                  onChange={(e) => setFormData({ ...formData, AporteBeneficiario: e.target.value })}
-                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Símbolo Monetario</label>
-                <input
-                  type="text"
-                  value={formData.SimboloMonetario}
-                  onChange={(e) => setFormData({ ...formData, SimboloMonetario: e.target.value })}
-                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">IGV</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={formData.IGV}
-                  onChange={(e) => setFormData({ ...formData, IGV: e.target.value })}
-                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Plazo Ejecución Meses</label>
-                <input
-                  type="number"
-                  value={formData.PlazoEjecucionMeses}
-                  onChange={(e) => setFormData({ ...formData, PlazoEjecucionMeses: e.target.value })}
-                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Plazo Ejecución Días</label>
-                <input
-                  type="number"
-                  value={formData.PlazoEjecucionDias}
-                  onChange={(e) => setFormData({ ...formData, PlazoEjecucionDias: e.target.value })}
-                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Número Beneficiarios</label>
-                <input
-                  type="number"
-                  value={formData.NumeroBeneficiarios}
-                  onChange={(e) => setFormData({ ...formData, NumeroBeneficiarios: e.target.value })}
-                  className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                />
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-5xl h-[90vh] flex flex-col">
+            <div className="p-4 sm:p-6 flex-shrink-0">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                Editar Convenio
+              </h2>
+            </div>
+            <div className="flex-grow overflow-y-auto px-4 sm:px-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Código UGT</label>
+                  <input
+                    type="text"
+                    value={formData.cod_ugt}
+                    onChange={(e) => setFormData({ ...formData, cod_ugt: e.target.value })}
+                    className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Código Convenio</label>
+                  <input
+                    type="text"
+                    value={formData.cod_Convenio}
+                    onChange={(e) => setFormData({ ...formData, cod_Convenio: e.target.value })}
+                    className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Nombre Convenio</label>
+                  <input
+                    type="text"
+                    value={formData.nombre_Convenio}
+                    onChange={(e) => setFormData({ ...formData, nombre_Convenio: e.target.value })}
+                    className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">ID Grupo</label>
+                  <input
+                    type="number"
+                    value={formData.id_grupo}
+                    onChange={(e) => setFormData({ ...formData, id_grupo: e.target.value })}
+                    className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">ID Tipo Intervención</label>
+                  <input
+                    type="number"
+                    value={formData.id_tipo_intervencion}
+                    onChange={(e) => setFormData({ ...formData, id_tipo_intervencion: e.target.value })}
+                    className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">ID Programa Presupuestal</label>
+                  <input
+                    type="number"
+                    value={formData.id_programa_presupuestal}
+                    onChange={(e) => setFormData({ ...formData, id_programa_presupuestal: e.target.value })}
+                    className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">ID Tipo Fenómeno</label>
+                  <input
+                    type="number"
+                    value={formData.id_tipo_fenomeno}
+                    onChange={(e) => setFormData({ ...formData, id_tipo_fenomeno: e.target.value })}
+                    className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">ID Tipo Material</label>
+                  <input
+                    type="number"
+                    value={formData.id_tipo_material}
+                    onChange={(e) => setFormData({ ...formData, id_tipo_material: e.target.value })}
+                    className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">ID Estado</label>
+                  <input
+                    type="number"
+                    value={formData.id_estado}
+                    onChange={(e) => setFormData({ ...formData, id_estado: e.target.value })}
+                    className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">ID Sub Estado</label>
+                  <input
+                    type="number"
+                    value={formData.id_sub_estado}
+                    onChange={(e) => setFormData({ ...formData, id_sub_estado: e.target.value })}
+                    className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">ID Priorización</label>
+                  <input
+                    type="number"
+                    value={formData.id_priorizacion}
+                    onChange={(e) => setFormData({ ...formData, id_priorizacion: e.target.value })}
+                    className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">ID Tipo Meta</label>
+                  <input
+                    type="number"
+                    value={formData.id_tipo_meta}
+                    onChange={(e) => setFormData({ ...formData, id_tipo_meta: e.target.value })}
+                    className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">ID Localidad</label>
+                  <input
+                    type="number"
+                    value={formData.id_Localidad}
+                    onChange={(e) => setFormData({ ...formData, id_Localidad: e.target.value })}
+                    className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">ID Distrito</label>
+                  <input
+                    type="number"
+                    value={formData.id_Distrito}
+                    onChange={(e) => setFormData({ ...formData, id_Distrito: e.target.value })}
+                    className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">ID Provincia</label>
+                  <input
+                    type="number"
+                    value={formData.id_Provincia}
+                    onChange={(e) => setFormData({ ...formData, id_Provincia: e.target.value })}
+                    className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">ID Departamento</label>
+                  <input
+                    type="number"
+                    value={formData.id_Departamento}
+                    onChange={(e) => setFormData({ ...formData, id_Departamento: e.target.value })}
+                    className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-medium">Fecha Convenios</label>
+                  <input
+                    type="date"
+                    value={formData.fecha_Convenios}
+                    onChange={(e) => setFormData({ ...formData, fecha_Convenios: e.target.value })}
+                    className="w-full p-2 rounded-lg border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-blue-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-medium">Fecha Transferencia</label>
+                  <input
+                    type="date"
+                    value={formData.fecha_transferencia}
+                    onChange={(e) => setFormData({ ...formData, fecha_transferencia: e.target.value })}
+                    className="w-full p-2 rounded-lg border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-blue-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-medium">Fecha Límite Inicio</label>
+                  <input
+                    type="date"
+                    value={formData.fecha_limite_inicio}
+                    onChange={(e) => setFormData({ ...formData, fecha_limite_inicio: e.target.value })}
+                    className="w-full p-2 rounded-lg border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-blue-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-medium">Fecha Inicio</label>
+                  <input
+                    type="date"
+                    value={formData.fecha_inicio}
+                    onChange={(e) => setFormData({ ...formData, fecha_inicio: e.target.value })}
+                    className="w-full p-2 rounded-lg border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-blue-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-medium">Plazo Ejecución</label>
+                  <input
+                    type="number"
+                    value={formData.plazo_ejecucion}
+                    onChange={(e) => setFormData({ ...formData, plazo_ejecucion: e.target.value })}
+                    className="w-full p-2 rounded-lg border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-blue-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-medium">Días Paralizados</label>
+                  <input
+                    type="number"
+                    value={formData.dias_paralizados}
+                    onChange={(e) => setFormData({ ...formData, dias_paralizados: e.target.value })}
+                    className="w-full p-2 rounded-lg border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-blue-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-medium">Días Ampliación</label>
+                  <input
+                    type="number"
+                    value={formData.dias_ampliacion}
+                    onChange={(e) => setFormData({ ...formData, dias_ampliacion: e.target.value })}
+                    className="w-full p-2 rounded-lg border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-blue-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-medium">Fecha Término</label>
+                  <input
+                    type="date"
+                    value={formData.fecha_termino}
+                    onChange={(e) => setFormData({ ...formData, fecha_termino: e.target.value })}
+                    className="w-full p-2 rounded-lg border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-blue-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-medium">Fecha Acta Término</label>
+                  <input
+                    type="date"
+                    value={formData.fecha_acta_termino}
+                    onChange={(e) => setFormData({ ...formData, fecha_acta_termino: e.target.value })}
+                    className="w-full p-2 rounded-lg border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-blue-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-medium">Motivo Atraso</label>
+                  <input
+                    type="text"
+                    value={formData.motivo_atraso}
+                    onChange={(e) => setFormData({ ...formData, motivo_atraso: e.target.value })}
+                    className="w-full p-2 rounded-lg border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-blue-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-medium">Acción Mitigación</label>
+                  <input
+                    type="text"
+                    value={formData.accion_mitigacion}
+                    onChange={(e) => setFormData({ ...formData, accion_mitigacion: e.target.value })}
+                    className="w-full p-2 rounded-lg border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-blue-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-medium">Fecha Inicio Estimada</label>
+                  <input
+                    type="date"
+                    value={formData.fecha_inicio_estimada}
+                    onChange={(e) => setFormData({ ...formData, fecha_inicio_estimada: e.target.value })}
+                    className="w-full p-2 rounded-lg border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-blue-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-medium">Fecha Término Estimada</label>
+                  <input
+                    type="date"
+                    value={formData.fecha_termino_estimada}
+                    onChange={(e) => setFormData({ ...formData, fecha_termino_estimada: e.target.value })}
+                    className="w-full p-2 rounded-lg border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-blue-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-medium">Año Intervención</label>
+                  <input
+                    type="number"
+                    value={formData.anio_intervencion}
+                    onChange={(e) => setFormData({ ...formData, anio_intervencion: e.target.value })}
+                    className="w-full p-2 rounded-lg border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-blue-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-medium">Entidad</label>
+                  <input
+                    type="text"
+                    value={formData.Entidad}
+                    onChange={(e) => setFormData({ ...formData, Entidad: e.target.value })}
+                    className="w-full p-2 rounded-lg border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-blue-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-medium">Programa</label>
+                  <input
+                    type="text"
+                    value={formData.Programa}
+                    onChange={(e) => setFormData({ ...formData, Programa: e.target.value })}
+                    className="w-full p-2 rounded-lg border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-blue-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-medium">Proyectista</label>
+                  <input
+                    type="text"
+                    value={formData.Proyectista}
+                    onChange={(e) => setFormData({ ...formData, Proyectista: e.target.value })}
+                    className="w-full p-2 rounded-lg border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-blue-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-medium">Evaluador</label>
+                  <input
+                    type="text"
+                    value={formData.Evaluador}
+                    onChange={(e) => setFormData({ ...formData, Evaluador: e.target.value })}
+                    className="w-full p-2 rounded-lg border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-blue-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-medium">Presupuesto Base</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={formData.PresupuestoBase}
+                    onChange={(e) => setFormData({ ...formData, PresupuestoBase: e.target.value })}
+                    className="w-full p-2 rounded-lg border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-blue-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-medium">Presupuesto Financiamiento</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={formData.PresupuestoFinanciamiento}
+                    onChange={(e) => setFormData({ ...formData, PresupuestoFinanciamiento: e.target.value })}
+                    className="w-full p-2 rounded-lg border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-blue-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-medium">Aporte Beneficiario</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={formData.AporteBeneficiario}
+                    onChange={(e) => setFormData({ ...formData, AporteBeneficiario: e.target.value })}
+                    className="w-full p-2 rounded-lg border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-blue-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-medium">Símbolo Monetario</label>
+                  <input
+                    type="text"
+                    value={formData.SimboloMonetario}
+                    onChange={(e) => setFormData({ ...formData, SimboloMonetario: e.target.value })}
+                    className="w-full p-2 rounded-lg border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-blue-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-medium">IGV</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={formData.IGV}
+                    onChange={(e) => setFormData({ ...formData, IGV: e.target.value })}
+                    className="w-full p-2 rounded-lg border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-blue-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-medium">Plazo Ejecución Meses</label>
+                  <input
+                    type="number"
+                    value={formData.PlazoEjecucionMeses}
+                    onChange={(e) => setFormData({ ...formData, PlazoEjecucionMeses: e.target.value })}
+                    className="w-full p-2 rounded-lg border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-blue-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-medium">Plazo Ejecución Días</label>
+                  <input
+                    type="number"
+                    value={formData.PlazoEjecucionDias}
+                    onChange={(e) => setFormData({ ...formData, PlazoEjecucionDias: e.target.value })}
+                    className="w-full p-2 rounded-lg border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-blue-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-medium">Número Beneficiarios</label>
+                  <input
+                    type="number"
+                    value={formData.NumeroBeneficiarios}
+                    onChange={(e) => setFormData({ ...formData, NumeroBeneficiarios: e.target.value })}
+                    className="w-full p-2 rounded-lg border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-blue-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  />
+                </div>
               </div>
             </div>
-            <div className="mt-6 flex justify-end space-x-2">
+            <div className="sticky bottom-0 bg-white dark:bg-gray-800 p-4 sm:p-6 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center flex-shrink-0">
               <button
                 onClick={() => {
                   setEditModalOpen(false);
@@ -1148,13 +1152,13 @@ const VerConvenios = () => {
                   });
                   setError(null);
                 }}
-                className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors"
+                className="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition-colors"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleSave}
-                className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+                className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors"
               >
                 Guardar
               </button>
