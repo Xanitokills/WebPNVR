@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
-import TableAdmin from "../../../../components/TableAdmin";
+import TableAdmin from "../../../../../components/TableAdmin";
+
 
 interface Grupo {
   id_grupo: number;

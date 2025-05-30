@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import TableAdmin from "../../../../components/TableAdmin";
+import TableAdmin from "../../../../../components/TableAdmin";
 
 // Update the interface to match the item_convocatoria API response
 interface ItemConvocatoria {
