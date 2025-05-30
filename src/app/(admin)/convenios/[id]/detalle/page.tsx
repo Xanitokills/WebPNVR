@@ -1,3 +1,4 @@
+
 "use client";
 import React, { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
@@ -226,11 +227,14 @@ const DetalleConvenio = () => {
   useEffect(() => {
     const fetchConvenio = async () => {
       try {
-        const response = await fetch(`/api/groconvenios/convenios`);
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        const data = await response.json();
-        const convenioEncontrado = data.find((c: Convenio) => c.id_convenio === id);
-        if (!convenioEncontrado) throw new Error("Convenio no encontrado");
+        const response = await fetch(`/api/groconvenios/convenios/${id}`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const convenioEncontrado = await response.json();
+        if (!convenioEncontrado) {
+          throw new Error("Convenio no encontrado");
+        }
         setConvenio(convenioEncontrado);
         setPersonalAsignadoTemporal(convenioEncontrado.personal_asignado || []);
 
@@ -348,7 +352,7 @@ const DetalleConvenio = () => {
 
     const fetchPersonasDisponibles = async () => {
       try {
-        const response = await fetch("http://localhost:3003/api/groconvenios/personal");
+        const response = await fetch("/api/groconvenios/personal");
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
         setPersonasDisponibles(data);
@@ -922,7 +926,7 @@ const DetalleConvenio = () => {
                 step="0.01"
                 value={formData.PresupuestoFinanciamiento}
                 onChange={(e) => setFormData({ ...formData, PresupuestoFinanciamiento: e.target.value })}
-                className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
@@ -932,7 +936,7 @@ const DetalleConvenio = () => {
                 step="0.01"
                 value={formData.AporteBeneficiario}
                 onChange={(e) => setFormData({ ...formData, AporteBeneficiario: e.target.value })}
-                className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
@@ -941,7 +945,7 @@ const DetalleConvenio = () => {
                 type="text"
                 value={formData.SimboloMonetario}
                 onChange={(e) => setFormData({ ...formData, SimboloMonetario: e.target.value })}
-                className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
@@ -951,7 +955,7 @@ const DetalleConvenio = () => {
                 step="0.01"
                 value={formData.IGV}
                 onChange={(e) => setFormData({ ...formData, IGV: e.target.value })}
-                className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
@@ -960,7 +964,7 @@ const DetalleConvenio = () => {
                 type="number"
                 value={formData.PlazoEjecucionMeses}
                 onChange={(e) => setFormData({ ...formData, PlazoEjecucionMeses: e.target.value })}
-                className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
@@ -969,7 +973,7 @@ const DetalleConvenio = () => {
                 type="number"
                 value={formData.PlazoEjecucionDias}
                 onChange={(e) => setFormData({ ...formData, PlazoEjecucionDias: e.target.value })}
-                className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
@@ -978,26 +982,24 @@ const DetalleConvenio = () => {
                 type="number"
                 value={formData.NumeroBeneficiarios}
                 onChange={(e) => setFormData({ ...formData, NumeroBeneficiarios: e.target.value })}
-                className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
               />
             </div>
           </div>
         </div>
 
-        {/* Sección de Asignación/Desasignación de Personal */}
+        {/* Sección de Asignación de Personal */}
         <div className="mb-8">
           <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">
-            Asignación de Personal
+            Asignar Personal
           </h2>
-
-          {/* Formulario de asignación */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
             <div>
               <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Cargo</label>
               <select
                 value={selectedCargo}
                 onChange={(e) => setSelectedCargo(e.target.value)}
-                className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Seleccione un cargo</option>
                 {cargos.map((cargo) => (
@@ -1012,7 +1014,7 @@ const DetalleConvenio = () => {
               <select
                 value={selectedPersona}
                 onChange={(e) => setSelectedPersona(e.target.value)}
-                className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Seleccione una persona</option>
                 {personasDisponibles.map((persona) => (
@@ -1028,163 +1030,131 @@ const DetalleConvenio = () => {
                 type="date"
                 value={fechaInicioAsignacion}
                 onChange={(e) => setFechaInicioAsignacion(e.target.value)}
-                className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
-              <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Fecha Fin (opcional)</label>
+              <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Fecha Final</label>
               <input
                 type="date"
                 value={fechaFinAsignacion}
                 onChange={(e) => setFechaFinAsignacion(e.target.value)}
-                className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
               />
             </div>
-            <div className="col-span-1 sm:col-span-2 lg:col-span-4">
-              <button
-                onClick={handleAsignar}
-                className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-              >
-                Asignar
-              </button>
-            </div>
           </div>
+          <button
+            onClick={handleAsignar}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+          >
+            Asignar Personal
+          </button>
+        </div>
 
-          {/* Tabla de personal asignado */}
-          <h3 className="text-xl font-medium mb-2 text-gray-900 dark:text-white">Personal Asignado Actualmente</h3>
-          <div className="overflow-x-auto rounded-lg shadow-lg">
-            <table className="min-w-full bg-white dark:bg-gray-800">
-              <thead className="bg-gray-50 dark:bg-gray-700">
-                <tr>
-                  <th className="py-3 px-4 text-left text-sm font-semibold text-gray-900 dark:text-white">Nombre</th>
-                  <th className="py-3 px-4 text-left text-sm font-semibold text-gray-900 dark:text-white">Cargo</th>
-                  <th className="py-3 px-4 text-left text-sm font-semibold text-gray-900 dark:text-white">Fecha Inicio</th>
-                  <th className="py-3 px-4 text-left text-sm font-semibold text-gray-900 dark:text-white">Fecha Fin</th>
-                  <th className="py-3 px-4 text-left text-sm font-semibold text-gray-900 dark:text-white">Acción</th>
+        {/* Sección de Personal Asignado */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">
+            Personal Asignado Actual
+          </h2>
+          <div className="overflow-x-auto">
+            <table className="min-w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg">
+              <thead>
+                <tr className="bg-gray-100 dark:bg-gray-700">
+                  <th className="py-2 px-4 border-b text-left text-gray-700 dark:text-gray-200">Nombre</th>
+                  <th className="py-2 px-4 border-b text-left text-gray-700 dark:text-gray-200">Cargo</th>
+                  <th className="py-2 px-4 border-b text-left text-gray-700 dark:text-gray-200">Fecha Inicio</th>
+                  <th className="py-2 px-4 border-b text-left text-gray-700 dark:text-gray-200">Fecha Fin</th>
+                  <th className="py-2 px-4 border-b text-left text-gray-700 dark:text-gray-200">Acciones</th>
                 </tr>
               </thead>
               <tbody>
-                {personalAsignadoTemporal.length > 0 ? (
-                  personalAsignadoTemporal.map((persona, index) => (
-                    <tr
-                      key={index}
-                      className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                    >
-                      <td className="py-4 px-4 text-gray-900 dark:text-white">
-                        {`${persona.nombre} ${persona.apellido_paterno} ${persona.apellido_materno}`}
+                {personalAsignadoTemporal
+                  .filter((asignacion) => !asignacion.fecha_fin)
+                  .map((asignacion) => (
+                    <tr key={`${asignacion.id_persona}-${asignacion.cargo}`} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                      <td className="py-2 px-4 border-b text-gray-800 dark:text-gray-200">
+                        {`${asignacion.nombre} ${asignacion.apellido_paterno} ${asignacion.apellido_materno}`}
                       </td>
-                      <td className="py-4 px-4 text-gray-900 dark:text-white">{persona.cargo}</td>
-                      <td className="py-4 px-4 text-gray-900 dark:text-white">
-                        {new Date(persona.fecha_inicio).toLocaleDateString()}
-                      </td>
-                      <td className="py-4 px-4 text-gray-900 dark:text-white">
-                        {persona.fecha_fin ? new Date(persona.fecha_fin).toLocaleDateString() : "Activo"}
-                      </td>
-                      <td className="py-4 px-4">
-                        {!persona.fecha_fin && (
-                          <button
-                            onClick={() => handleDesasignar(persona.id_persona, persona.cargo)}
-                            className="text-red-500 hover:text-red-600 transition-colors"
-                          >
-                            Desasignar
-                          </button>
-                        )}
+                      <td className="py-2 px-4 border-b text-gray-600 dark:text-gray-300">{asignacion.cargo}</td>
+                      <td className="py-2 px-4 border-b text-gray-600 dark:text-gray-300">{asignacion.fecha_inicio}</td>
+                      <td className="py-2 px-4 border-b text-gray-600 dark:text-gray-300">{asignacion.fecha_fin || "N/A"}</td>
+                      <td className="py-2 px-4 border-b">
+                        <button
+                          onClick={() => handleDesasignar(asignacion.id_persona, asignacion.cargo)}
+                          class="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+                        >
+                          Desasignar
+                        </button>
                       </td>
                     </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={5} className="py-4 px-4 text-center text-gray-500 dark:text-gray-400">
-                      No hay personal asignado
-                    </td>
-                  </tr>
-                )}
+                ))}
               </tbody>
             </table>
           </div>
         </div>
 
-        {/* Sección de Histórico */}
+        {/* Sección de Historial de Asignaciones */}
         <div className="mb-8">
           <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">
-            Histórico de Asignaciones
+            Historial de Asignaciones
           </h2>
-
-          {/* Filtros de fecha */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+          <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Fecha Inicio Filtro</label>
+              <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Fecha Desde</label>
               <input
                 type="date"
                 value={fechaFiltroInicio}
                 onChange={(e) => setFechaFiltroInicio(e.target.value)}
-                className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
-              <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Fecha Fin Filtro</label>
+              <label className="block text-gray-700 dark:text-gray-300 font-medium mb-1">Fecha Hasta</label>
               <input
                 type="date"
                 value={fechaFiltroFin}
                 onChange={(e) => setFechaFiltroFin(e.target.value)}
-                className="w-full p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
               />
             </div>
           </div>
-
-          {/* Tabla de histórico */}
-          <div className="overflow-x-auto rounded-lg shadow-lg">
-            <table className="min-w-full bg-white dark:bg-gray-800">
-              <thead className="bg-gray-50 dark:bg-gray-700">
-                <tr>
-                  <th className="py-3 px-4 text-left text-sm font-semibold text-gray-900 dark:text-white">Nombre</th>
-                  <th className="py-3 px-4 text-left text-sm font-semibold text-gray-900 dark:text-white">Cargo</th>
-                  <th className="py-3 px-4 text-left text-sm font-semibold text-gray-900 dark:text-white">Fecha Inicio</th>
-                  <th className="py-3 px-4 text-left text-sm font-semibold text-gray-900 dark:text-white">Fecha Fin</th>
+          <div className="overflow-x-auto">
+            <table className="min-w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg">
+              <thead>
+                <tr className="bg-gray-100 dark:bg-gray-700">
+                  <th className="py-2 px-4 border-b text-left text-gray-700 dark:text-gray-200">Nombre</th>
+                  <th className="py-2 px-4 border-b text-left text-gray-700 dark:text-gray-200">Cargo</th>
+                  <th className="py-2 px-4 border-b text-left text-gray-700 dark:text-gray-200">Fecha Inicio</th>
+                  <th className="py-2 px-4 border-b text-left text-gray-700 dark:text-gray-200">Fecha Fin</th>
                 </tr>
               </thead>
               <tbody>
-                {historialFiltrado.length > 0 ? (
-                  historialFiltrado.map((persona, index) => (
-                    <tr
-                      key={index}
-                      className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                    >
-                      <td className="py-4 px-4 text-gray-900 dark:text-white">
-                        {`${persona.nombre} ${persona.apellido_paterno} ${persona.apellido_materno}`}
-                      </td>
-                      <td className="py-4 px-4 text-gray-900 dark:text-white">{persona.cargo}</td>
-                      <td className="py-4 px-4 text-gray-900 dark:text-white">
-                        {new Date(persona.fecha_inicio).toLocaleDateString()}
-                      </td>
-                      <td className="py-4 px-4 text-gray-900 dark:text-white">
-                        {persona.fecha_fin ? new Date(persona.fecha_fin).toLocaleDateString() : "Activo"}
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={4} className="py-4 px-4 text-center text-gray-500 dark:text-gray-400">
-                      No hay asignaciones en este rango de fechas
+                {historialFiltrado.map((asignacion) => (
+                  <tr key={`${asignacion.id_persona}-${asignacion.cargo}-${asignacion.fecha_inicio}`} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                    <td className="py-2 px-4 border-b text-gray-800 dark:text-gray-200">
+                      {`${asignacion.nombre} ${asignacion.apellido_paterno} ${asignacion.apellido_materno}`}
                     </td>
+                    <td className="py-2 px-4 border-b text-gray-600 dark:text-gray-300">{asignacion.cargo}</td>
+                    <td className="py-2 px-4 border-b text-gray-600 dark:text-gray-300">{asignacion.fecha_inicio}</td>
+                    <td className="py-2 px-4 border-b text-gray-600 dark:text-gray-300">{asignacion.fecha_fin || "En curso"}</td>
                   </tr>
-                )}
+                ))}
               </tbody>
             </table>
           </div>
         </div>
 
-        {/* Botones de Guardar y Cancelar */}
-        <div className="flex space-x-4">
+        {/* Botones de Acción */}
+        <div className="flex gap-4">
           <button
             onClick={handleSave}
-            className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
           >
             Guardar Cambios
           </button>
           <button
             onClick={() => router.push("/convenios")}
-            className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+            className="px-6 py-3 bg-gray-500 text-white rounded-lg font-semibold hover:bg-gray-600 focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
           >
             Cancelar
           </button>

@@ -1,28 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import sql from "mssql";
 
-export async function PUT(
-  request: NextRequest,
-  context: { params: Promise<{ id: string }> }
-) {
-  const params = await context.params;
-  const id = params.id; // Keep as string
-  const body = await request.json();
+// Interface para las variables de entorno
+interface EnvVars {
+  DB_USER: string;
+  DB_PASSWORD: string;
+  DB_SERVER: string;
+  DB_NAME: string;
+}
 
-  if (!id) {
-    return NextResponse.json({ error: "ID is required" }, { status: 400 });
-  }
-
-  // Validate mandatory fields
-  if (!body.nombre_Convenio) {
-    return NextResponse.json({ error: "Nombre Convenio is required" }, { status: 400 });
-  }
-
-  const requiredEnvVars = {
-    DB_USER: process.env.DB_USER,
-    DB_PASSWORD: process.env.DB_PASSWORD,
-    DB_SERVER: process.env.DB_SERVER,
-    DB_NAME: process.env.DB_NAME,
+// Función para validar variables de entorno
+const validateEnvVars = (): EnvVars | NextResponse => {
+  const requiredEnvVars: EnvVars = {
+    DB_USER: process.env.DB_USER as string,
+    DB_PASSWORD: process.env.DB_PASSWORD as string,
+    DB_SERVER: process.env.DB_SERVER as string,
+    DB_NAME: process.env.DB_NAME as string,
   };
 
   const missingEnvVars = Object.entries(requiredEnvVars)
@@ -31,29 +24,204 @@ export async function PUT(
 
   if (missingEnvVars.length > 0) {
     return NextResponse.json(
-      { error: `Missing required environment variables: ${missingEnvVars.join(", ")}` },
+      {
+        error: `Missing required environment variables: ${missingEnvVars.join(", ")}`,
+      },
       { status: 500 }
     );
   }
 
-  const config = {
-    user: requiredEnvVars.DB_USER as string,
-    password: requiredEnvVars.DB_PASSWORD as string,
-    server: requiredEnvVars.DB_SERVER as string,
-    database: requiredEnvVars.DB_NAME as string,
-    options: {
-      encrypt: false,
-      trustServerCertificate: true,
-    },
-  };
+  return requiredEnvVars;
+};
+
+// Configuración de la base de datos
+const getDbConfig = (envVars: EnvVars) => ({
+  user: envVars.DB_USER,
+  password: envVars.DB_PASSWORD,
+  server: envVars.DB_SERVER,
+  database: envVars.DB_NAME,
+  options: {
+    encrypt: false,
+    trustServerCertificate: true,
+  },
+});
+
+// GET: Obtener un convenio específico por ID
+export async function GET(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
+  const params = await context.params;
+  const id = params.id;
+
+  if (!id) {
+    return NextResponse.json({ error: "ID is required" }, { status: 400 });
+  }
+
+  const envVars = validateEnvVars();
+  if (envVars instanceof NextResponse) return envVars;
 
   try {
-    const pool = await sql.connect(config);
+    const pool = await sql.connect(getDbConfig(envVars));
+
+    // Consulta para obtener el convenio específico
+    const convenioResult = await pool.request()
+      .input("id_convenio", sql.NVarChar(50), id)
+      .query(`
+        SELECT 
+          c.[id_convenio],
+          c.[cod_ugt],
+          c.[cod_Convenio],
+          c.[nombre_Convenio],
+          c.[id_grupo],
+          c.[id_tipo_intervencion],
+          c.[id_programa_presupuestal],
+          c.[id_tipo_fenomeno],
+          c.[id_tipo_material],
+          c.[id_estado],
+          c.[id_sub_estado],
+          c.[id_priorizacion],
+          c.[id_tipo_meta],
+          c.[id_Localidad],
+          c.[id_Distrito],
+          c.[id_Provincia],
+          c.[id_Departamento],
+          c.[fecha_Convenios],
+          c.[fecha_transferencia],
+          c.[fecha_limite_inicio],
+          c.[fecha_inicio],
+          c.[plazo_ejecucion],
+          c.[dias_paralizados],
+          c.[dias_ampliacion],
+          c.[fecha_termino],
+          c.[fecha_acta_termino],
+          c.[motivo_atraso],
+          c.[accion_mitigacion],
+          c.[fecha_inicio_estimada],
+          c.[fecha_termino_estimada],
+          c.[anio_intervencion],
+          c.[Entidad],
+          c.[Programa],
+          c.[Proyectista],
+          c.[Evaluador],
+          c.[PresupuestoBase],
+          c.[PresupuestoFinanciamiento],
+          c.[AporteBeneficiario],
+          c.[SimboloMonetario],
+          c.[IGV],
+          c.[PlazoEjecucionMeses],
+          c.[PlazoEjecucionDias],
+          c.[NumeroBeneficiarios],
+          c.[CreadoEn],
+          c.[ActualizadoEn],
+          g.[nombre] AS Grupo,
+          ti.[descripcion] AS Interevencion,
+          pp.[codigo] AS Programa_Presupuestal,
+          tf.[descripcion] AS Tipo_Fenomeno,
+          tm.[descripcion] AS Tipo_Material,
+          ec.[descripcion] AS Estado_Convenio,
+          sec.[descripcion] AS Sub_Estado_Convenio,
+          pr.[grupo_priorizacion] AS Priorizacion,
+          tme.[descripcion] AS Meta,
+          l.[nombre_Localidad] AS Localidad,
+          dis.[nombre_Distrito] AS Distrito,
+          p.[nombre_Provincia] AS Provincia,
+          d.[nombre_Departamento] AS Departamento
+        FROM [${envVars.DB_NAME}].[dbo].[Convenios] c
+        LEFT JOIN [${envVars.DB_NAME}].[dbo].[Grupo] g ON c.[id_grupo] = g.[id_grupo]
+        LEFT JOIN [${envVars.DB_NAME}].[dbo].[Tipo_Intervencion] ti ON c.[id_tipo_intervencion] = ti.[id_tipo_intervencion]
+        LEFT JOIN [${envVars.DB_NAME}].[dbo].[Programa_Presupuestal] pp ON c.[id_programa_presupuestal] = pp.[id_programa_presupuestal]
+        LEFT JOIN [${envVars.DB_NAME}].[dbo].[Tipo_Fenomeno] tf ON c.[id_tipo_fenomeno] = tf.[id_tipo_fenomeno]
+        LEFT JOIN [${envVars.DB_NAME}].[dbo].[Tipo_Material] tm ON c.[id_tipo_material] = tm.[id_tipo_material]
+        LEFT JOIN [${envVars.DB_NAME}].[dbo].[Estado_Conv] ec ON c.[id_estado] = ec.[id_estado]
+        LEFT JOIN [${envVars.DB_NAME}].[dbo].[Sub_Estado_Conv] sec ON c.[id_sub_estado] = sec.[id_sub_estado]
+        LEFT JOIN [${envVars.DB_NAME}].[dbo].[Priorizaciones] pr ON c.[id_priorizacion] = pr.[id_priorizacion]
+        LEFT JOIN [${envVars.DB_NAME}].[dbo].[Tipos_Meta] tme ON c.[id_tipo_meta] = tme.[id_tipo_meta]
+        LEFT JOIN [${envVars.DB_NAME}].[dbo].[Localidad] l ON c.[id_Localidad] = l.[id_Localidad]
+        LEFT JOIN [${envVars.DB_NAME}].[dbo].[Distrito] dis ON c.[id_Distrito] = dis.[id_Distrito]
+        LEFT JOIN [${envVars.DB_NAME}].[dbo].[Provincia] p ON c.[id_Provincia] = p.[id_Provincia]
+        LEFT JOIN [${envVars.DB_NAME}].[dbo].[Departamento] d ON c.[id_Departamento] = d.[id_Departamento]
+        WHERE c.[id_convenio] = @id_convenio
+      `);
+
+    if (convenioResult.recordset.length === 0) {
+      return NextResponse.json({ error: "Convenio not found" }, { status: 404 });
+    }
+
+    const convenio = convenioResult.recordset[0];
+
+    // Consulta para obtener el personal asignado
+    const personalResult = await pool.request()
+      .input("id_convenio", sql.NVarChar(50), id)
+      .query(`
+        SELECT 
+          cp.id_convenio,
+          p.id_personal,
+          p.nombre,
+          p.apellido_paterno,
+          p.apellido_materno,
+          ca.descripcion AS cargo,
+          cp.fecha_inicio,
+          cp.fecha_fin
+        FROM [${envVars.DB_NAME}].[dbo].[convenio_personal] cp
+        JOIN [${envVars.DB_NAME}].[dbo].[personal] p ON cp.id_personal = p.id_personal
+        JOIN [${envVars.DB_NAME}].[dbo].[cargo] ca ON cp.id_cargo = ca.id_cargo
+        WHERE cp.id_convenio = @id_convenio
+      `);
+
+    const personal = personalResult.recordset.map((item: any) => ({
+      id_persona: item.id_personal,
+      nombre: item.nombre,
+      apellido_paterno: item.apellido_paterno,
+      apellido_materno: item.apellido_materno,
+      cargo: item.cargo,
+      fecha_inicio: item.fecha_inicio,
+      fecha_fin: item.fecha_fin,
+    }));
+
+    // Combinar datos del convenio con el personal asignado
+    const result = {
+      ...convenio,
+      personal_asignado: personal,
+    };
+
+    return NextResponse.json(result);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    return NextResponse.json(
+      { error: "Failed to retrieve convenio", details: errorMessage },
+      { status: 500 }
+    );
+  }
+}
+
+// Mantener el resto de los métodos (PUT, etc.) tal como están
+export async function PUT(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
+  const params = await context.params;
+  const id = params.id;
+  const body = await request.json();
+
+  if (!id) {
+    return NextResponse.json({ error: "ID is required" }, { status: 400 });
+  }
+
+  if (!body.nombre_Convenio) {
+    return NextResponse.json({ error: "Nombre Convenio is required" }, { status: 400 });
+  }
+
+  const envVars = validateEnvVars();
+  if (envVars instanceof NextResponse) return envVars;
+
+  try {
+    const pool = await sql.connect(getDbConfig(envVars));
     const request = pool.request();
 
-    // Check if convenio exists and is not finalized
+    // Verificar si el convenio existe y no está finalizado
     const checkQuery = `
-      SELECT id_estado FROM [${requiredEnvVars.DB_NAME}].[dbo].[Convenios] WHERE id_convenio = @id
+      SELECT id_estado FROM [${envVars.DB_NAME}].[dbo].[Convenios] WHERE id_convenio = @id
     `;
     request.input("id", sql.NVarChar(50), id);
     const checkResult = await request.query(checkQuery);
@@ -69,7 +237,7 @@ export async function PUT(
       );
     }
 
-    // Prepare inputs
+    // Preparar inputs
     request.input("id_convenio", sql.NVarChar(50), id);
     if (body.cod_ugt !== undefined) request.input("cod_ugt", sql.NVarChar(50), body.cod_ugt);
     if (body.cod_Convenio !== undefined) request.input("cod_Convenio", sql.NVarChar(50), body.cod_Convenio);
@@ -114,7 +282,7 @@ export async function PUT(
     if (body.PlazoEjecucionDias !== undefined) request.input("PlazoEjecucionDias", sql.Int, body.PlazoEjecucionDias);
     if (body.NumeroBeneficiarios !== undefined) request.input("NumeroBeneficiarios", sql.Int, body.NumeroBeneficiarios);
 
-    // Dynamically construct the update query
+    // Construir la consulta de actualización dinámicamente
     const updates = [];
     if (body.cod_ugt !== undefined) updates.push("cod_ugt = @cod_ugt");
     if (body.cod_Convenio !== undefined) updates.push("cod_Convenio = @cod_Convenio");
@@ -167,7 +335,7 @@ export async function PUT(
     }
 
     const query = `
-      UPDATE [${requiredEnvVars.DB_NAME}].[dbo].[Convenios]
+      UPDATE [${envVars.DB_NAME}].[dbo].[Convenios]
       SET ${updates.join(", ")}
       OUTPUT INSERTED.*
       WHERE id_convenio = @id_convenio
@@ -176,6 +344,48 @@ export async function PUT(
 
     if (result.recordset.length === 0) {
       return NextResponse.json({ error: "Convenio not found" }, { status: 404 });
+    }
+
+    // Actualizar las asignaciones de personal
+    if (body.personal_asignado && Array.isArray(body.personal_asignado)) {
+      // Eliminar asignaciones existentes (opcional, dependiendo de la lógica deseada)
+      await pool.request()
+        .input("id_convenio", sql.NVarChar(50), id)
+        .query(`
+          DELETE FROM [${envVars.DB_NAME}].[dbo].[convenio_personal]
+          WHERE id_convenio = @id_convenio
+        `);
+
+      // Insertar nuevas asignaciones
+      for (const asignacion of body.personal_asignado) {
+        const cargoResult = await pool.request()
+          .input("descripcion", sql.NVarChar(255), asignacion.cargo)
+          .query(`
+            SELECT id_cargo FROM [${envVars.DB_NAME}].[dbo].[cargo]
+            WHERE descripcion = @descripcion
+          `);
+
+        if (cargoResult.recordset.length === 0) {
+          return NextResponse.json(
+            { error: `Cargo ${asignacion.cargo} not found` },
+            { status: 400 }
+          );
+        }
+
+        const id_cargo = cargoResult.recordset[0].id_cargo;
+
+        await pool.request()
+          .input("id_convenio", sql.NVarChar(50), id)
+          .input("id_personal", sql.Int, asignacion.id_persona)
+          .input("id_cargo", sql.Int, id_cargo)
+          .input("fecha_inicio", sql.Date, new Date(asignacion.fecha_inicio))
+          .input("fecha_fin", sql.Date, asignacion.fecha_fin ? new Date(asignacion.fecha_fin) : null)
+          .query(`
+            INSERT INTO [${envVars.DB_NAME}].[dbo].[convenio_personal]
+            (id_convenio, id_personal, id_cargo, fecha_inicio, fecha_fin)
+            VALUES (@id_convenio, @id_personal, @id_cargo, @fecha_inicio, @fecha_fin)
+          `);
+      }
     }
 
     return NextResponse.json(result.recordset[0]);
