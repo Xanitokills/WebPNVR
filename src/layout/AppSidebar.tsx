@@ -174,7 +174,7 @@ const AppSidebar: React.FC = () => {
                 }}
                 className="overflow-hidden transition-all duration-300"
                 style={{
-                  height: isOpen ? `${subMenuHeight[key] || 0}px` : "0px",
+                  height: isOpen ? `${subMenuHeight[key] || "auto"}px` : "0px",
                 }}
               >
                 {renderMenuItems(nav.subItems, menuType, level + 1, itemKey)}
@@ -225,9 +225,10 @@ const AppSidebar: React.FC = () => {
 
   useEffect(() => {
     const updateHeights = () => {
-      openSubmenus.forEach((key) => {
-        if (subMenuRefs.current[key]) {
-          const height = subMenuRefs.current[key]?.scrollHeight || 0;
+      Object.keys(subMenuRefs.current).forEach((key) => {
+        const el = subMenuRefs.current[key];
+        if (el) {
+          const height = el.scrollHeight;
           setSubMenuHeight((prev) => ({
             ...prev,
             [key]: height,
@@ -237,8 +238,14 @@ const AppSidebar: React.FC = () => {
     };
 
     updateHeights();
-    const timeout = setTimeout(updateHeights, 0);
-    return () => clearTimeout(timeout);
+    const observer = new ResizeObserver(updateHeights);
+    Object.values(subMenuRefs.current).forEach((el) => {
+      if (el) observer.observe(el);
+    });
+
+    return () => {
+      observer.disconnect();
+    };
   }, [openSubmenus]);
 
   const handleSubmenuToggle = (menuType: "main" | "others", index: string) => {
@@ -249,6 +256,16 @@ const AppSidebar: React.FC = () => {
         newSet.delete(key);
       } else {
         newSet.add(key);
+        // Force height recalculation after opening
+        setTimeout(() => {
+          const el = subMenuRefs.current[key];
+          if (el) {
+            setSubMenuHeight((prev) => ({
+              ...prev,
+              [key]: el.scrollHeight,
+            }));
+          }
+        }, 0);
       }
       return newSet;
     });
@@ -266,7 +283,6 @@ const AppSidebar: React.FC = () => {
         }
         ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
         lg:translate-x-0`}
-      style={{ zIndex: 1000 }} // Increase z-index to ensure visibility
       onMouseEnter={() => !isExpanded && setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -284,7 +300,6 @@ const AppSidebar: React.FC = () => {
                 alt="Logo"
                 width={150}
                 height={40}
-                priority
               />
               <Image
                 className="hidden dark:block"
@@ -292,7 +307,6 @@ const AppSidebar: React.FC = () => {
                 alt="Logo"
                 width={150}
                 height={40}
-                priority
               />
             </>
           ) : (
@@ -301,7 +315,6 @@ const AppSidebar: React.FC = () => {
               alt="Logo"
               width={32}
               height={32}
-              priority
             />
           )}
         </Link>
