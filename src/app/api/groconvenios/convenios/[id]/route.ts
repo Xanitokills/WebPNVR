@@ -169,7 +169,7 @@ export async function GET(
         WHERE cp.id_convenio = @id_convenio
       `);
 
-    const personal = personalResult.recordset.map((item: any) => ({
+    const personal = personalResult.recordset.map((item: unknown) => ({
       id_persona: item.id_personal,
       nombre: item.nombre,
       apellido_paterno: item.apellido_paterno,

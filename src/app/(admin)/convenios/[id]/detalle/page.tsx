@@ -150,6 +150,7 @@ interface Persona {
   nombre: string;
   apellido_paterno: string;
   apellido_materno: string;
+  perfil: string; // Nuevo campo para el perfil de la persona
 }
 
 const DetalleConvenio = () => {
@@ -208,6 +209,7 @@ const DetalleConvenio = () => {
   const [tipoMateriales, setTipoMateriales] = useState<TipoMaterial[]>([]);
   const [cargos, setCargos] = useState<Cargo[]>([]);
   const [personasDisponibles, setPersonasDisponibles] = useState<Persona[]>([]);
+  const [personasFiltradas, setPersonasFiltradas] = useState<Persona[]>([]); // Nuevo estado para personas filtradas
   const [error, setError] = useState<string | null>(null);
   const [fechaFiltroInicio, setFechaFiltroInicio] = useState<string>("");
   const [fechaFiltroFin, setFechaFiltroFin] = useState<string>("");
@@ -356,6 +358,7 @@ const DetalleConvenio = () => {
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
         setPersonasDisponibles(data);
+        setPersonasFiltradas(data); // Inicialmente, todas las personas están disponibles
       } catch (error) {
         console.error("Error fetching personal:", error);
         setError("No se pudo cargar el personal disponible");
@@ -370,6 +373,19 @@ const DetalleConvenio = () => {
     fetchCargos();
     fetchPersonasDisponibles();
   }, [id]);
+
+  // Filtrar personas cuando cambia el cargo seleccionado
+  useEffect(() => {
+    if (selectedCargo === "Representante") {
+      const filtered = personasDisponibles.filter(
+        (persona) => persona.perfil === "Representante"
+      );
+      setPersonasFiltradas(filtered);
+    } else {
+      setPersonasFiltradas(personasDisponibles); // Si no es "Representante", mostrar todas las personas
+    }
+    setSelectedPersona(""); // Resetear la persona seleccionada al cambiar el cargo
+  }, [selectedCargo, personasDisponibles]);
 
   // Manejar errores temporales
   useEffect(() => {
@@ -386,7 +402,7 @@ const DetalleConvenio = () => {
       return;
     }
 
-    const persona = personasDisponibles.find((p) => String(p.id_personal) === selectedPersona);
+    const persona = personasFiltradas.find((p) => String(p.id_personal) === selectedPersona);
     if (!persona) {
       setError("Persona no encontrada");
       return;
@@ -506,8 +522,8 @@ const DetalleConvenio = () => {
     };
 
     try {
-      const response = await fetch(`/api/groconvenios/convenios/${id}`, {
-        method: "PUT",
+      const response = await fetch(`/api/groconvenios/convenios/update/${id}`, {
+        method: "POST", // Cambiado de PUT a POST
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
@@ -1017,7 +1033,7 @@ const DetalleConvenio = () => {
                 className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Seleccione una persona</option>
-                {personasDisponibles.map((persona) => (
+                {personasFiltradas.map((persona) => (
                   <option key={persona.id_personal} value={String(persona.id_personal)}>
                     {`${persona.nombre} ${persona.apellido_paterno} ${persona.apellido_materno}`}
                   </option>
