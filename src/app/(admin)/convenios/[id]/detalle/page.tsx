@@ -1081,7 +1081,7 @@ const DetalleConvenio = () => {
                       <td className="py-2 px-4 border-b">
                         <button
                           onClick={() => handleDesasignar(asignacion.id_persona, asignacion.cargo)}
-                          class="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+                          className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
                         >
                           Desasignar
                         </button>
