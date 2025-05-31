@@ -1082,3 +1082,448 @@ select * from grupo
 
 
 
+---
+
+
+select * from Grupo
+select * from Departamento
+select * from Provincia
+select * from Distrito
+select * from Localidad
+select * from Programa_Presupuestal
+select * from Convenios
+select * from Personal
+select * from Cargo
+select * from Personal_Cargo
+INSERT INTO Grupo (nombre,estado)
+VALUES 
+    ('PMFH 2024',1),
+    ('PMFH 2024 CONTINUIDAD',1),
+    ('PMFH 2025',1),
+    ('REGULAR 2024',1),
+	('REGULAR 2024 CONTINUIDAD',1);
+   
+
+	DELETE FROM  GRUPO WHERE id_grupo IS NOT NULL
+
+	alter table Programa_Presupuestal
+	add descripcion varchar(200)
+
+	update Programa_Presupuestal
+	set descripcion = 'Reducción de la Vulnerabilidad y Atención de Emergencias por Desastres'
+
+
+	alter table convenios
+	add id_representante int
+
+	---
+
+	SELECT * FROM Convenio_Personal
+
+	select * from personal
+	select * from Cargo
+
+	delete from Convenio_Personal
+
+	CREATE TABLE Convenio_personal (
+    id_convenio_personal INT identity PRIMARY KEY,
+    id_convenio INT NOT NULL,
+    id_personal INT NOT NULL,
+    id_cargo INT NOT NULL,
+    fecha_inicio DATETIME NOT NULL,
+    fecha_fin DATETIME DEFAULT NULL,
+    FOREIGN KEY (id_convenio) REFERENCES convenios(id_convenio),
+    FOREIGN KEY (id_personal) REFERENCES personal(id_personal),
+    FOREIGN KEY (id_cargo) REFERENCES cargo(id_cargo)
+);
+
+INSERT INTO convenio_personal (id_convenio, id_personal, id_cargo, fecha_inicio)
+VALUES (1, 7, 1, '2025-05-01 00:00:00');
+
+INSERT INTO convenio_personal (id_convenio, id_personal, id_cargo, fecha_inicio)
+VALUES (1, 107, 9, '2025-05-01 00:00:00');
+
+UPDATE convenio_personal
+SET fecha_fin = '2025-05-14 23:59:59'
+WHERE id_convenio = 1 AND id_personal = 7 AND fecha_fin IS NULL;
+
+INSERT INTO convenio_personal (id_convenio, id_personal, id_cargo, fecha_inicio)
+VALUES (1, 14, 9, '2025-05-15 00:00:00');
+
+
+SELECT p.nombre, p.apellido_paterno, c.descripcion
+FROM convenio_personal cp
+JOIN personal p ON cp.id_personal = p.id_personal
+JOIN cargo c ON cp.id_cargo = c.id_cargo
+WHERE cp.id_convenio = 1
+AND '2025-05-29 16:48:00' BETWEEN cp.fecha_inicio AND COALESCE(cp.fecha_fin, '9999-12-31 23:59:59');
+
+
+---
+select * from Personal
+
+select * from Convenio_personal
+
+
+CREATE TABLE Hogar (
+    id_hogar INT  IDENTITY PRIMARY KEY,
+    codigo_hogar VARCHAR(20) UNIQUE NOT NULL,
+    direccion VARCHAR(200) NOT NULL,
+    ubigeo VARCHAR(6) NOT NULL,
+    tipo_vivienda ENUM VARCHAR(6) NOT NULL,
+    material_vivienda ENUM('Ladrillo', 'Adobe', 'Madera', 'Otro') NOT NULL,
+    acceso_agua ENUM('Red pública', 'Pozo', 'Río', 'Otro') NOT NULL,
+    acceso_electricidad BOOLEAN DEFAULT FALSE,
+    numero_integrantes INT NOT NULL,
+    clasificacion_socioeconomica ENUM('Pobre extremo', 'Pobre no extremo', 'No pobre') DEFAULT NULL,
+    fecha_registro DATE NOT NULL
+);}
+
+
+
+select * from Vivienda
+select * from Persona
+
+CREATE TABLE Persona_Parentesco (
+    id_persona_parentesco INT IDENTITY PRIMARY KEY,
+    codigo_parentesco VARCHAR(8) NOT NULL UNIQUE,
+    descripcion VARCHAR(50) NOT NULL UNIQUE,
+    CONSTRAINT chk_codigo_parentesco CHECK (codigo_parentesco IN (
+        '00230201',
+        '00230202',
+        '00230203',
+        '00230204',
+        '00230205',
+        '00230206',
+        '00230207',
+        '00230208',
+        '00230209',
+        '00230210',
+        '00230211',
+        '00230200'
+    ))
+);
+
+INSERT INTO Persona_Parentesco (codigo_parentesco, descripcion) VALUES
+('00230201', 'JEFE'),
+('00230202', 'CONYUGE'),
+('00230203', 'HIJO/A'),
+('00230204', 'YERNO/NUERA'),
+('00230205', 'NIETO/A'),
+('00230206', 'PADRES/SUEGROS'),
+('00230207', 'HERMANO/A'),
+('00230208', 'TRABAJADOR DE HOGAR'),
+('00230209', 'PENSIONISTA'),
+('00230210', 'OTROS PARIENTES'),
+('00230211', 'OTROS NO PARIENTES'),
+('00230200', 'SIN DATO');
+
+INSERT INTO [dbo].[Vivienda]([cod]           ,[cuv]           ,[id_convenio]           ,[id_ubicacion]           ,[id_estado]
+           ,[id_sub_estado]           ,[fecha_inicio]           ,[fecha_termino]           ,[costo_total]
+		   ,[observaciones])
+     VALUES
+           (<cod, varchar(20),>
+           ,<cuv, varchar(20),>
+           ,<id_convenio, int,>
+           ,<id_ubicacion, int,>
+           ,<id_estado, int,>
+           ,<id_sub_estado, int,>
+           ,<fecha_inicio, date,>
+           ,<fecha_termino, date,>
+           ,<costo_total, decimal(15,2),>
+           ,<observaciones, text,>)
+GO
+
+
+
+	alter table persona
+	add id_Persona_Parentesco int;
+
+
+
+
+	alter table vivienda
+	add hogar_ubigeo int;
+
+
+
+
+	drop table Persona_Parentesco;
+
+ALTER TABLE Persona
+ADD CONSTRAINT FK_Persona_parentesco
+FOREIGN KEY (id_Persona_Parentesco) REFERENCES Persona_Parentesco(id_Persona_Parentesco);
+
+--- table Ficha Evaluacion Social
+--- table ficha evaluacion tecnica
+--  especialista sociales
+--  supervisores
+--  Evaluadores
+
+create table MAE_AREA (
+Id_Area int identity primary key,
+Descripcion varchar(20),
+Estado int)
+
+select * from Personal
+select * from MAE_AREA
+select 
+
+
+alter table personal
+add Id_Area int
+
+alter table MAE_AREA
+add Abreviatura varchar(10)
+
+ALTER TABLE MAE_AREA
+ALTER COLUMN Descripcion VARCHAR(50);
+
+alter table Personal
+ADD CONSTRAINT FK_Personal_Area
+FOREIGN KEY (id_Area) REFERENCES MAE_AREA(id_Area);
+
+insert into MAE_AREA(Abreviatura,Descripcion,Estado)
+values ('UGS','UNIDAD DE GESTIÓN SOCIAL',1)
+
+
+insert into MAE_AREA(Abreviatura,Descripcion,Estado)
+values ('UGT','UNIDAD DE GESTION TÉCNICA',1)
+insert into MAE_AREA(Abreviatura,Descripcion,Estado)
+values ('UATS','UNIDAD DE ASISTENCIA TECNICA Y SOSTENIBILIDAD',1)
+insert into MAE_AREA(Abreviatura,Descripcion,Estado)
+values ('CT','COORDINACIÓN TÉCNICA',1)
+insert into MAE_AREA(Abreviatura,Descripcion,Estado)
+values ('DE','DIRECCIÓN EJECUTIVA',1)
+
+insert into MAE_AREA(Abreviatura,Descripcion,Estado)
+values ('AAL','AREA ASESORIA LEGAL',1)
+
+
+
+TRUNCATE  MAE_AREA WHERE  ID_AREA IS NOT NULL
+
+DELETE FROM MAE_AREA WHERE ID_AREA IS NOT NULL;
+
+
+UPDATE PersonaL set ID_AREA = 9
+
+
+	select * from Convenios
+	select * from Vivienda
+	select * from Persona
+	select * from Persona_Parentesco
+	select * from Departamento
+	select * from Provincia
+	select * from Distrito
+	select * from Tipo_Discapacidad
+
+	ALTER TABLE Vivienda
+	add  id_Departamento int;
+
+	ALTER TABLE Vivienda
+	add  id_Provincia int;
+
+	ALTER TABLE Vivienda
+	add  id_Distrito int;
+
+	ALTER TABLE Vivienda
+	add  Ubigeo_Vivienda VARCHAR(50);
+
+	ALTER TABLE Vivienda
+	add  Ubigeo_Vivienda VARCHAR(50);
+
+	ALTER TABLE Persona
+	add  Vigencia_Hogar varchar(2);
+
+	ALTER TABLE persona
+	add  Lengua_Originaria varchar(50);
+
+	ALTER TABLE persona
+	add  Discapacidad Varchar(2);
+
+	ALTER TABLE [dbo].[Persona]
+	ADD [id_tipo_discapacidad] [int] NULL;
+	--
+	tipo discacidad
+
+	CREATE TABLE [dbo].[Tipo_Discapacidad](
+    [id_tipo_discapacidad] [int] IDENTITY(1,1) NOT NULL,
+    [nombre_discapacidad] [varchar](50) NOT NULL,
+    [descripcion] [varchar](200) NULL,
+    [activo] [bit] NOT NULL DEFAULT (1),
+    CONSTRAINT [PK_Tipo_Discapacidad] PRIMARY KEY CLUSTERED ([id_tipo_discapacidad] ASC)
+);
+
+
+INSERT INTO [dbo].[Tipo_Discapacidad] ([nombre_discapacidad], [descripcion], [activo])
+VALUES 
+    ('Visual', 'Discapacidad relacionada con la pérdida total o parcial de la visión.', 1),
+    ('Auditiva', 'Discapacidad relacionada con la pérdida total o parcial de la audición.', 1),
+    ('Motriz', 'Discapacidad que afecta la movilidad física.', 1),
+    ('Intelectual', 'Discapacidad que afecta las capacidades cognitivas.', 1),
+    ('Psicosocial', 'Discapacidad relacionada con trastornos mentales o emocionales.', 1);
+
+
+	ALTER TABLE [dbo].[Persona]
+ADD CONSTRAINT [FK_Persona_Tipo_Discapacidad] 
+FOREIGN KEY ([id_tipo_discapacidad]) 
+REFERENCES [dbo].[Tipo_Discapacidad] ([id_tipo_discapacidad]);
+
+	--
+	INSERT INTO [dbo].[Vivienda] (
+    [cod], [cuv], [id_convenio], [id_estado], [id_sub_estado], 
+    [fecha_inicio], [fecha_termino], [costo_total], [observaciones], 
+    [Ubigeo_Vivienda], [id_Departamento], [id_Provincia], [id_Distrito]
+)
+VALUES (
+    'VIV002',          -- cod
+    'CUV453',       -- cuv
+    5,                -- id_convenio
+    2,                -- id_estado
+    3,                -- id_sub_estado
+    '2025-01-01',     -- fecha_inicio
+    '2025-12-31',     -- fecha_termino
+    150000.50,        -- costo_total
+    'Vivienda en focalización', -- observaciones
+    '150101',         -- Ubigeo_Vivienda
+    1,               -- id_Departamento
+    3,             -- id_Provincia
+    2            -- id_Distrito
+);
+
+select * from db_accessadmin;
+
+
+truncate table persona
+SELECT * FROM PERSONA
+ALTER TABLE [dbo].[Persona]
+DROP CONSTRAINT CK__Persona__benefic__58D1301D;
+
+
+
+--
+INSERT INTO [dbo].[Persona] (
+    [id_vivienda], [nombre], [apellido_paterno], [apellido_materno], [dni], [sexo], 
+    [fecha_nacimiento], [id_Persona_Parentesco], [Vigencia_Hogar], [Discapacidad], 
+    [Lengua_Originaria], [id_tipo_discapacidad]
+)
+VALUES 
+    (1,    'Carlos', 'García',   'Martínez', '11223344', 'Masculino', '1995-03-10', 1,    'Sí', 'No', 'Aymara', NULL), -- 12 values
+    (1, 'Ana',    'Sánchez',  'Ramírez',  '44332211', 'Femenino',  '2000-07-25', 2, 'Sí', 'Sí', 'Español',      2),    -- 12 values
+    (1,    'Luis',   'Torres',   'Vega',     '99887766', 'Masculino', '1980-12-01', 3,    'Sí', 'No', 'Español', NULL); -- 12 values
+
+	--
+	INSERT INTO [dbo].[Persona] (
+    [id_vivienda], [nombre], [apellido_paterno], [apellido_materno], [dni], [sexo], 
+    [fecha_nacimiento], [id_Persona_Parentesco], [Vigencia_Hogar], [Discapacidad], 
+    [Lengua_Originaria], [id_tipo_discapacidad]
+)
+VALUES 
+ -- 12 values
+    (2, 'Ana',    'Sánchez',  'Ramírez',  '44332211', 'Femenino',  '2000-07-25', 2, 'Sí', 'Sí', 'Español', 2);   
+
+
+
+
+	select * from convenios
+	select * from GRUPO
+	SELECT * FROM Tipo_Fenomeno,
+	SELECT * FROM LOCALIDAD
+	---
+	INSERT INTO [dbo].[Convenios] (
+    [cod_ugt], [cod_Convenio], [nombre_Convenio], [id_grupo], [id_tipo_intervencion], 
+    [id_programa_presupuestal], [id_tipo_fenomeno], [id_tipo_material], [id_estado], 
+    [id_sub_estado], [id_priorizacion], [id_tipo_meta], [id_Localidad], [id_Distrito], 
+    [id_Provincia], [id_Departamento], [fecha_Convenios], [fecha_transferencia], 
+    [fecha_limite_inicio], [fecha_inicio], [plazo_ejecucion], [dias_paralizados], 
+    [dias_ampliacion], [fecha_termino], [fecha_acta_termino], [motivo_atraso], 
+    [accion_mitigacion], [fecha_inicio_estimada], [fecha_termino_estimada], 
+    [anio_intervencion], [Entidad], [Programa],  
+    [PresupuestoBase], [PresupuestoFinanciamiento], [AporteBeneficiario], 
+    [SimboloMonetario], [IGV], [PlazoEjecucionMeses], [PlazoEjecucionDias], 
+    [NumeroBeneficiarios], [CreadoEn], [ActualizadoEn]
+)
+VALUES (
+    'MOQ-002-2026',         -- cod_ugt
+    '1082-MOQ-001-MVCS/PNVR/2025',        -- cod_Convenio
+    'MEJORAMIENTO DE VIVIENDA RURAL', -- nombre_Convenio
+    7,                -- id_grupo
+    1,                -- id_tipo_intervencion
+    1,                -- id_programa_presupuestal
+    2,                -- id_tipo_fenomeno
+    1,                -- id_tipo_material
+    1,                -- id_estado
+    1,                -- id_sub_estado
+    1,                -- id_priorizacion
+    1,                -- id_tipo_meta
+    19,              -- id_Localidad
+    2,           -- id_Distrito
+    3,             -- id_Provincia
+    1,               -- id_Departamento
+    '2025-01-01',     -- fecha_Convenios
+    '2025-01-15',     -- fecha_transferencia
+    '2025-02-01',     -- fecha_limite_inicio
+    '2025-02-10',     -- fecha_inicio
+    180,              -- plazo_ejecucion
+    10,               -- dias_paralizados
+    20,               -- dias_ampliacion
+    '2025-08-10',     -- fecha_termino
+    '2025-08-15',     -- fecha_acta_termino
+    'Retraso en permisos', -- motivo_atraso
+    'Agilizar trámites',   -- accion_mitigacion
+    '2025-02-05',     -- fecha_inicio_estimada
+    '2025-08-05',     -- fecha_termino_estimada
+    2025,             -- anio_intervencion
+    'Municipalidad XYZ', -- Entidad
+    'Programa Reconstrucción', -- Programa
+    
+    500000.00,        -- PresupuestoBase
+    450000.00,        -- PresupuestoFinanciamiento
+    50000.00,         -- AporteBeneficiario
+    'PEN',            -- SimboloMonetario
+    18.00,            -- IGV
+    6,                -- PlazoEjecucionMeses
+    180,              -- PlazoEjecucionDias
+    100,              -- NumeroBeneficiarios
+    '2025-01-01 10:00:00', -- CreadoEn
+    '2025-01-02 15:30:00'  -- ActualizadoEn
+);
+
+ALTER TABLE [dbo].[Persona]
+DROP CONSTRAINT [UQ_Persona_dni];
+select * from persona
+
+update persona set vigencia_hogar = 'No' where id_persona=2
+
+update persona set id_persona_parentesco = 1 where id_persona=4
+
+
+CREATE TABLE [dbo].[Comunidades_Nativas](
+    [id_comunidad] [int] IDENTITY(1,1) NOT NULL,
+    [nombre_comunidad] [varchar](100) NOT NULL,
+    [grupo_etnico] [varchar](50) NULL,
+    [id_Departamento] [int] NULL,
+    [id_Provincia] [int] NULL,
+    [id_Distrito] [int] NULL,
+    [ubigeo] [varchar](6) NULL,
+    [lengua_originaria] [varchar](50) NULL,
+    [titulo_propiedad] [varchar](3) NULL,
+    [fecha_titulacion] [date] NULL,
+    [activo] [bit] NOT NULL DEFAULT (1),
+    [fecha_creacion] [datetime] NULL,
+    [fecha_actualizacion] [datetime] NULL,
+    CONSTRAINT [PK_Comunidades_Nativas] PRIMARY KEY CLUSTERED ([id_comunidad] ASC)
+);
+
+INSERT INTO [dbo].[Comunidades_Nativas] (
+    [nombre_comunidad], [grupo_etnico], [id_Departamento], [id_Provincia], [id_Distrito], 
+    [ubigeo], [lengua_originaria], [titulo_propiedad], [fecha_titulacion], [activo], 
+    [fecha_creacion], [fecha_actualizacion]
+)
+VALUES 
+    ('Comunidad Quechua de Cusco', 'Quechua', 8, 801, 80101, '080101', 'Quechua', 'Sí', '2020-06-10', 1, '2025-05-30 09:00:00', NULL),
+    ('Comunidad Aymara de Puno', 'Aymara', 21, 2101, 210101, '210101', 'Aymara', 'No', NULL, 1, '2025-05-30 10:00:00', '2025-05-30 12:00:00'),
+    ('Comunidad Awajún de Amazonas', 'Awajún', 1, 101, 10101, '010101', 'Awajún', 'Sí', '2023-12-01', 1, '2025-05-30 11:00:00', NULL);
+
+	truncate comunidades nativas

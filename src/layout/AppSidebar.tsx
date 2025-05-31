@@ -22,27 +22,27 @@ const navItems: NavItem[] = [
     icon: <TableIcon />,
     subItems: [
       {
-        name: "Convenios",
+        name: "Focalización y Priorización",
         icon: <TableIcon />,
         subItems: [
           { name: "Ver Expediente", path: "/ugt/convenios/ver-expediente", pro: false },
         ],
       },
+  {
+        name: "Identificación y Seleccion de Familias",
+        icon: <TableIcon />,
+        subItems: [
+          { name: "Ver Expediente", path: "/ugt/convenios/ver-expediente", pro: false },
+        ],
+      },
+
     ]
   },
   {
     name: "UGT",
     icon: <TableIcon />,
     subItems: [
-      {
-        name: "Convenios",
-        icon: <TableIcon />,
-        subItems: [
-          { name: "Ver Convenios", path: "/UGT/convenios/convenios", pro: false },
-          { name: "Administrar Parámetros", path: "/UGT/convenios/parametros", pro: false },
-        ],
-      },
-      {
+        {
         name: "Expediente",
         icon: <TableIcon />,
         subItems: [
@@ -52,8 +52,44 @@ const navItems: NavItem[] = [
           { name: "Presupuesto", path: "/expediente/presupuesto", pro: false },
         ],
       },
+      {
+        name: "Convenios",
+        icon: <TableIcon />,
+        subItems: [
+          { name: "Ver Convenios", path: "/UGT/convenios/convenios", pro: false },
+          { name: "Administrar Parámetros", path: "/UGT/convenios/parametros", pro: false },
+        ],
+      },
+    
     ],
   },
+   {
+    name: "UATS",
+    icon: <TableIcon />,
+    subItems: [
+        {
+        name: "Expediente",
+        icon: <TableIcon />,
+        subItems: [
+          { name: "Subir Expediente", path: "/expediente/subir-expediente", pro: false },
+          { name: "Ver Expediente", path: "/expediente/ver-expediente", pro: false },
+          { name: "Administrar Parámetros", path: "/expediente/administrar-parametros", pro: false },
+          { name: "Presupuesto", path: "/expediente/presupuesto", pro: false },
+        ],
+      },
+      {
+        name: "Convenios",
+        icon: <TableIcon />,
+        subItems: [
+          { name: "Ver Convenios", path: "/UGT/convenios/convenios", pro: false },
+          { name: "Administrar Parámetros", path: "/UGT/convenios/parametros", pro: false },
+        ],
+      },
+    
+    ],
+  },
+
+  
 ];
 
 const othersItems: NavItem[] = [
