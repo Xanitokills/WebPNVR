@@ -1345,7 +1345,7 @@ UPDATE PersonaL set ID_AREA = 9
 	ALTER TABLE [dbo].[Persona]
 	ADD [id_tipo_discapacidad] [int] NULL;
 	--
-	tipo discacidad
+
 
 	CREATE TABLE [dbo].[Tipo_Discapacidad](
     [id_tipo_discapacidad] [int] IDENTITY(1,1) NOT NULL,

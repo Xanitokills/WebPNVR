@@ -1,4 +1,3 @@
-
 "use client";
 import React, { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
@@ -42,7 +41,7 @@ interface Convenio {
   Evaluador: string | null;
   PresupuestoBase: number | null;
   PresupuestoFinanciamiento: number | null;
-  AporteBeneficiario: number | null;
+  AporteBeneficiario: string | null;
   SimboloMonetario: string | null;
   IGV: number | null;
   PlazoEjecucionMeses: number | null;
@@ -147,10 +146,15 @@ interface Cargo {
 
 interface Persona {
   id_personal: number;
+  id_cargo: number;
+  descripcion: string;
   nombre: string;
   Apellido_Paterno: string;
   Apellido_Materno: string;
-  perfil: string; // Nuevo campo para el perfil de la persona
+  dni: string;
+  celular: string;
+  correo: string;
+  profesion: string | null;
 }
 
 const DetalleConvenio = () => {
@@ -209,7 +213,7 @@ const DetalleConvenio = () => {
   const [tipoMateriales, setTipoMateriales] = useState<TipoMaterial[]>([]);
   const [cargos, setCargos] = useState<Cargo[]>([]);
   const [personasDisponibles, setPersonasDisponibles] = useState<Persona[]>([]);
-  const [personasFiltradas, setPersonasFiltradas] = useState<Persona[]>([]); // Nuevo estado para personas filtradas
+  const [personasFiltradas, setPersonasFiltradas] = useState<Persona[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [fechaFiltroInicio, setFechaFiltroInicio] = useState<string>("");
   const [fechaFiltroFin, setFechaFiltroFin] = useState<string>("");
@@ -358,7 +362,7 @@ const DetalleConvenio = () => {
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
         setPersonasDisponibles(data);
-        setPersonasFiltradas(data); // Inicialmente, todas las personas están disponibles
+        setPersonasFiltradas([]); // Inicialmente no hay personas filtradas
       } catch (error) {
         console.error("Error fetching personal:", error);
         setError("No se pudo cargar el personal disponible");
@@ -376,13 +380,16 @@ const DetalleConvenio = () => {
 
   // Filtrar personas cuando cambia el cargo seleccionado
   useEffect(() => {
-    if (selectedCargo === "Representante") {
+    if (selectedCargo) {
       const filtered = personasDisponibles.filter(
-        (persona) => persona.perfil === "Representante"
+        (persona) => persona.descripcion && persona.descripcion.toLowerCase() === selectedCargo.toLowerCase()
       );
+      console.log("Cargo seleccionado:", selectedCargo);
+      console.log("Personas disponibles para filtrar:", personasDisponibles.map(p => ({ id: p.id_personal, descripcion: p.descripcion })));
+      console.log("Personas filtradas:", filtered);
       setPersonasFiltradas(filtered);
     } else {
-      setPersonasFiltradas(personasDisponibles); // Si no es "Representante", mostrar todas las personas
+      setPersonasFiltradas([]);
     }
     setSelectedPersona(""); // Resetear la persona seleccionada al cambiar el cargo
   }, [selectedCargo, personasDisponibles]);
@@ -523,7 +530,7 @@ const DetalleConvenio = () => {
 
     try {
       const response = await fetch(`/api/groconvenios/convenios/update/${id}`, {
-        method: "PUT", // Cambiado de PUT a POST
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
@@ -1030,7 +1037,8 @@ const DetalleConvenio = () => {
               <select
                 value={selectedPersona}
                 onChange={(e) => setSelectedPersona(e.target.value)}
-                className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                disabled={!selectedCargo || personasFiltradas.length === 0}
+                className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
               >
                 <option value="">Seleccione una persona</option>
                 {personasFiltradas.map((persona) => (
@@ -1169,7 +1177,7 @@ const DetalleConvenio = () => {
             Guardar Cambios
           </button>
           <button
-            onClick={() => router.push("/convenios")}
+            onClick={() => router.push("/UGT/convenios/convenios")}
             className="px-6 py-3 bg-gray-500 text-white rounded-lg font-semibold hover:bg-gray-600 focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
           >
             Cancelar
