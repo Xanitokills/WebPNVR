@@ -66,8 +66,8 @@ interface Convenio {
   personal_asignado: {
     id_persona: number;
     nombre: string;
-    apellido_paterno: string;
-    apellido_materno: string;
+    Apellido_Paterno: string;
+    Apellido_Materno: string;
     cargo: string;
     fecha_inicio: string;
     fecha_fin: string | null;
@@ -148,8 +148,8 @@ interface Cargo {
 interface Persona {
   id_personal: number;
   nombre: string;
-  apellido_paterno: string;
-  apellido_materno: string;
+  Apellido_Paterno: string;
+  Apellido_Materno: string;
   perfil: string; // Nuevo campo para el perfil de la persona
 }
 
@@ -420,8 +420,8 @@ const DetalleConvenio = () => {
     const nuevaAsignacion = {
       id_persona: persona.id_personal,
       nombre: persona.nombre,
-      apellido_paterno: persona.apellido_paterno,
-      apellido_materno: persona.apellido_materno,
+      Apellido_Paterno: persona.Apellido_Paterno,
+      Apellido_Materno: persona.Apellido_Materno,
       cargo: selectedCargo,
       fecha_inicio: fechaInicioAsignacion,
       fecha_fin: fechaFinAsignacion || null,
@@ -523,7 +523,7 @@ const DetalleConvenio = () => {
 
     try {
       const response = await fetch(`/api/groconvenios/convenios/update/${id}`, {
-        method: "POST", // Cambiado de PUT a POST
+        method: "PUT", // Cambiado de PUT a POST
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
@@ -552,7 +552,7 @@ const DetalleConvenio = () => {
         throw new Error(errorData.error || errorData.details || "Error al actualizar el convenio");
       }
 
-      router.push("/convenios"); // Redirigir de vuelta a la lista de convenios
+      router.push("/UGT/convenios/convenios"); // Redirigir de vuelta a la lista de convenios
     } catch (error) {
       console.error("Error al actualizar el convenio:", error);
       setError(error instanceof Error ? error.message : "Error al actualizar el convenio");
@@ -1035,7 +1035,7 @@ const DetalleConvenio = () => {
                 <option value="">Seleccione una persona</option>
                 {personasFiltradas.map((persona) => (
                   <option key={persona.id_personal} value={String(persona.id_personal)}>
-                    {`${persona.nombre} ${persona.apellido_paterno} ${persona.apellido_materno}`}
+                    {`${persona.nombre} ${persona.Apellido_Paterno} ${persona.Apellido_Materno}`}
                   </option>
                 ))}
               </select>
@@ -1089,7 +1089,7 @@ const DetalleConvenio = () => {
                   .map((asignacion) => (
                     <tr key={`${asignacion.id_persona}-${asignacion.cargo}`} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                       <td className="py-2 px-4 border-b text-gray-800 dark:text-gray-200">
-                        {`${asignacion.nombre} ${asignacion.apellido_paterno} ${asignacion.apellido_materno}`}
+                        {`${asignacion.nombre} ${asignacion.Apellido_Paterno} ${asignacion.Apellido_Materno}`}
                       </td>
                       <td className="py-2 px-4 border-b text-gray-600 dark:text-gray-300">{asignacion.cargo}</td>
                       <td className="py-2 px-4 border-b text-gray-600 dark:text-gray-300">{asignacion.fecha_inicio}</td>
@@ -1148,7 +1148,7 @@ const DetalleConvenio = () => {
                 {historialFiltrado.map((asignacion) => (
                   <tr key={`${asignacion.id_persona}-${asignacion.cargo}-${asignacion.fecha_inicio}`} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                     <td className="py-2 px-4 border-b text-gray-800 dark:text-gray-200">
-                      {`${asignacion.nombre} ${asignacion.apellido_paterno} ${asignacion.apellido_materno}`}
+                      {`${asignacion.nombre} ${asignacion.Apellido_Paterno} ${asignacion.Apellido_Materno}`}
                     </td>
                     <td className="py-2 px-4 border-b text-gray-600 dark:text-gray-300">{asignacion.cargo}</td>
                     <td className="py-2 px-4 border-b text-gray-600 dark:text-gray-300">{asignacion.fecha_inicio}</td>

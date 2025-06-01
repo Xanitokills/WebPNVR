@@ -144,7 +144,7 @@ const VerConvenios = () => {
       setError("No se puede editar un convenio finalizado.");
       return;
     }
-    router.push(`/convenios/${id}/detalle`); // Redirigir a la nueva página de detalle
+    router.push(`/UGT/convenios/${id}/detalle`); // Redirigir a la nueva página de detalle
   };
 
   const handleDelete = async (id: string) => {
