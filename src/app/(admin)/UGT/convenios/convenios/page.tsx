@@ -79,7 +79,7 @@ const VerConvenios = () => {
   const [filteredConvenios, setFilteredConvenios] = useState<Convenio[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [itemsPerPage] = useState<number>(10);
+  const [itemsPerPage] = useState<number>(15);
   const router = useRouter();
 
   const estadoColores: { [key: string]: { bg: string; text: string } } = {

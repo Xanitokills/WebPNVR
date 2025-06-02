@@ -143,11 +143,10 @@ export async function GET() {
         ca.descripcion AS cargo,
         cp.fecha_inicio,
         cp.fecha_fin
-      FROM [${envVars.DB_NAME}].[dbo].[convenio_personal] cp
-      JOIN [${envVars.DB_NAME}].[dbo].[personal] p ON cp.id_personal = p.id_personal
-      JOIN [${envVars.DB_NAME}].[dbo].[cargo] ca ON cp.id_cargo = ca.id_cargo
-      WHERE (cp.fecha_fin IS NULL OR cp.fecha_fin >= GETDATE())
-        AND cp.fecha_inicio <= GETDATE()
+      FROM [dbo].[convenio_personal] cp
+      JOIN [dbo].[personal] p ON cp.id_personal = p.id_personal
+      JOIN [dbo].[cargo] ca ON cp.id_cargo = ca.id_cargo
+
     `);
 
     const personal = personalResult.recordset;
