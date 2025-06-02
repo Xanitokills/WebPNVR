@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
-import { useRouter } from "next/navigation"; // Importar useRouter para la redirección
+import { useRouter } from "next/navigation";
 
 interface Convenio {
   id_convenio: string;
@@ -78,7 +78,9 @@ const VerConvenios = () => {
   const [convenios, setConvenios] = useState<Convenio[]>([]);
   const [filteredConvenios, setFilteredConvenios] = useState<Convenio[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter(); // Usar el router para redirigir
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [itemsPerPage] = useState<number>(10);
+  const router = useRouter();
 
   const estadoColores: { [key: string]: { bg: string; text: string } } = {
     PENDIENTE: { bg: "bg-yellow-100 dark:bg-yellow-900", text: "text-yellow-800 dark:text-yellow-200" },
@@ -129,6 +131,7 @@ const VerConvenios = () => {
       : convenios;
     console.log("Filtered convenios by year:", filtered);
     setFilteredConvenios(filtered);
+    setCurrentPage(1);
   }, [filterAnio, convenios]);
 
   useEffect(() => {
@@ -144,7 +147,7 @@ const VerConvenios = () => {
       setError("No se puede editar un convenio finalizado.");
       return;
     }
-    router.push(`/UGT/convenios/${id}/detalle`); // Redirigir a la nueva página de detalle
+    router.push(`/UGT/convenios/${id}/detalle`);
   };
 
   const handleDelete = async (id: string) => {
@@ -170,10 +173,23 @@ const VerConvenios = () => {
           ? updatedConvenios.filter((c) => String(c.anio_intervencion) === filterAnio)
           : updatedConvenios
       );
+      const totalPages = Math.ceil(updatedConvenios.length / itemsPerPage);
+      if (currentPage > totalPages && totalPages > 0) {
+        setCurrentPage(totalPages);
+      }
     } catch (error) {
       console.error("Error al eliminar el convenio:", error);
       setError(error instanceof Error ? error.message : "Error al eliminar el convenio");
     }
+  };
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredConvenios.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredConvenios.length / itemsPerPage);
+
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
   };
 
   const tableHeaders = [
@@ -228,8 +244,8 @@ const VerConvenios = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="ml-0 lg:ml-[90px] transition-all duration-300 ease-in-out p-6">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 w-full">
+      <div className="ml-0 lg:ml-[90px] transition-all duration-300 ease-in-out p-6 w-full max-w-full">
         <h1 className="text-3xl font-bold mb-6 text-gray-900 dark:text-white">
           Convenios
         </h1>
@@ -253,9 +269,9 @@ const VerConvenios = () => {
           />
         </div>
 
-        <div className="overflow-x-auto rounded-lg shadow-lg">
-          <table className="min-w-full bg-white dark:bg-gray-800">
-            <thead className="bg-gray-50 dark:bg-gray-700">
+        <div className="overflow-x-auto rounded-lg shadow-lg w-full">
+          <table className="min-w-max bg-white dark:bg-gray-800">
+            <thead className="bg-gray-50 dark:bg-gray-700 sticky top-0">
               <tr>
                 {tableHeaders.map((header, index) => (
                   <th
@@ -272,8 +288,8 @@ const VerConvenios = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredConvenios.length > 0 ? (
-                filteredConvenios.map((convenio) => {
+              {currentItems.length > 0 ? (
+                currentItems.map((convenio) => {
                   const estado = convenio.Estado_Convenio || "No definido";
                   const colores = estadoColores[estado] || {
                     bg: "bg-gray-100 dark:bg-gray-700",
@@ -413,6 +429,45 @@ const VerConvenios = () => {
             </tbody>
           </table>
         </div>
+
+        {totalPages > 1 && (
+          <div className="mt-6 flex justify-center items-center space-x-2 w-full overflow-x-auto max-w-full">
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Anterior
+            </button>
+            {Array.from({ length: Math.min(5, totalPages) }, (_, index) => {
+              const startPage = Math.max(1, currentPage - 2);
+              const pageNumber = startPage + index;
+              if (pageNumber <= totalPages) {
+                return (
+                  <button
+                    key={pageNumber}
+                    onClick={() => handlePageChange(pageNumber)}
+                    className={`px-4 py-2 rounded-lg ${
+                      currentPage === pageNumber
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white"
+                    }`}
+                  >
+                    {pageNumber}
+                  </button>
+                );
+              }
+              return null;
+            })}
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Siguiente
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
