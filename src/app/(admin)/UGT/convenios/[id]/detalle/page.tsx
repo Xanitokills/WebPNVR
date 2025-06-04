@@ -65,8 +65,8 @@ interface Convenio {
   personal_asignado: {
     id_persona: number;
     nombre: string;
-    Apellido_Paterno: string;
-    Apellido_Materno: string;
+    apellido_paterno: string;
+    apellido_materno: string;
     cargo: string;
     fecha_inicio: string;
     fecha_fin: string | null;
@@ -149,8 +149,8 @@ interface Persona {
   id_cargo: number;
   descripcion: string;
   nombre: string;
-  Apellido_Paterno: string;
-  Apellido_Materno: string;
+  apellido_paterno: string;
+  apellido_materno: string;
   dni: string;
   celular: string;
   correo: string;
@@ -427,8 +427,8 @@ const DetalleConvenio = () => {
     const nuevaAsignacion = {
       id_persona: persona.id_personal,
       nombre: persona.nombre,
-      Apellido_Paterno: persona.Apellido_Paterno,
-      Apellido_Materno: persona.Apellido_Materno,
+      apellido_paterno: persona.apellido_paterno,
+      apellido_materno: persona.apellido_materno,
       cargo: selectedCargo,
       fecha_inicio: fechaInicioAsignacion,
       fecha_fin: fechaFinAsignacion || null,
@@ -1043,7 +1043,7 @@ const DetalleConvenio = () => {
                 <option value="">Seleccione una persona</option>
                 {personasFiltradas.map((persona) => (
                   <option key={persona.id_personal} value={String(persona.id_personal)}>
-                    {`${persona.nombre} ${persona.Apellido_Paterno} ${persona.Apellido_Materno}`}
+                    {`${persona.nombre} ${persona.apellido_paterno} ${persona.apellido_materno}`}
                   </option>
                 ))}
               </select>
@@ -1097,7 +1097,7 @@ const DetalleConvenio = () => {
                   .map((asignacion) => (
                     <tr key={`${asignacion.id_persona}-${asignacion.cargo}`} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                       <td className="py-2 px-4 border-b text-gray-800 dark:text-gray-200">
-                        {`${asignacion.nombre} ${asignacion.Apellido_Paterno} ${asignacion.Apellido_Materno}`}
+                        {`${asignacion.nombre} ${asignacion.apellido_paterno} ${asignacion.apellido_materno}`}
                       </td>
                       <td className="py-2 px-4 border-b text-gray-600 dark:text-gray-300">{asignacion.cargo}</td>
                       <td className="py-2 px-4 border-b text-gray-600 dark:text-gray-300">{asignacion.fecha_inicio}</td>
@@ -1156,7 +1156,7 @@ const DetalleConvenio = () => {
                 {historialFiltrado.map((asignacion) => (
                   <tr key={`${asignacion.id_persona}-${asignacion.cargo}-${asignacion.fecha_inicio}`} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                     <td className="py-2 px-4 border-b text-gray-800 dark:text-gray-200">
-                      {`${asignacion.nombre} ${asignacion.Apellido_Paterno} ${asignacion.Apellido_Materno}`}
+                      {`${asignacion.nombre} ${asignacion.apellido_paterno} ${asignacion.apellido_materno}`}
                     </td>
                     <td className="py-2 px-4 border-b text-gray-600 dark:text-gray-300">{asignacion.cargo}</td>
                     <td className="py-2 px-4 border-b text-gray-600 dark:text-gray-300">{asignacion.fecha_inicio}</td>

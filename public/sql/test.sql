@@ -71,6 +71,10 @@ INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dn
 (2, 'Rosa Martina', 'Mamani', 'Lopez','00000021', '985940581', 'mvcs_pnvr_rmml@viviendaext.pe'),
 (2, 'Juan Diego', 'Rivero', 'Ugarte', '00000022', '974214782', 'jrivero@vivienda.gob.pe');
 
+---
+INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES(2, 'Edith Stefani', 'Gracia', 'Rivera', '00100022', '943496071', 'edithstefanigarciarivera@gmail.com');
+
+
 --
 INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES
 (3, 'Fernando', 'Atapaucar', 'Guevara', '00000023', '990020663', 'fatapaucar@vivienda.gob.pe'),
@@ -87,6 +91,17 @@ INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dn
 (4, 'Ronal', 'Apaza', 'Pari', '00000031', '940228925', 'mvcs_pnvr_rap@viviendaext.pe'),
 (4, 'Henderson Julio', 'Inca', 'Quispe', '00000032', '985916849', 'arq.inca@gmail.com'),
 (4, 'Jose Luis', 'Matos', 'Benavides', '00000033', '999919115', 'jlmatosbenavides@gmail.com');
+
+INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES(4, 'Victor Andres', 'Sicus', 'Champi', '00000033', '994737242', 'victorandreschampi@gmail.com');
+
+INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES(4, 'Paul', 'Anglas', 'Roque', '00000033', '945944438', 'epar501@hotmail.com');
+INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES(4, 'Isela Victoria', 'Requena', 'Medina', '00000033', '954069115', 'arq.iselareq18@gmail.com');
+INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES(4, 'Gretel', 'Pando', 'Espinoza', '00000033', '984760985', 'gretelpando@gmail.com');
+INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES(4, 'Jesus Santos', 'Figueroa', 'Lino', '00000033', '968669253', 'jeshusant@gmail.com');
+INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES(4, 'Henderson Julio', 'Inca', 'Quispe', '00000033', '985916849', 'arq.inca@gmail.com');
+INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES(4, 'Manuel Leolpoldo', 'Mantilla', 'Quispe', '00000033', '966599966', 'mantilla.leo.88.2@softmix.click');
+
+
 --
 INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES
 (5, 'Erick Emersson', 'Huaman', 'Chuquija', '00000034', '987788874', 'mvcs_pnvr_eehc@viviendaext.pe'),
@@ -102,6 +117,53 @@ INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dn
 (5, 'Juan Carlos', 'Andrade', 'Velazco', '00000044', '989742108', 'ing.jcarlos.av@gmail.com');
 
 
+INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES
+(5, 'ERICK EMERSSON', 'HUAMAN', 'CHUQUIJA', '12345678', '987788874', 'mvcs_pnvr_eehc@viviendaext.pe'),
+(5, 'EDMUND WILGHEN', 'HUARSAYA', 'CHAMBI', '23456789', '962829220', 'ewilghen@gmail.com'),
+(5, 'EDMUND WILGHEN', 'HUARSAYA', 'CHAMBI', '34567890', '938965006', 'guerrerocruzjhon@gmail.com'),
+(5, 'VICTOR HUGO', 'HUACARPUMA', 'BUSTAMANTE', '45678901', '961023100', 'mvcs_pnvr_vhhb@viviendaext.pe'),
+(5, 'ALDO', 'CAPANI', 'PAUCAR', '56789012', '951975757', 'pacmaldo@hotmail.com'),
+(5, 'YOEL', 'HERRERA', 'PARRAGUEZ', '67890123', '964999406', 'yhpaz@hotmail.com'),
+(5, 'HECTOR', 'CCAMA', 'TITO', '78901234', '901900712', 'mvcs_pnvr_hct@viviendaext.pe'),
+(5, 'JORGE ENRIQUE', 'HUALLPA', 'MAMANI', '89012345', '986744336', 'canenitoh@hotmail.com'),
+(5, 'ZURIEL NOE', 'VALENCIA', 'QUISPE', '90123456', '990030021', 'zurielnoev@gmail.com'),
+(5, 'KELNIA FLOR', 'CANCAPA', 'CACERES', '01234567', '990111161', 'Kelnia.caceres@gmail.com'),
+(5, 'ELISBAN', 'APAZA', 'ESCALANTE', '12345679', '935055023', 'nabsile.ae@gmail.com'),
+(5, 'CARLOS', 'CUADROS', 'ESPINOZA', '23456780', '990331305', 'ing_carlosce@hotmail.com'),
+(5, 'LUIS', 'ACERO', 'VELO', '34567891', '950764050', 'luisacero374@gmail.com'),
+(5, 'IVAN RODOLFO', 'ANAMPA', 'PRADO', '45678902', '966991111', 'irap1877@gmail.com'),
+(5, 'JHON', 'POCOHUANCA', 'FLORES', '56789013', '947853259', 'johnpofl@gmail.com'),
+(5, 'WILLIAM EDUARDO', 'QUISPE', 'VELASQUEZ', '67890124', '988118027', 'arq.william0501@gmail.com'),
+(5, 'RICHAR ANTONY', 'TACURE', 'MOLINA', '78901235', '933600745', 'riantamoratm@gmail.com'),
+(5, 'NATALI', 'LOPEZ', 'CABRERA', '89012346', '984614747', 'najosy@hotmail.com'),
+(5, 'ELSA', 'QUILLAMA', 'DE MACHA', '90123457', '954090071', 'elsaqdm@gmail.com'),
+(5, 'HUGO', 'CENTENO', 'CERAS', '01234568', '929241327', 'hcenteno1993@gmail.com'),
+(5, 'VIRGILIO EDGAR', 'HERRERA', 'POLINO', '12345680', '992442776', 'ing.herrerave.03@gmail.com'),
+(5, 'LORENA', 'LUNA', 'ENRIQUEZ', '23456781', '922682417', 'lorenalunaenriquez@gmail.com'),
+(5, 'JUAN', 'TENORIO', 'BEJAR', '34567892', '999050270', 'juantenoriobejar@gmail.com'),
+(5, 'SOLEDAD MIRIAM', 'GARCIA', 'INGAROCA', '45678903', '964506057', 'somygi12@gmail.com'),
+(5, 'NELKYN DEYVIS', 'PACHECO', 'HOPPEN', '56789014', '985764370', 'deyvis_nelkin@hotmail.com'),
+(5, 'JUNIOR', 'GIRÓN', 'ISIDORO', '67890125', '986605166', 'juniorgiron198@gmail.com'),
+(5, 'MARLON ALBERTO', 'ÁLVAREZ', 'BARRANTES', '78901236', '976373888', 'maraab76@gmail.com'),
+(5, 'LUIGI MAKNIELL', 'PAREDES', 'CARCAUSTO', '89012347', '990868663', 'mvcs_pnvr_lmpc@viviendaext.pe'),
+(5, 'YAKELIN KATIA', 'MAMANI', 'COILA', '01234569', '948572499', 'yakis3112@gmail.com'),
+(5, 'GONZALO', 'MESTAS', 'SUCASACA', '12345681', '995554715', 'gonzamestas9@gmail.com'),
+(5, 'RONALD', 'PACCO', 'SAGUA', '23456782', '951506752', 'paccosr1123@gmail.com'),
+(5, 'BENINY', 'HUMPIRI', 'HUAMAN', '34567893', '994445464', 'mvcs_pnvr_bhh@viviendaext.pe'),
+(5, 'WILMER EDISON', 'CONDORI', 'CARRIZALES', '45678904', '990230404', 'ingwileccarrizales@gmail.com'),
+(5, 'WILLY', 'BEDOYA', 'HUANCA', '56789015', '986866006', 'INGWILLYBEDOYA@GMAIL.COM'),
+(5, 'LUIS ALBERTO', 'INGA', 'BARRERA', '78901237', '970154132', 'luinbar@gmail.com'),
+(5, 'DENNIS JAVIER', 'FERNÁNDEZ', 'HURTADO', '89012348', '953761246', 'arquidennis@hotmail.com'),
+(5, 'FREDY', 'MACHICAO', 'JUSTO', '90123459', '990040016', 'fredymachicao@hotmail.com'),
+(5, 'ALEXIS EDINHO', 'MOGOLLON', 'VIZUETA', '01234570', '901948534', 'ARQMOGOLLON@GMAIL.COM'),
+(5, 'YELDA', 'BENDEZÚ', 'ROCA', '12345682', '954802699', 'ybendezuroca@gmail.com'),
+(5, 'YOSSIP ABIMAEL', 'ESCALANTE', 'GUTIERREZ', '23456783', '927195122', 'mvcs_pnvr_yaeg@viviendaext.pe');
+
+
+
+
+
+
 --
 INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES
 (6, 'Dina', 'Carrasco', 'Zuñiga', '00000045', '983129008', 'mvcs_pnvr_dcz@viviendaext.pe'),
@@ -114,6 +176,44 @@ INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dn
 (6, 'Edwin', 'Romero', 'Espinoza', '00000052', '931828047', 'edwincp89@gmail.com'),
 (6, 'Ruzmery', 'Ururi', 'Quispe', '00000053', '951837596', 'kaythrousmery@gmail.com'),
 (6, 'Rosalia', 'Choquehuayta', 'Pacosonco', '00000054', '988297339', 'liachp1990@gmail.com');
+--news
+INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES
+(6, 'JHON', 'GUERRERO', 'CRUZ', '23456784', '962829220', 'guerrerocruzjhon@gmail.com'),
+(6, 'JHON', 'GUERRERO', 'CRUZ', '23456785', '938965006', 'guerrerocruzjhon@gmail.com'),
+(6, 'GREYLI', 'TINOCO', 'VILLA', '23456786', '984470297', 'mvcs_pnvr_gtv@viviendaext.pe'),
+(6, 'BELIA BETZABE', 'ROQUE', 'MENDOZA', '23456787', '988011065', 'betzy.romen@gmail.com'),
+(6, 'EDHIÑO CESAR', 'CHACON', 'ESTRADA', '23456788', '981899601', 'cesar.chacon23@gmail.com'),
+(6, 'NADIA JACQUELINE', 'DEZA', 'ZEBALLOS', '23456789', '951215015', 'mvcs_pnvr_njdz@viviendaext.pe'),
+(6, 'BETTY', 'GAMARRA', 'MOTTA', '23456790', '950947051', 'bettygamarracii@gmail.com'),
+(6, 'GLADYS MARIELA', 'SACCATOMA', 'YANCCE', '23456791', '914651134', 'gmarielasy1@gmail.com'),
+(6, 'MARUJA', 'VILCATOMA', 'SULCA', '23456792', '966101413', 'maru.0215@hotmail.com'),
+(6, 'ROGELIO ILICH', 'UGARTE', '', '23456793', '936800103', 'ilichitougarte@gmail.com'),
+(6, 'LUZ CORINA', 'APAZA', 'PAUCAR', '23456794', '961867465', 'lucianacorina0511@gmail.com'),
+(6, 'GILBERT', 'LOAYZA', 'MERCADO', '23456795', '917178934', 'loayzamercado105@gmail.com'),
+(6, 'MAVILA', 'CASTRO', 'CURASI', '23456796', '964014009', 'mcc3028@gmail.com'),
+(6, 'MAVILA', 'CASTRO', 'CURASI', '23456797', '965014009', 'mcc3028@gmail.com'),
+(6, 'MAVILA', 'CASTRO', 'CURASI', '23456798', '966014009', 'mcc3028@gmail.com'),
+(6, 'MAVILA', 'CASTRO', 'CURASI', '23456799', '967014009', 'mcc3028@gmail.com'),
+(6, 'PAMELA', 'TICONA', 'VILCA', '23456800', '969723893', 'rpticonav1@gmail.com'),
+(6, 'RAYDA', 'JURADO', 'CONDORI', '23456801', '971055449', 'raydajuradocondori@gmail.com'),
+(6, 'KETY GELSY', 'APONTE', 'VILLADOMA', '23456802', '933065101', 'ketygelcy.aponte@gmail.com'),
+(6, 'HECTOR JAVIER', 'LAZARTE', 'ARIAS', '23456803', '991691599', 'hemigra1@yahoo.com'),
+(6, 'GLADYS', 'AMORIN', 'LEON', '23456804', '920027660', 'glamorin11@gmail.com'),
+(6, 'LUIS ANGEL', 'RODRIGUEZ', 'YUPANQUI', '23456805', '966001883', 'luisangelrodriguezyupanqui@gmail.com'),
+(6, 'CARLOS ANTONIO', 'MORALES', 'CHOQUEMAMANI', '23456806', '929432126', 'Cpc.Carlosmorales@gmail.com'),
+(6, 'EDWIN', 'ROMERO', 'ESPINOZA', '23456807', '931828047', 'edwincp89@gmail.com'),
+(6, 'JOSE LUIS', 'ORMEÑO', 'RAMIREZ', '23456809', '980133603', 'josce.pnvr@gmail.com'),
+(6, 'MARIVI GIULIANA', 'APAZA', 'PACARA', '23456810', '916360021', 'giumarivi@gmail.com'),
+(6, 'CINTHYA SUSANA', 'RODRIGUEZ', 'YANA', '23456811', '941063282', 'mvcs_pnvr_csry@viviendaext.pe'),
+(6, 'ESMERALDA', 'CASTRO', 'MENDOZA', '23456812', '987838857', 'citlalyya96@gmail.com'),
+(6, 'CRISTHIAN SAMUEL', 'TRIPUL', 'CORDOVA', '23456814', '972892903', 'cristhiantripul@gmail.com'),
+(6, 'UBALDINA', 'MONTERROSO', 'GRAJEDA', '23456815', '982041610', 'Ubimonterroso@gmail.com'),
+(6, 'YENI JANNET', 'AQUINO', 'LOPEZ', '23456816', '971000661', 'yenijaquino@gmail.com'),
+(6, 'ESTHER', 'PINTO', 'PALACIOS', '23456817', '927272008', 'sthephanpalacios@gmail.com'),
+(6, 'RICARDO FLAVIO', 'NECIOSUP', 'CARRILLO', '23456818', '948441192', 'contabilidad.neciosup81@gmail.com'),
+(6, 'SANDRA', 'GONZALES', 'QUISPE', '23456819', '946632233', 'mvcs_pnvr_sgq@viviendaext.pe');
+
+
 
 INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES
 (7, 'Denisse Zusan', 'Quispe', 'Mamani', '00000055', '937096263', 'susan.dqm@gmail.com'),
@@ -129,11 +229,58 @@ INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dn
 (7, 'Ivon Katherin', 'Cano', 'Achahui', '00000065', '984888019', 'ivoncano56@gmail.com'),
 (7, 'Sandra', 'Caceres', 'Tito', '00000066', '955801130', 'sandracacerest@gmail.com');
 
+--news
+INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES
+(7, 'Benedicto Luis', 'Regalado', 'Silva', '23456975', '992352115', 'bregalados36@gmail.com'),
+(7, 'Beatriz', 'Flores', 'Huisa', '23456976', '964196783', 'mvcs_pnvr_bfh@viviendaext.pe'),
+(7, 'Luz Maritza', 'Ramos', 'Huaman', '23456977', '967146838', 'yahitzaluz@gmail.com'),
+(7, 'Ela', 'Inga', 'Machacuay', '23456978', '999221075', 'elain266@hotmail.com'),
+(7, 'Farrah', 'Santa Cruz', 'Contreras', '23456979', '950173689', 'mvcs_pnvr_fscc@viviendaext.pe'),
+(7, 'Ronald Adolfo', 'Carcausto', 'Ñaupa', '23456980', '993360139', 'ronaldcn767@gmail.com'),
+(7, 'Rossy', 'Marin', 'Condo', '23456981', '970972125', 'rossymaric@gmail.com'),
+(7, 'Sebastian', 'Tovar', 'Poma', '23456982', '990778531', 'sebasftp@gmail.com'),
+(7, 'Victor Hugo', 'Hilario', 'Sierra', '23456983', '974023817', 'vhhsierra@gmail.com'),
+(7, 'Irma', 'Vallejo', 'Vallejos', '23456984', '999957222', 'vallejoirma1028@gmail.com'),
+(7, 'Alex', 'Quispe', 'Aquino', '23456985', '900591334', 'le-aq-10@hotmail.com'),
+(7, 'Claudio', 'Hancco', 'Aguilar', '23456986', '950051043', 'gaclaudios@gmail.com'),
+(7, 'Noemi', 'Lima', 'Armuto', '23456987', '928222362', 'nlimaarmuto1@gmail.com'),
+(7, 'Eleonora E.', 'Montoya', 'Victoria', '23456988', '950728831', 'eleonoramvictoria@gmail.com'),
+(7, 'Luis Alberto', 'Lucumi', 'Lluncor', '23456989', '979914401', 'luislucumi1@gmail.com'),
+(7, 'Yajaida Anyela', 'Cuba', 'Salas', '23456990', '951373656', 'yajaidacuba3@gmail.com'),
+(7, 'Daisy Danelli', 'Daga', 'Mariño', '23456991', '983440913', 'deinitsy88.danelli@gmail.com'),
+(7, 'Sela Jimena', 'Contreras', 'Zambrano', '23456992', '975423766', 'selaj@hotmail.com'),
+(7, 'Judith Lucy', 'Trujillo', 'Tello', '23456993', '958716093', 'Jusytt@hotmail.com'),
+(7, 'Lesly Roxana', 'Canaza', 'Yancachajlla', '23456994', '959330002', 'lcanaza.18@gmail.com'),
+(7, 'Arlos', 'Orihuela', 'Chambi', '23456996', '953487871', 'carlosdanielo@gmail.com'),
+(7, 'Juan', 'Encinas', 'Aguilar', '23456997', '953871090', 'encinasconsultores@gmail.com'),
+(7, 'Brigida Susana', 'Mamani', 'Rodriguez', '23456998', '978494605', 'mvcs_pnvr_bsmr@viviendaext.pe'),
+(7, 'Manuel Ricardo', 'Quijhua', 'Gomez', '23456999', '957733006', 'Manuel.quijhua@gmail.com'),
+(7, 'Melly A.', 'Cutipa', 'Mamani', '23457000', '951753510', 'cutipamelly@gmail.com'),
+(7, 'Judith', 'Chambilla', 'Condori', '23457002', '999999999', 'judith.chc19@gmail.com'),
+(7, 'Judith', 'Chambilla', 'Condori', '23457003', '888888888', 'judith.chc19@gmail.com'),
+(7, 'Juan Carlos', 'Huarilloclla', 'Almanzae', '23457004', '974414511', 'juanhuarilloclla10@gmail.com'),
+(7, 'Mirian Maritza', 'Machaca', 'Quispe', '23457005', '999957222', 'ulemirian2016@gmail.com'),
+(7, 'Marliz Marily', 'Quispe', 'Paricahua', '23457006', '999989711', 'marily19.ccs@gmail.com'),
+(7, 'Anderson Homar', 'Sanchez', 'Guevara', '23457007', '971713776', 'ander.sg.1105@gmail.com'),
+(7, 'Liz Karen', 'Sanchez', 'Ortega', '23457008', '950000200', 'mvcs_pnvr_lkso@viviendaext.pe');
+
+
+
 INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES
 (8, 'Fanny Rossmery', 'Limaylla', 'Gutierrez', '00000067', '964508272', 'mvcs_pnvr_frlg@viviendaext.pe'),
 (8, 'Melvin Saul', 'Herrera', 'Villanueva', '00000068', '983403514', 'msherreravillanueva@gmail.com'),
 (8, 'Luis Alvaro', 'Castillo', 'Velo', '00000069', '955032749', 'acastillov.1618@gmail.com'),
 (8, 'Mirian Estefhany', 'Ascuña', 'Quiroga', '00000070', '999999999', 'mvcs_pnvr_meaq@viviendaext.pe');
+
+--new
+INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES
+(8, 'Heydi', 'Angoma', 'Ramos', '23457009', '992228105', 'mvcs_pnvr_har@viviendaext.pe'),
+(8, 'Marco Antonio', 'Luque', 'Ruelas', '23457010', '992509069', 'mvcs_pnvr_malr@viviendaext.pe'),
+(8, 'Ingrit Erika', 'Gutierrez', 'Quispe', '23457011', '974253926', 'ingrit.gutir@gmail.com'),
+(8, 'Gabriel', 'Cisneros', 'Silva', '23457012', '997791299', 'jibrael1287.gc@gmail.com'),
+(8, 'Nicolas Yerals', 'Matamoros', 'Cuicapuza', '23457013', '916302881', 'yerals1995@gmail.com'),
+(8, 'Julio Cesar', 'Cruz', 'Apaza', '23457014', '953744474', 'ing.cruz2979@gmail.com'),
+(8, 'Erik Jesus', 'Tipula', 'Zapata', '23457016', '929398039', 'erikzapata17@miinfo.click');
 
 
 INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES
@@ -336,6 +483,40 @@ INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dn
 (9, 'José Raúl', 'Chiroque', 'Pineda', '47608167', '955345891', 'jraul.cp7@hotmail.com'),
 (9, 'William Lui', 'Holgado', 'Velasquez', '41785805', '955534501', 'Ing.williamholgado@gmail.com');
 
+---new
+INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES
+(9, 'Sixto', 'Mamani', 'Vargas', '23457017', '974963707', 'sixtomv4@gmail.com'),
+(9, 'Yordin Darwin', 'Peña', 'Ledesma', '23457018', '931155654', 'nidroypled@gmail.com'),
+(9, 'Juan Oswaldo', 'Suaña', 'Mamani', '23457019', '950921079', 'owaldos@hotmail.com'),
+(9, 'Edy Eduardo', 'Cruz', 'Apaza', '23457020', '920040446', 'edyecruz.1310@gmail.com'),
+(9, 'Jesus Luis', 'Purilla', 'Velarde', '23457021', '966074966', 'jesus_purilla@hotmail.com'),
+(9, 'Ruben', 'Guerra', 'Graus', '23457022', '977617334', 'guerragraus@gmail.com'),
+(9, 'Efrain', 'Rojas', 'Poma', '23457023', '939731204', 'efrainrojaspoma38@gmail.com'),
+(9, 'Anny Melissa', 'Montellanos', 'Laos', '23457024', '953744474', 'annymontellanos@hotmail.com'),
+(9, 'Alfredo', 'Limaylla', 'Montalvo', '23457025', '968243446', 'allimon_09@hotmail.com'),
+(9, 'Cesar Manuel', 'Calero', 'Casimiro', '23457026', '939768983', 'caces_7@hotmail.com'),
+(9, 'Franklin', 'Apolinario', 'Fabian', '23457027', '990509770', 'apofranklin@gmail.com'),
+(9, 'Alexandrei Jamilton', 'Meza', 'Ariza', '23457028', '920721178', 'jamilton_meza@hotmail.com'),
+(9, 'Juan Manuel', 'Caceres', 'Chauca', '23457029', '995061492', 'juancacereschauca@yahoo.es'),
+(9, 'Percy Ildefonso', 'Vargas', '', '23457030', '955842134', 'per.ilde.var@gmail.com'),
+(9, 'Isaias', 'Quispe', 'Chahuayo', '23457031', '945703638', 'iqch89@gmail.com'),
+(9, 'Holguer', 'Romainville', 'Roffner', '23457032', '983279232', 'holromrof@gmail.com'),
+(9, 'Hugo Abel', 'Villaverde', 'Rafael', '23457033', '964806072', 'hvillaverde843@gmail.com'),
+(9, 'Rosa Vilma', 'Acho', 'Huamani', '23457034', '980172320', 'rosaacho@gmail.com'),
+(9, 'Jimy Guillermo', 'Chamorro', 'Huaman', '23457035', '951936795', 'ingcont_jimy@hotmail.com'),
+(9, 'Eliud Jonatan', 'Huarancca', 'Calizaya', '23457036', '998858507', 'ejhc35@gmail.com'),
+(9, 'Antonio', 'Miranda', 'Yarin', '23457037', '984169060', 'mirandayarinantonio@gmail.com'),
+(9, 'Juan Jose', 'Mancilla', 'Castilla', '23457038', '966886363', 'juanitoluz1974@hotmail.com'),
+(9, 'Hubert', 'Valencia', 'Gongora', '23457039', '964807250', 'hubersin@gmail.com'),
+(9, 'Miguel Jesus', 'Solorzano', 'Loroña', '23457040', '998942754', 'mglsolorzano@gmail.com'),
+(9, 'Carlos Americo', 'Rojas', 'Yllesca', '23457041', '939374818', 'caruzosale_04@hotmail.com'),
+(9, 'Ricarty Humberto', 'Chafloque', 'Carhuatanta', '23457042', '921740314', 'ricartyhumberto@gmail.com'),
+(9, 'Freddy Smith', 'Bermudo', 'Enciso', '23457043', '966684377', 'fre_bermudo@hotmail.com'),
+(9, 'Kriskna', 'Clemente', 'Cahuaya', '23457044', '952276278', 'ing.kriscc@gmail.com'),
+(9, 'Rolando', 'Quispe', 'Chahuayo', '23457045', '945887733', 'roland.qch@gmail.com'),
+(9, 'Mariela Estefany', 'Figueroa', 'Salazar', '23457046', '951123283', 'arqmefisa@gmail.com'),
+(9, 'Dante Claudio', 'Luque', 'Abarca', '23457047', '993488124', 'danteluquea7@gmail.com');
+
 INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES
 (10, 'Rene', 'Chura', 'Huisa', '25311813', '961729908', 'rene.ch.huisa@gmail.com'),
 (10, 'Jarwy Arturo', 'Gomez', 'Fasanando', '01126733', '932814410', 'jarwy20@gmail.com'),
@@ -520,6 +701,14 @@ INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dn
 (10, 'Jose Argenis', 'Reque', 'Barrios', '41920786', '935090565', 'argenis.rb83@gmail.com'),
 (10, 'Johnny Junior', 'Cruz', 'Leon', '70886908', '950664018', 'jcruzl_92@hotmail.com'),
 (10, 'Danner Eduardo', 'Amari', 'Mijahuanca', '71108262', '914930826', 'DANNEREDUAMARI@GMAIL.COM');
+
+--news
+INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES
+(10, 'Tito', 'Hoyos', 'Fernández', '23457048', '977124714', 'titohf62@gmail.com'),
+(10, 'Pedro Francisco', 'Vallejos', 'Monja', '23457049', '942924655', 'frank_vamo2@hotmail.com'),
+(10, 'Omar Lenin', 'Cuestas', 'Huallpa', '23457050', '998880706', 'omarcuestas19@gmail.com'),
+(10, 'Yeltzhin Efrain', 'Casachagua', 'Veliz', '23457051', '925651083', 'yeltzincv@gmail.com'),
+(10, 'Meliton Tito', 'Velasquez', 'Cruz', '23457052', '931166010', 'melivc_03@hotmail.com');
 
 -----
 
@@ -721,6 +910,13 @@ INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dn
 (11, 'Eduardo Miguel', 'Romo', 'García', '26685871', '973363343', 'edumig33@hotmail.com');
 
 
+---news
+INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES
+(11, 'Marco Antonio', 'Cantaro', 'Egusquiza', '23457053', '968866992', 'macae181284@gmail.com'),
+(11, 'Diana Vanessy', 'Sopan', 'Romero', '23457054', '997332945', 'dianavanessy@gmail.com'),
+(11, 'Javier Winston', 'Rodrigo', 'Adco', '23457055', '978933219', 'javierrodrigo_1602@hotmail.com');
+
+
 --
 -- Insert statements for the Personal table (Gestor Social, id_cargo = 12)
 INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES
@@ -898,6 +1094,12 @@ INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dn
 (12, 'Nestor Miguel', 'Terrones', 'Alfaro', '70016494', '933904908', 'nmterrones@gmail.com');
 
 
+--news
+INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES(12, 'Modesto Leonidas', 'Ramos', 'Chavez', '00000000', '986338595', 'modesracha@gmail.com');
+INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES(12, 'Ivan Felipe', 'Ordoñez', 'Santisteban', '00000000', '123456789', 'ivanoscus2@hotmail.com');
+
+
+
 INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES
 (13, 'Oswaldo Americo', 'Laguna', 'Espinoza', '10000001', '959525518', ' '),
 (13, 'Zolio Juan', 'Espinoza', 'Linan', '10000002', '957946122', ' '),
@@ -1037,7 +1239,91 @@ INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dn
 (13, 'Raul', 'Flores', 'Tisnado', '10000137', '992598531', ' '),
 (13, 'Antolin', 'Apaza', 'Apaza', '10000138', '', '');
 
----
+---new
+INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES
+(13, 'Benjamin Arturo', 'Castillo', 'Caqui', '23457056', '961377736', NULL),
+(13, 'William Hugo', 'Vega', 'Raymundo', '23457057', NULL, NULL),
+(13, 'Bardolio Rufino', 'Cruz', 'Rivera', '23457058', NULL, NULL),
+(13, 'Bello', 'Nicanor', 'Lopinta', '23457060', NULL, NULL),
+(13, 'Rosales', 'Huamani', 'Martinez', '23457061', NULL, NULL),
+(13, 'Delfina', 'Guzman', 'Antacayo', '23457063', NULL, NULL),
+(13, 'Florencia Clara', 'Calachua', 'Alcasihuaincha', '23457064', '957734366', NULL),
+(13, 'Herminio', 'Rojas', 'Muñoz', '23457065', NULL, NULL),
+(13, 'Jose Luis', 'Rodriguez', 'Hinostroza', '23457066', NULL, NULL),
+(13, 'Felix', 'Pacotaype', 'Nuñez', '23457067', NULL, NULL),
+(13, 'Eugenio', 'Jauregui', 'Huaman', '23457068', NULL, NULL),
+(13, 'Samuel', 'Zarate', 'Contreras', '23457069', NULL, NULL),
+(13, 'Arturo', 'Gomez', 'Chamorro', '23457070', NULL, NULL),
+(13, 'Francisco', 'Fernandez', 'Huanhuayo', '23457071', NULL, NULL),
+(13, 'Benito', 'Limache', 'Breña', '23457072', NULL, NULL),
+(13, 'Oscar', 'Cuadros', 'Trillo', '23457073', NULL, NULL),
+(13, 'Rufino', 'Basilio', 'Casio', '23457074', NULL, NULL),
+(13, 'Felipe', 'Reyes', 'Camara', '23457075', NULL, NULL),
+(13, 'Selso', 'Gamarra', 'Perez', '23457076', NULL, NULL),
+(13, 'Froylan', 'Roque', 'Ramirez', '23457077', NULL, NULL),
+(13, 'Paulino Lorenzo', 'Rubina', 'Miraval', '23457078', NULL, NULL),
+(13, 'Franklin Dany', 'Moran', 'Taipe', '23457079', NULL, NULL),
+(13, 'Arturo Clim', 'Berrospi', 'Daga', '23457080', NULL, NULL),
+(13, 'Jose', 'Ramos', 'Chambi', '23457081', NULL, NULL),
+(13, 'Luis Terencio', 'Cutipa', 'Catari', '23457082', NULL, NULL),
+(13, 'Tomas', 'Charca', 'Hancco', '23457083', '918899087', NULL),
+(13, 'Luis', 'Colquehuanca', 'Yucra', '23457084', '954158741', NULL),
+(13, 'Richard', 'Halanoca', 'Uchumaco', '23457085', NULL, NULL),
+(13, 'Lola', 'Quispe', 'Mamani De Zapata', '23457086', NULL, NULL),
+(13, 'Pantaleon', 'Aguilar', 'Ticona', '23457087', '982185776', NULL),
+(13, 'Ceferina', 'Chambi', 'Chavez', '23457088', '900367697', NULL),
+(13, 'Claudia Serafina', 'Zapana', 'Torococha', '23457089', '990890405', NULL),
+(13, 'Agustina', 'Calsin', 'Canaza', '23457090', '974395460', NULL),
+(13, 'Jaime Vidal', 'Calla', 'Quispe', '23457091', '965858505', NULL),
+(13, 'Edgar', 'Mancha', 'Mamani', '23457092', '950913653', NULL),
+(13, 'Luis Alberto', 'Mamani', 'Apaza', '23457093', '943082375', NULL),
+(13, 'Victor', 'Apaza', 'Sanca', '23457094', '931517192', NULL),
+(13, 'Diana Jenniffer', 'Quispe', 'Apaza', '23457095', '983890546', NULL),
+(13, 'Santusa', 'Ccaccala', 'Huaymeri', '23457096', '978963552', NULL),
+(13, 'Pedro Celestino', 'Samayani', 'Condo', '23457097', '958769502', NULL),
+(13, 'Eduardo', 'Llactarimay', 'Alferes', '23457098', '948715203', NULL),
+(13, 'Hernan', 'Aguilar', 'Yucra', '23457099', '959081963', NULL),
+(13, 'Armando', 'Salon', 'Muñoz', '23457100', '971099783', NULL),
+(13, 'Washington', 'Sanchez', 'Mar', '23457101', '947087543', NULL),
+(13, 'Romel', 'Mamani', 'Palomino', '23457102', '972406552', NULL),
+(13, 'Zeila', 'Rivas', 'Chacon', '23457103', '933702511', NULL),
+(13, 'Dennys Moises', 'Tapia', 'Shumpate', '23457104', '929264297', NULL),
+(13, 'Wilson', 'Parado', 'Llanco', '23457105', '959091849', NULL),
+(13, 'Leandro', 'Marzano', 'Mori', '23457106', '920764215', NULL),
+(13, 'Lucio', 'Alberto', 'Motiquiri', '23457107', '979185925', NULL),
+(13, 'Walter', 'Contreras', 'Torero', '23457108', '925668113', NULL),
+(13, 'Luciano', 'Campos', 'Lola', '23457109', '944401957', NULL),
+(13, 'Julio', 'Chuño', 'Mishicoli', '23457110', '900128211', NULL),
+(13, 'Chapiama', 'Saticonatzi', 'Ampati', '23457111', '932817092', NULL),
+(13, 'Isaias', 'Campos', 'Shimpointi', '23457112', '966695385', NULL),
+(13, 'Jadmer', 'Campos', 'Peco', '23457113', '936395913', NULL),
+(13, 'Walter Luis', 'Flores', 'Lopez', '23457114', '975608821', NULL),
+(13, 'Elio', 'Crespo', 'Huarita', '23457115', '917989302', NULL),
+(13, 'Jucias', 'Aguilar', 'Quispe', '23457116', '926443805', NULL),
+(13, 'Zacarias', 'Torres', 'Bendita', '23457117', '926001045', NULL),
+(13, 'Graciano', 'Quispe', 'Cardenas', '23457118', '959282207', NULL),
+(13, 'Edwin', 'Roman', 'Sanchez', '23457119', NULL, NULL),
+(13, 'Misael', 'Bendita', 'Manchinari', '23457120', '931445790', NULL),
+(13, 'Willin', 'Sinturi', 'Tihuay', '23457121', '984806319', NULL),
+(13, 'Zenon Edgar', 'Anccasi', 'Chura', '23457122', '950723870', NULL),
+(13, 'Jacinto Eusebio', 'Juarez', 'Arpita', '23457123', '951146249', NULL),
+(13, 'Felicitas Alejandrina', 'Juarez', 'Mamani', '23457124', '920490807', NULL),
+(13, 'Juvinal Edwin', 'Huanca', 'Mayta', '23457125', '967052711', NULL),
+(13, 'Cristobal', 'Larico', 'Borda', '23457126', '960531453', NULL),
+(13, 'Juan', 'Aquise', 'Pari', '23457127', '917266636', NULL),
+(13, 'Domingo', 'Quispe', 'Belizario', '23457128', '987342105', NULL),
+(13, 'Tomas Julian', 'Yunca', 'Riva', '23457129', '950425413', NULL),
+(13, 'Vidal', 'Limachi', 'Laura', '23457130', '901581080', NULL),
+(13, 'Delvis Roy', 'Anchiraico', 'Cosios', '23457131', '954903223', NULL),
+(13, 'Francisco', 'Adriano', 'Renteria', '23457132', '916852654', NULL),
+(13, 'Lorenzo', 'Castillo', 'Facundo', '23457133', NULL, NULL),
+(13, 'Artemio', 'Facundo', 'Pongo', '23457134', '921005403', NULL),
+(13, 'Grimaldo Dubal', 'Martinez', 'Peña', '23457135', '969309111', NULL),
+(13, 'Noe Rober', 'Velasquez', 'Ojeda', '23457136', '913426386', NULL),
+(13, 'Juan Armando', 'Ocaña', 'Neyra', '23457137', '917231532', NULL),
+(13, 'Cristobal', 'Muñoz', 'Tello', '23457138', '900872038', NULL),
+(13, 'Antonio', 'Vasquez', 'Muñoz', '23457139', '918964740', NULL);
+
 
 INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo)
 VALUES 
@@ -1260,6 +1546,9 @@ VALUES
 (14, 'Anny Marita', 'Constantino', 'Sanchez', NULL, '955646101', NULL);
 
 
+--new
+INSERT INTO [Personal] (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo) VALUES
+(14, 'Esteban', 'Choqquepura', 'Chino', '23457140', NULL, NULL);
 
 --
 
@@ -1280,12 +1569,12 @@ VALUES
 (15, 'Eva',                 'Chilo',    'Chuchullo', NULL, '973129304', NULL),
 (15, 'Nabel Soyana',        'Camargo', 'Chuctaya', NULL, '963234860', NULL),
 (15, 'Margarita',           'Achire', 'Carlos', NULL, '901942499', NULL),
-(15, 'Leandro Brigida',     'Chancayauri', 'Defaul', NULL, '900312635', NULL),
+(15, 'Leandro Brigida',     'Chancayauri', NULL, NULL, '900312635', NULL),
 (15, 'Hermelinda',          'Huanaco', 'Condori', NULL, '986317328', NULL),
 (15, 'Rosmery',             'Ccapa', 'Cayllahua', NULL, '914876026', NULL),
 (15, 'Sonia',               'Alvarez', 'Ataulluco', NULL, '910434357', NULL),
 (15, 'Rebeca', '            Sedano', 'Quispe', NULL, '997302647', NULL),
-(15, 'Victoria Izarra',     'Saltachin', 'No tiene', NULL, '956654557', NULL),
+(15, 'Victoria Izarra',     'Saltachin', NULL, NULL, '956654557', NULL),
 (15, 'Juana'                , 'Apaza', 'Laura', NULL, '950878128', NULL),
 (15, 'Yony Purifina', 'Sauñe', 'Andia', NULL, NULL, NULL),
 (15, 'Irene', 'Huayllasco', 'Pillaca', NULL, '921900987', NULL),
