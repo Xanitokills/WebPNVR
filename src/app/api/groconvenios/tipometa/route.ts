@@ -36,7 +36,7 @@ export async function GET() {
     const pool = await sql.connect(configuracion);
     const resultado = await pool
       .request()
-      .query("SELECT * FROM [dbo].[Tipos_Meta]");
+      .query("SELECT * FROM [dbo].[PNVR_Tipos_Meta]");
     return NextResponse.json(resultado.recordset);
   } catch (error) {
     console.error("Error en la consulta GET:", error);
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
       .request()
       .input("descripcion", sql.NVarChar(255), body.descripcion)
       .query(
-        "INSERT INTO [dbo].[Tipos_Meta] (descripcion) VALUES (@descripcion); SELECT SCOPE_IDENTITY() as id_Tipo_Meta"
+        "INSERT INTO [dbo].[PNVR_Tipos_Meta] (descripcion) VALUES (@descripcion); SELECT SCOPE_IDENTITY() as id_Tipo_Meta"
       );
     const newId = result.recordset[0].id_Tipo_Meta;
     const newTipoMeta = { id_Tipo_Meta: newId, descripcion: body.descripcion };

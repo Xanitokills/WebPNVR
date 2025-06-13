@@ -2,7 +2,6 @@
 import React, { useState } from "react";
 import TableAdmin from "../../../../../components/TableAdmin";
 
-
 interface Grupo {
   id_grupo: number;
   nombre: string;
@@ -33,6 +32,11 @@ interface TipoFenomeno {
   estado: number | null;
 }
 
+interface Estado {
+  id_estado_conv: number;
+  descripcion: string;
+}
+
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState("grupo");
 
@@ -44,7 +48,6 @@ const AdminDashboard = () => {
         fields={[
           { key: "nombre", label: "Nombre del grupo" },
           { key: "estado", label: "Estado", type: "select", options: [
-            { value: "", label: "Seleccione estado" },
             { value: "1", label: "Activo" },
             { value: "0", label: "Inactivo" },
           ]},
@@ -64,7 +67,6 @@ const AdminDashboard = () => {
         fields={[
           { key: "descripcion", label: "Descripción del tipo de meta" },
           { key: "estado", label: "Estado", type: "select", options: [
-            { value: "", label: "Seleccione estado" },
             { value: "1", label: "Activo" },
             { value: "0", label: "Inactivo" },
           ]},
@@ -77,7 +79,7 @@ const AdminDashboard = () => {
             key: "estado", 
             label: "Estado", 
             transform: (value: number | null) => value === 1 ? "Activo" : value === 0 ? "Inactivo" : "No definido" 
-          },
+          }
         ]}
       />
     )},
@@ -88,20 +90,19 @@ const AdminDashboard = () => {
         fields={[
           { key: "descripcion", label: "Descripción del tipo de intervención" },
           { key: "estado", label: "Estado", type: "select", options: [
-            { value: "", label: "Seleccione estado" },
             { value: "1", label: "Activo" },
             { value: "0", label: "Inactivo" },
-          ]},      
+          ]}      
         ]}
-        keyField="id_tipo_intervencion"
+        keyField="id_Tipo_Intervencion"
         displayFields={[
-          { key: "id_tipo_intervencion", label: "ID" },
+          { key: "id_Tipo_Intervencion", label: "ID" },
           { key: "descripcion", label: "Descripción" },
           { 
             key: "estado", 
             label: "Estado", 
             transform: (value: number | null) => value === 1 ? "Activo" : value === 0 ? "Inactivo" : "No definido" 
-          },
+          }
         ]}
       />
     )},
@@ -109,22 +110,22 @@ const AdminDashboard = () => {
       <TableAdmin<TipoMaterial>
         apiUrl="groconvenios/tipomaterial"
         entityName="Tipo Material"
-        fields={[{ key: "descripcion", label: "Descripción del tipo de material" },
+        fields={[
+          { key: "descripcion", label: "Descripción del tipo de material" },
           { key: "estado", label: "Estado", type: "select", options: [
-            { value: "", label: "Seleccione estado" },
             { value: "1", label: "Activo" },
             { value: "0", label: "Inactivo" },
-          ]},      
+          ]}      
         ]}
-        keyField="id_tipo_material"
+        keyField="id_Tipo_Material"
         displayFields={[
-          { key: "id_tipo_material", label: "ID" },
+          { key: "id_Tipo_Material", label: "ID" },
           { key: "descripcion", label: "Descripción" },
           { 
             key: "estado", 
             label: "Estado", 
             transform: (value: number | null) => value === 1 ? "Activo" : value === 0 ? "Inactivo" : "No definido" 
-          },
+          }
         ]}
       />
     )},
@@ -135,13 +136,10 @@ const AdminDashboard = () => {
         fields={[
           { key: "descripcion", label: "Descripción del tipo de fenómeno" },
           { key: "estado", label: "Estado", type: "select", options: [
-            { value: "", label: "Seleccione estado" },
             { value: "1", label: "Activo" },
             { value: "0", label: "Inactivo" },
-          ]},
-        
+          ]}
         ]}
-          
         keyField="id_tipo_fenomeno"
         displayFields={[
           { key: "id_tipo_fenomeno", label: "ID" },
@@ -150,7 +148,25 @@ const AdminDashboard = () => {
             key: "estado", 
             label: "Estado", 
             transform: (value: number | null) => value === 1 ? "Activo" : value === 0 ? "Inactivo" : "No definido" 
-          },
+          }
+        ]}
+      />
+    )},
+    { id: "estado", label: "Estados", apiUrl: "groconvenios/estado", component: (
+      <TableAdmin<Estado>
+        apiUrl="groconvenios/estado"
+        entityName="Estado"
+        fields={[
+          { key: "descripcion", label: "Descripción del estado" },
+            { key: "estado", label: "Estado", type: "select", options: [
+            { value: "1", label: "Activo" },
+            { value: "0", label: "Inactivo" },
+          ]}
+        ]}
+        keyField="id_estado"
+        displayFields={[
+          { key: "id_estado", label: "ID" },
+          { key: "descripcion", label: "Descripción" },
         ]}
       />
     )},
@@ -178,7 +194,7 @@ const AdminDashboard = () => {
             ))}
           </ul>
         </div>
-        <div>
+        <div className="w-full">
           {tabs.find((tab) => tab.id === activeTab)?.component}
         </div>
       </div>

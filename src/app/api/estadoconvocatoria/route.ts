@@ -34,7 +34,7 @@ export async function GET() {
     const pool = await sql.connect(configuracion);
     const result = await pool.request().query(`
       SELECT id_estado, estado
-      FROM [PNVR].[dbo].[Estado_Convocatoria]
+      FROM [PNVR].[dbo].[PNVR_Estado_Convocatoria]
     `);
 
     return NextResponse.json(result.recordset);

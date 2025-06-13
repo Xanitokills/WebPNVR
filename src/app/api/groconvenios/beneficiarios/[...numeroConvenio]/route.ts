@@ -49,7 +49,7 @@ export async function GET(request: NextRequest, context: { params: Promise<{ num
           [Reprogramación], [Cartera], [Tipo], [Programación Linea Base 1], [Sectoristas], [Fecha Inicio Proyectada],
           [Fecha Termino Proyectada], [Transferencia PNVR], [Aporte del beneficiario], [Costo Total], [Monto Liquidacion],
           [calculo]
-        FROM [DB-PNVR].[dbo].[BD_Beneficiario]
+        FROM [DB-PNVR].[dbo].[PNVR_BD_Beneficiario]
         WHERE [Número de Convenio] = @numeroConvenio
       `);
     return NextResponse.json(resultado.recordset);
@@ -216,7 +216,7 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ num
       .input('MontoLiquidacion', sql.NVarChar(255), MontoLiquidacion || null)
       .input('calculo', sql.NVarChar(255), calculo || null)
       .query(`
-        UPDATE [DB-PNVR].[dbo].[BD_Beneficiario]
+        UPDATE [DB-PNVR].[dbo].[PNVR_BD_Beneficiario]
         SET 
           [Departamento] = @Departamento,
           [Provincia] = @Provincia,

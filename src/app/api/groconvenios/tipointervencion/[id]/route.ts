@@ -69,7 +69,7 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
     }
 
     const query = `
-      UPDATE [dbo].[Tipo_Intervencion]
+      UPDATE [dbo].[PNVR_Tipo_Intervencion]
       SET descripcion = @descripcion
       ${body.estado !== undefined ? ", estado = @estado" : ""}
       WHERE id_tipo_intervencion = @id_tipo_intervencion
@@ -111,7 +111,7 @@ export async function DELETE(request: NextRequest, context: { params: Promise<{ 
     const result = await pool
       .request()
       .input("id", sql.Int, id)
-      .query("DELETE FROM [dbo].[Tipo_Intervencion] WHERE id_tipo_intervencion = @id");
+      .query("DELETE FROM [dbo].[PNVR_Tipo_Intervencion] WHERE id_tipo_intervencion = @id");
 
     if (result.rowsAffected[0] === 0) {
       return NextResponse.json({ error: "Tipo de intervención no encontrado" }, { status: 404 });

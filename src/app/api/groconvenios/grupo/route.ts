@@ -36,7 +36,7 @@ export async function GET() {
     const pool = await sql.connect(config);
     const result = await pool
       .request()
-      .query("SELECT * FROM [dbo].[Grupo]"); // Simplifiqué la consulta eliminando [PNVR] ya que el database se especifica en la conexión
+      .query("SELECT * FROM [dbo].[PNVR_Grupo]"); // Simplifiqué la consulta eliminando [PNVR] ya que el database se especifica en la conexión
     return NextResponse.json(result.recordset);
   } catch (error) {
     console.error("Error en la consulta GET:", error);
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
       .input("nombre", sql.NVarChar(100), body.nombre)
       .input("estado", sql.Int, body.estado || null)
       .query(
-        "INSERT INTO [dbo].[Grupo] (nombre, estado) VALUES (@nombre, @estado); SELECT SCOPE_IDENTITY() as id_grupo"
+        "INSERT INTO [dbo].[PNVR_Grupo] (nombre, estado) VALUES (@nombre, @estado); SELECT SCOPE_IDENTITY() as id_grupo"
       );
     const newId = result.recordset[0].id_grupo;
     const newGrupo = { id_grupo: newId, nombre: body.nombre, estado: body.estado || null };

@@ -79,7 +79,7 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
     }
 
     const query = `
-      UPDATE [dbo].[Tipo_Convocatoria]
+      UPDATE [dbo].[PNVR_Tipo_Convocatoria]
       SET descripcion = @descripcion,
           nombre = @nombre
       ${body.estado !== undefined ? ", estado = @estado" : ""}
@@ -126,7 +126,7 @@ export async function DELETE(request: NextRequest, context: { params: Promise<{ 
     const result = await pool
       .request()
       .input("id", sql.Int, id)
-      .query("DELETE FROM [dbo].[Tipo_Convocatoria] WHERE id_tipo = @id");
+      .query("DELETE FROM [dbo].[PNVR_Tipo_Convocatoria] WHERE id_tipo = @id");
 
     if (result.rowsAffected[0] === 0) {
       return NextResponse.json({ error: "Registro no encontrado" }, { status: 404 });

@@ -65,7 +65,7 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
       .input("nombre", sql.NVarChar(100), body.nombre)
       .input("estado", sql.Int, body.estado !== undefined ? body.estado : null)
       .query(
-        "UPDATE [dbo].[Grupo] SET nombre = @nombre, estado = @estado WHERE id_grupo = @id"
+        "UPDATE [dbo].[PNVR_Grupo] SET nombre = @nombre, estado = @estado WHERE id_grupo = @id"
       );
 
     if (result.rowsAffected[0] === 0) {
@@ -98,7 +98,7 @@ export async function DELETE(request: NextRequest, context: { params: Promise<{ 
     const result = await pool
       .request()
       .input("id", sql.Int, id)
-      .query("DELETE FROM [dbo].[Grupo] WHERE id_grupo = @id");
+      .query("DELETE FROM [dbo].[PNVR_Grupo] WHERE id_grupo = @id");
 
     if (result.rowsAffected[0] === 0) {
       return NextResponse.json({ error: "Grupo no encontrado" }, { status: 404 });

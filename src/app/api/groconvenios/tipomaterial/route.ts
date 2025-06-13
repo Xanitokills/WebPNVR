@@ -36,7 +36,7 @@ export async function GET() {
     const pool = await sql.connect(configuracion);
     const resultado = await pool
       .request()
-      .query("SELECT id_tipo_material, descripcion, estado FROM [dbo].[Tipo_Material]");
+      .query("SELECT id_tipo_material, descripcion, estado FROM [dbo].[PNVR_Tipo_Material]");
     return NextResponse.json(resultado.recordset);
   } catch (error) {
     console.error("Error en la consulta GET:", error);
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
       .input("descripcion", sql.NVarChar(100), body.descripcion)
       .input("estado", sql.Int, body.estado !== undefined ? body.estado : null)
       .query(
-        "INSERT INTO [dbo].[Tipo_Material] (descripcion, estado) VALUES (@descripcion, @estado); SELECT SCOPE_IDENTITY() as id_tipo_material"
+        "INSERT INTO [dbo].[PNVR_Tipo_Material] (descripcion, estado) VALUES (@descripcion, @estado); SELECT SCOPE_IDENTITY() as id_tipo_material"
       );
 
     const newId = result.recordset[0].id_tipo_material;

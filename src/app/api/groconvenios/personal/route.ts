@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
       .input("correo", sql.NVarChar(100), body.correo || null)
       .input("profesion", sql.NVarChar(100), body.profesion || null)
       .query(`
-        INSERT INTO [${process.env.DB_NAME}].[dbo].[Personal] 
+        INSERT INTO [${process.env.DB_NAME}].[dbo].[PNVR_Personal] 
         (id_cargo, nombre, Apellido_Paterno, Apellido_Materno, dni, celular, correo, profesion) 
         VALUES (@id_cargo, @nombre, @Apellido_Paterno, @Apellido_Materno, @dni, @celular, @correo, @profesion); 
         SELECT SCOPE_IDENTITY() as id_personal

@@ -4,8 +4,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "../context/SidebarContext";
-import { ChevronDownIcon, TableIcon, HorizontaLDots } from "../icons/index";
+import { ChevronDownIcon, TableIcon, HorizontaLDots, BoltIcon, DocsIcon, ChevronLeftIcon, CopyIcon } from "../icons/index";
 import SidebarWidget from "./SidebarWidget";
+import { FaPlusSquare, FaTools } from "react-icons/fa";
 
 type NavItem = {
   name: string;
@@ -19,7 +20,7 @@ type NavItem = {
 const navItems: NavItem[] = [
   {
     name: "UGS",
-    icon: <TableIcon />,
+    icon: <DocsIcon />,
     subItems: [
       {
         name: "Focalización y Priorización",
@@ -40,18 +41,36 @@ const navItems: NavItem[] = [
   },
   {
     name: "UGT",
-    icon: <TableIcon />,
+    icon: <FaTools />,
     subItems: [
+        {
+        name: "Herrramientas de Control",
+        icon: <TableIcon />,
+        subItems: [
+          { name: "Cuaderno de Obra", path: "/UGT/Cuaderno_obra", pro: false },
+        ],
+      },
+        {
+        name: "Seguimiento y Repotes de Convenios",
+        icon: <TableIcon />,
+        subItems: [
+          { name: "Subir Expediente", path: "/UGT/expediente/subir-expediente", pro: false },
+          { name: "Ver Expediente", path: "/UGT/expediente/ver-expediente", pro: false },
+          { name: "Administrar Parámetros", path: "/UGT/expediente/administrar-parametros", pro: false },
+          { name: "Presupuesto", path: "/UGT/expediente/presupuesto", pro: false },
+        ],
+      },
         {
         name: "Expediente",
         icon: <TableIcon />,
         subItems: [
-          { name: "Subir Expediente", path: "/expediente/subir-expediente", pro: false },
-          { name: "Ver Expediente", path: "/expediente/ver-expediente", pro: false },
-          { name: "Administrar Parámetros", path: "/expediente/administrar-parametros", pro: false },
-          { name: "Presupuesto", path: "/expediente/presupuesto", pro: false },
+          { name: "Subir Expediente", path: "/UGT/expediente/subir-expediente", pro: false },
+          { name: "Ver Expediente", path: "/UGT/expediente/ver-expediente", pro: false },
+          { name: "Administrar Parámetros", path: "/UGT/expediente/administrar-parametros", pro: false },
+          { name: "Presupuesto", path: "/UGT/expediente/presupuesto", pro: false },
         ],
       },
+
       {
         name: "Convenios",
         icon: <TableIcon />,
@@ -65,7 +84,7 @@ const navItems: NavItem[] = [
   },
    {
     name: "UATS",
-    icon: <TableIcon />,
+    icon: <CopyIcon />,
     subItems: [
         {
         name: "Expediente",

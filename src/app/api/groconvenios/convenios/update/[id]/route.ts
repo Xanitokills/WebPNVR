@@ -71,7 +71,7 @@ export async function PUT(
 
     // Verificar si el convenio existe y no está finalizado
     const checkQuery = `
-      SELECT id_estado FROM [${envVars.DB_NAME}].[dbo].[Convenios] WHERE id_convenio = @id
+      SELECT id_estado FROM [${envVars.DB_NAME}].[dbo].[PNVR_Convenios] WHERE id_convenio = @id
     `;
     request.input("id", sql.NVarChar(50), id);
     const checkResult = await request.query(checkQuery);
@@ -185,7 +185,7 @@ export async function PUT(
     }
 
     const query = `
-      UPDATE [${envVars.DB_NAME}].[dbo].[Convenios]
+      UPDATE [${envVars.DB_NAME}].[dbo].[PNVR_Convenios]
       SET ${updates.join(", ")}
       OUTPUT INSERTED.*
       WHERE id_convenio = @id_convenio
@@ -202,7 +202,7 @@ export async function PUT(
       await pool.request()
         .input("id_convenio", sql.NVarChar(50), id)
         .query(`
-          DELETE FROM [${envVars.DB_NAME}].[dbo].[convenio_personal]
+          DELETE FROM [${envVars.DB_NAME}].[dbo].[PNVR_convenio_personal]
           WHERE id_convenio = @id_convenio
         `);
 
@@ -211,7 +211,7 @@ export async function PUT(
         const cargoResult = await pool.request()
           .input("descripcion", sql.NVarChar(255), asignacion.cargo)
           .query(`
-            SELECT id_cargo FROM [${envVars.DB_NAME}].[dbo].[cargo]
+            SELECT id_cargo FROM [${envVars.DB_NAME}].[dbo].[PNVR_cargo]
             WHERE descripcion = @descripcion
           `);
 
@@ -231,7 +231,7 @@ export async function PUT(
           .input("fecha_inicio", sql.Date, new Date(asignacion.fecha_inicio))
           .input("fecha_fin", sql.Date, asignacion.fecha_fin ? new Date(asignacion.fecha_fin) : null)
           .query(`
-            INSERT INTO [${envVars.DB_NAME}].[dbo].[convenio_personal]
+            INSERT INTO [${envVars.DB_NAME}].[dbo].[PNVR_convenio_personal]
             (id_convenio, id_personal, id_cargo, fecha_inicio, fecha_fin)
             VALUES (@id_convenio, @id_personal, @id_cargo, @fecha_inicio, @fecha_fin)
           `);

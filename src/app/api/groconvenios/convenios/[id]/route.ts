@@ -127,20 +127,20 @@ export async function GET(
           dis.[nombre_Distrito] AS Distrito,
           p.[nombre_Provincia] AS Provincia,
           d.[nombre_Departamento] AS Departamento
-        FROM [${envVars.DB_NAME}].[dbo].[Convenios] c
-        LEFT JOIN [${envVars.DB_NAME}].[dbo].[Grupo] g ON c.[id_grupo] = g.[id_grupo]
-        LEFT JOIN [${envVars.DB_NAME}].[dbo].[Tipo_Intervencion] ti ON c.[id_tipo_intervencion] = ti.[id_tipo_intervencion]
-        LEFT JOIN [${envVars.DB_NAME}].[dbo].[Programa_Presupuestal] pp ON c.[id_programa_presupuestal] = pp.[id_programa_presupuestal]
-        LEFT JOIN [${envVars.DB_NAME}].[dbo].[Tipo_Fenomeno] tf ON c.[id_tipo_fenomeno] = tf.[id_tipo_fenomeno]
-        LEFT JOIN [${envVars.DB_NAME}].[dbo].[Tipo_Material] tm ON c.[id_tipo_material] = tm.[id_tipo_material]
-        LEFT JOIN [${envVars.DB_NAME}].[dbo].[Estado_Conv] ec ON c.[id_estado] = ec.[id_estado]
-        LEFT JOIN [${envVars.DB_NAME}].[dbo].[Sub_Estado_Conv] sec ON c.[id_sub_estado] = sec.[id_sub_estado]
-        LEFT JOIN [${envVars.DB_NAME}].[dbo].[Priorizaciones] pr ON c.[id_priorizacion] = pr.[id_priorizacion]
-        LEFT JOIN [${envVars.DB_NAME}].[dbo].[Tipos_Meta] tme ON c.[id_tipo_meta] = tme.[id_tipo_meta]
-        LEFT JOIN [${envVars.DB_NAME}].[dbo].[Localidad] l ON c.[id_Localidad] = l.[id_Localidad]
-        LEFT JOIN [${envVars.DB_NAME}].[dbo].[Distrito] dis ON c.[id_Distrito] = dis.[id_Distrito]
-        LEFT JOIN [${envVars.DB_NAME}].[dbo].[Provincia] p ON c.[id_Provincia] = p.[id_Provincia]
-        LEFT JOIN [${envVars.DB_NAME}].[dbo].[Departamento] d ON c.[id_Departamento] = d.[id_Departamento]
+        FROM [${envVars.DB_NAME}].[dbo].[PNVR_Convenios] c
+        LEFT JOIN [${envVars.DB_NAME}].[dbo].[PNVR_Grupo] g ON c.[id_grupo] = g.[id_grupo]
+        LEFT JOIN [${envVars.DB_NAME}].[dbo].[PNVR_Tipo_Intervencion] ti ON c.[id_tipo_intervencion] = ti.[id_tipo_intervencion]
+        LEFT JOIN [${envVars.DB_NAME}].[dbo].[PNVR_Programa_Presupuestal] pp ON c.[id_programa_presupuestal] = pp.[id_programa_presupuestal]
+        LEFT JOIN [${envVars.DB_NAME}].[dbo].[PNVR_Tipo_Fenomeno] tf ON c.[id_tipo_fenomeno] = tf.[id_tipo_fenomeno]
+        LEFT JOIN [${envVars.DB_NAME}].[dbo].[PNVR_Tipo_Material] tm ON c.[id_tipo_material] = tm.[id_tipo_material]
+        LEFT JOIN [${envVars.DB_NAME}].[dbo].[PNVR_Estado_Conv] ec ON c.[id_estado] = ec.[id_estado]
+        LEFT JOIN [${envVars.DB_NAME}].[dbo].[PNVR_Sub_Estado_Conv] sec ON c.[id_sub_estado] = sec.[id_sub_estado]
+        LEFT JOIN [${envVars.DB_NAME}].[dbo].[PNVR_Priorizaciones] pr ON c.[id_priorizacion] = pr.[id_priorizacion]
+        LEFT JOIN [${envVars.DB_NAME}].[dbo].[PNVR_Tipos_Meta] tme ON c.[id_tipo_meta] = tme.[id_tipo_meta]
+        LEFT JOIN [${envVars.DB_NAME}].[dbo].[PNVR_Localidad] l ON c.[id_Localidad] = l.[id_Localidad]
+        LEFT JOIN [${envVars.DB_NAME}].[dbo].[PNVR_Distrito] dis ON c.[id_Distrito] = dis.[id_Distrito]
+        LEFT JOIN [${envVars.DB_NAME}].[dbo].[PNVR_Provincia] p ON c.[id_Provincia] = p.[id_Provincia]
+        LEFT JOIN [${envVars.DB_NAME}].[dbo].[PNVR_Departamento] d ON c.[id_Departamento] = d.[id_Departamento]
         WHERE c.[id_convenio] = @id_convenio
       `);
 
@@ -163,9 +163,9 @@ export async function GET(
           ca.descripcion AS cargo,
           cp.fecha_inicio,
           cp.fecha_fin
-        FROM [${envVars.DB_NAME}].[dbo].[convenio_personal] cp
-        JOIN [${envVars.DB_NAME}].[dbo].[personal] p ON cp.id_personal = p.id_personal
-        JOIN [${envVars.DB_NAME}].[dbo].[cargo] ca ON cp.id_cargo = ca.id_cargo
+        FROM [${envVars.DB_NAME}].[dbo].[PNVR_convenio_personal] cp
+        JOIN [${envVars.DB_NAME}].[dbo].[PNVR_personal] p ON cp.id_personal = p.id_personal
+        JOIN [${envVars.DB_NAME}].[dbo].[PNVR_cargo] ca ON cp.id_cargo = ca.id_cargo
         WHERE cp.id_convenio = @id_convenio
       `);
 

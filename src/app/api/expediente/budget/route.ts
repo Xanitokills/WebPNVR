@@ -48,13 +48,13 @@ export async function GET(request: NextRequest) {
     // Obtener categorías
     const categoriesResult = await pool.query(`
       SELECT CategoriaID, NombreCategoria
-      FROM [dbo].[CategoriasPresupuesto]
+      FROM [dbo].[PNVR_CategoriasPresupuesto]
     `);
 
     // Obtener subcategorías
     const subcategoriesResult = await pool.query(`
       SELECT SubcategoriaID, CategoriaID, NombreSubcategoria AS Descripción
-      FROM [dbo].[SubcategoriasPresupuesto]
+      FROM [dbo].[PNVR_SubcategoriasPresupuesto]
     `);
 
     // Obtener ítems detallados
@@ -63,9 +63,9 @@ export async function GET(request: NextRequest) {
       .input('id_convenio', sql.Int, parseInt(id_convenio))
       .query(`
         SELECT ip.ItemPresupuestoID, ip.id_convenio, ip.CategoriaID, ip.SubcategoriaID, ip.CodigoItem, ip.Descripcion, ip.Unidad, ip.Cantidad AS Metrado, ip.PrecioUnitario, ip.CostoTotal, cp.NombreCategoria, sp.NombreSubcategoria
-        FROM [dbo].[ItemsPresupuesto] ip
-        LEFT JOIN [dbo].[CategoriasPresupuesto] cp ON ip.CategoriaID = cp.CategoriaID
-        LEFT JOIN [dbo].[SubcategoriasPresupuesto] sp ON ip.SubcategoriaID = sp.SubcategoriaID
+        FROM [dbo].[PNVR_ItemsPresupuesto] ip
+        LEFT JOIN [dbo].[PNVR_CategoriasPresupuesto] cp ON ip.CategoriaID = cp.CategoriaID
+        LEFT JOIN [dbo].[PNVR_SubcategoriasPresupuesto] sp ON ip.SubcategoriaID = sp.SubcategoriaID
         WHERE ip.id_convenio = @id_convenio
         ORDER BY ip.CodigoItem
       `);

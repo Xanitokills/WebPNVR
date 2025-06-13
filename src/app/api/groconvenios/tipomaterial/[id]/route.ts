@@ -69,7 +69,7 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
     }
 
     const query = `
-      UPDATE [dbo].[Tipo_Material]
+      UPDATE [dbo].[PNVR_Tipo_Material]
       SET descripcion = @descripcion
       ${body.estado !== undefined ? ", estado = @estado" : ""}
       WHERE id_tipo_material = @id_tipo_material
@@ -111,7 +111,7 @@ export async function DELETE(request: NextRequest, context: { params: Promise<{ 
     const result = await pool
       .request()
       .input("id", sql.Int, id)
-      .query("DELETE FROM [dbo].[Tipo_Material] WHERE id_tipo_material = @id");
+      .query("DELETE FROM [dbo].[PNVR_Tipo_Material] WHERE id_tipo_material = @id");
 
     if (result.rowsAffected[0] === 0) {
       return NextResponse.json({ error: "Tipo de material no encontrado" }, { status: 404 });

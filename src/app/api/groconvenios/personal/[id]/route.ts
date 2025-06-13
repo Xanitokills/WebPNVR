@@ -76,11 +76,11 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
       .input("cargo", sql.NVarChar, body.cargo)
       .input("fecha_fin", sql.Date, body.fecha_fin || null)
       .query(`
-        UPDATE [${process.env.DB_NAME}].[dbo].[Convenio_personal]
+        UPDATE [${process.env.DB_NAME}].[dbo].[PNVR_Convenio_personal]
         SET fecha_fin = @fecha_fin
         WHERE id_convenio = @id_convenio
           AND id_persona = @id_persona
-          AND id_cargo = (SELECT id_cargo FROM [${process.env.DB_NAME}].[dbo].[Cargo] WHERE descripcion = @cargo)
+          AND id_cargo = (SELECT id_cargo FROM [${process.env.DB_NAME}].[dbo].[PNVR_Cargo] WHERE descripcion = @cargo)
           AND fecha_fin IS NULL
       `);
 

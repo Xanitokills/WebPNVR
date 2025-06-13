@@ -76,7 +76,7 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
 
       if (updatesConvocatoria.length > 0) {
         const queryConvocatoria = `
-          UPDATE [PNVR].[dbo].[Convocatoria] 
+          UPDATE [PNVR].[dbo].[PNVR_Convocatoria] 
           SET ${updatesConvocatoria.join(", ")} 
           OUTPUT INSERTED.* 
           WHERE id_convocatoria = @id
@@ -100,7 +100,7 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
             requestItem.input("precio_referencial", sql.Decimal(15, 2), item.precio_referencial);
             requestItem.input("especificaciones_tecnicas", sql.NVarChar(sql.MAX), item.especificaciones_tecnicas);
             await requestItem.query(`
-              UPDATE [PNVR].[dbo].[Item_Convocatoria]
+              UPDATE [PNVR].[dbo].[PNVR_Item_Convocatoria]
               SET descripcion = @descripcion,
                   tipo_material = @tipo_material,
                   cantidad = @cantidad,
@@ -125,7 +125,7 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
                 requestValidacion.input("usuario_validador", sql.NVarChar(100), validacion.usuario_validador);
                 requestValidacion.input("comentarios", sql.NVarChar(sql.MAX), validacion.comentarios);
                 await requestValidacion.query(`
-                  UPDATE [PNVR].[dbo].[Validacion_Bases]
+                  UPDATE [PNVR].[dbo].[PNVR_Validacion_Bases]
                   SET estado = @estado,
                       usuario_validador = @usuario_validador,
                       comentarios = @comentarios,

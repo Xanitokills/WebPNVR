@@ -94,7 +94,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       .input("id_convocatoria", sql.Int, body.id_convocatoria);
 
     const query = `
-      UPDATE [dbo].[item_convocatoria]
+      UPDATE [dbo].[PNVR_item_convocatoria]
       SET
         descripcion = @descripcion,
         cantidad = @cantidad,
@@ -148,7 +148,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     const requestQuery = pool.request().input("id_item_convocatoria", sql.Int, id);
 
     const query = `
-      DELETE FROM [dbo].[item_convocatoria]
+      DELETE FROM [dbo].[PNVR_item_convocatoria]
       OUTPUT DELETED.id_item_convocatoria
       WHERE id_item_convocatoria = @id_item_convocatoria
     `;

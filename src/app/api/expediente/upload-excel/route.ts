@@ -219,7 +219,7 @@ export async function POST(request: NextRequest) {
     const convenioCheck = await pool
       .request()
       .input('id_convenio', sql.Int, parseInt(id_convenio))
-      .query(`SELECT Id_convenio FROM [${process.env.DB_NAME}].[dbo].[Convenios] WHERE Id_convenio = @id_convenio`);
+      .query(`SELECT Id_convenio FROM [${process.env.DB_NAME}].[dbo].[PNVR_Convenios] WHERE Id_convenio = @id_convenio`);
 
     if (convenioCheck.recordset.length === 0) {
       console.log('Error: Convenio no encontrado para id_convenio:', id_convenio);
@@ -281,7 +281,7 @@ export async function POST(request: NextRequest) {
           .input("Categoria", sql.NVarChar, category)
           .input("FechaCarga", sql.DateTime, new Date())
           .query(`
-            INSERT INTO [${process.env.DB_NAME}].[dbo].[ExpedienteTecnico] 
+            INSERT INTO [${process.env.DB_NAME}].[dbo].[PNVR_ExpedienteTecnico] 
             (id_convenio, NombreArchivo, TipoArchivo, RutaArchivo, TamañoArchivo, Descripcion, Categoria, FechaCarga)
             VALUES (@id_convenio, @NombreArchivo, @TipoArchivo, @RutaArchivo, @TamañoArchivo, @Descripcion, @Categoria, @FechaCarga)
           `);
@@ -305,7 +305,7 @@ export async function POST(request: NextRequest) {
                     .input('CodigoCategoria', sql.NVarChar, item.Codigo)
                     .input('NombreCategoria', sql.NVarChar, item.Descripción)
                     .query(`
-                      INSERT INTO [${process.env.DB_NAME}].[dbo].[CategoriasPresupuesto] (CodigoCategoria, NombreCategoria, CreadoEn)
+                      INSERT INTO [${process.env.DB_NAME}].[dbo].[PNVR_CategoriasPresupuesto] (CodigoCategoria, NombreCategoria, CreadoEn)
                       OUTPUT INSERTED.CategoriaID
                       VALUES (@CodigoCategoria, @NombreCategoria, GETDATE())
                     `);
@@ -334,7 +334,7 @@ export async function POST(request: NextRequest) {
                     .input('CodigoSubcategoria', sql.NVarChar, item.Codigo)
                     .input('NombreSubcategoria', sql.NVarChar, item.Descripción)
                     .query(`
-                      INSERT INTO [${process.env.DB_NAME}].[dbo].[SubcategoriasPresupuesto] (CategoriaID, CodigoSubcategoria, NombreSubcategoria, CreadoEn)
+                      INSERT INTO [${process.env.DB_NAME}].[dbo].[PNVR_SubcategoriasPresupuesto] (CategoriaID, CodigoSubcategoria, NombreSubcategoria, CreadoEn)
                       OUTPUT INSERTED.SubcategoriaID
                       VALUES (@CategoriaID, @CodigoSubcategoria, @NombreSubcategoria, GETDATE())
                     `);
@@ -385,7 +385,7 @@ export async function POST(request: NextRequest) {
                     .input('PrecioUnitario', sql.Decimal(18, 2), item.PrecioUnitario || null)
                     .input('CostoTotal', sql.Decimal(18, 2), item.CostoTotal || null)
                     .query(`
-                      INSERT INTO [${process.env.DB_NAME}].[dbo].[ItemsPresupuesto] (
+                      INSERT INTO [${process.env.DB_NAME}].[dbo].[PNVR_ItemsPresupuesto] (
                         Id_Convenio, CategoriaID, SubcategoriaID, CodigoItem, Descripcion, Unidad, Cantidad, PrecioUnitario, CostoTotal, CreadoEn
                       )
                       VALUES (

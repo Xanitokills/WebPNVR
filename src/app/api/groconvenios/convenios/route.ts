@@ -56,9 +56,9 @@ export async function GET() {
     // Consulta principal para obtener los convenios
     const conveniosResult = await pool.request().query(`
       SELECT 
-        c.[id_convenio],
-        c.[cod_ugt],
-        c.[cod_Convenio],
+        c.[CONVENIO_ID],
+        c.[CODIGO_UGT],
+        c.[CODIGO_CONVENIO],
         c.[nombre_Convenio],
         c.[id_grupo],
         c.[id_tipo_intervencion],
@@ -91,16 +91,13 @@ export async function GET() {
         c.[Programa],
         c.[Proyectista],
         c.[Evaluador],
-        c.[PresupuestoBase],
-        c.[PresupuestoFinanciamiento],
-        c.[AporteBeneficiario],
-        c.[SimboloMonetario],
-        c.[IGV],
-        c.[PlazoEjecucionMeses],
-        c.[PlazoEjecucionDias],
-        c.[NumeroBeneficiarios],
+        c.[PRESUPUESTO_BASE],
+        c.[PRESUPUESTO_FINANCIAMIENTO],
+        c.[APORTE_BENEFICIARIO],
+        c.[PLAZO_EJECUCION_MESES],
+        c.[PLAZO_EJECUCION_DIAS],
+        c.[NUMERO_BENEFICIARIOS],
         c.[CreadoEn],
-        c.[ActualizadoEn],
         g.[nombre] AS Grupo,
         ti.[descripcion] AS Interevencion,
         pp.[codigo] AS Programa_Presupuestal,
@@ -114,20 +111,20 @@ export async function GET() {
         dis.[nombre_Distrito] AS Distrito,
         p.[nombre_Provincia] AS Provincia,
         d.[nombre_Departamento] AS Departamento
-      FROM [${envVars.DB_NAME}].[dbo].[Convenios] c
-      LEFT JOIN [${envVars.DB_NAME}].[dbo].[Grupo] g ON c.[id_grupo] = g.[id_grupo]
-      LEFT JOIN [${envVars.DB_NAME}].[dbo].[Tipo_Intervencion] ti ON c.[id_tipo_intervencion] = ti.[id_tipo_intervencion]
-      LEFT JOIN [${envVars.DB_NAME}].[dbo].[Programa_Presupuestal] pp ON c.[id_programa_presupuestal] = pp.[id_programa_presupuestal]
-      LEFT JOIN [${envVars.DB_NAME}].[dbo].[Tipo_Fenomeno] tf ON c.[id_tipo_fenomeno] = tf.[id_tipo_fenomeno]
-      LEFT JOIN [${envVars.DB_NAME}].[dbo].[Tipo_Material] tm ON c.[id_tipo_material] = tm.[id_tipo_material]
-      LEFT JOIN [${envVars.DB_NAME}].[dbo].[Estado_Conv] ec ON c.[id_estado] = ec.[id_estado]
-      LEFT JOIN [${envVars.DB_NAME}].[dbo].[Sub_Estado_Conv] sec ON c.[id_sub_estado] = sec.[id_sub_estado]
-      LEFT JOIN [${envVars.DB_NAME}].[dbo].[Priorizaciones] pr ON c.[id_priorizacion] = pr.[id_priorizacion]
-      LEFT JOIN [${envVars.DB_NAME}].[dbo].[Tipos_Meta] tme ON c.[id_tipo_meta] = tme.[id_tipo_meta]
-      LEFT JOIN [${envVars.DB_NAME}].[dbo].[Localidad] l ON c.[id_Localidad] = l.[id_Localidad]
-      LEFT JOIN [${envVars.DB_NAME}].[dbo].[Distrito] dis ON c.[id_Distrito] = dis.[id_Distrito]
-      LEFT JOIN [${envVars.DB_NAME}].[dbo].[Provincia] p ON c.[id_Provincia] = p.[id_Provincia]
-      LEFT JOIN [${envVars.DB_NAME}].[dbo].[Departamento] d ON c.[id_Departamento] = d.[id_Departamento]
+      FROM [${envVars.DB_NAME}].[dbo].[PNVR_Convenios] c
+      LEFT JOIN [${envVars.DB_NAME}].[dbo].[PNVR_Grupo] g ON c.[id_grupo] = g.[id_grupo]
+      LEFT JOIN [${envVars.DB_NAME}].[dbo].[PNVR_Tipo_Intervencion] ti ON c.[id_tipo_intervencion] = ti.[id_tipo_intervencion]
+      LEFT JOIN [${envVars.DB_NAME}].[dbo].[PNVR_Programa_Presupuestal] pp ON c.[id_programa_presupuestal] = pp.[id_programa_presupuestal]
+      LEFT JOIN [${envVars.DB_NAME}].[dbo].[PNVR_Tipo_Fenomeno] tf ON c.[id_tipo_fenomeno] = tf.[id_tipo_fenomeno]
+      LEFT JOIN [${envVars.DB_NAME}].[dbo].[PNVR_Tipo_Material] tm ON c.[id_tipo_material] = tm.[id_tipo_material]
+      LEFT JOIN [${envVars.DB_NAME}].[dbo].[PNVR_Estado_Conv] ec ON c.[id_estado] = ec.[id_estado]
+      LEFT JOIN [${envVars.DB_NAME}].[dbo].[PNVR_Sub_Estado_Conv] sec ON c.[id_sub_estado] = sec.[id_sub_estado]
+      LEFT JOIN [${envVars.DB_NAME}].[dbo].[PNVR_Priorizaciones] pr ON c.[id_priorizacion] = pr.[id_priorizacion]
+      LEFT JOIN [${envVars.DB_NAME}].[dbo].[PNVR_Tipos_Meta] tme ON c.[id_tipo_meta] = tme.[id_tipo_meta]
+      LEFT JOIN [${envVars.DB_NAME}].[dbo].[PNVR_Localidad] l ON c.[id_Localidad] = l.[id_Localidad]
+      LEFT JOIN [${envVars.DB_NAME}].[dbo].[PNVR_Distrito] dis ON c.[id_Distrito] = dis.[id_Distrito]
+      LEFT JOIN [${envVars.DB_NAME}].[dbo].[PNVR_Provincia] p ON c.[id_Provincia] = p.[id_Provincia]
+      LEFT JOIN [${envVars.DB_NAME}].[dbo].[PNVR_Departamento] d ON c.[id_Departamento] = d.[id_Departamento]
     `);
 
     const convenios = conveniosResult.recordset;
@@ -135,7 +132,7 @@ export async function GET() {
     // Consulta para obtener el personal asignado a cada convenio
     const personalResult = await pool.request().query(`
       SELECT 
-        cp.id_convenio,
+        cp.ID_CONVENIO,
         p.id_personal,
         p.nombre,
         p.apellido_paterno,
@@ -143,20 +140,20 @@ export async function GET() {
         ca.descripcion AS cargo,
         cp.fecha_inicio,
         cp.fecha_fin
-      FROM [dbo].[convenio_personal] cp
-      JOIN [dbo].[personal] p ON cp.id_personal = p.id_personal
-      JOIN [dbo].[cargo] ca ON cp.id_cargo = ca.id_cargo
+      FROM [dbo].[PNVR_convenio_personal] cp
+      JOIN [dbo].[PNVR_personal] p ON cp.id_personal = p.id_personal
+      JOIN [dbo].[PNVR_cargo] ca ON cp.id_cargo = ca.id_cargo
 
     `);
 
     const personal = personalResult.recordset;
 
-    // Agrupar el personal por id_convenio
+    // Agrupar el personal por CONVENIO_ID
     const personalByConvenio = personal.reduce((acc, item) => {
-      if (!acc[item.id_convenio]) {
-        acc[item.id_convenio] = [];
+      if (!acc[item.CONVENIO_ID]) {
+        acc[item.CONVENIO_ID] = [];
       }
-      acc[item.id_convenio].push({
+      acc[item.CONVENIO_ID].push({
         id_personal: item.id_personal,
         nombre: item.nombre,
         apellido_paterno: item.apellido_paterno,
@@ -171,7 +168,7 @@ export async function GET() {
     // Combinar los datos de convenios con el personal asignado
     const result = convenios.map((convenio) => ({
       ...convenio,
-      personal_asignado: personalByConvenio[convenio.id_convenio] || [],
+      personal_asignado: personalByConvenio[convenio.CONVENIO_ID] || [],
     }));
 
     return NextResponse.json(result);
@@ -193,8 +190,8 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData();
 
     // Extract form data
-    const cod_ugt = formData.get("cod_ugt") as string | null;
-    const cod_Convenio = formData.get("cod_Convenio") as string | null;
+    const CODIGO_UGT = formData.get("CODIGO_UGT") as string | null;
+    const CODIGO_CONVENIO = formData.get("CODIGO_CONVENIO") as string | null;
     const nombre_Convenio = formData.get("nombre_Convenio") as string;
     const id_grupo = formData.get("id_grupo") ? parseInt(formData.get("id_grupo") as string) : null;
     const id_tipo_intervencion = formData.get("id_tipo_intervencion") ? parseInt(formData.get("id_tipo_intervencion") as string) : null;
@@ -227,14 +224,12 @@ export async function POST(request: NextRequest) {
     const Programa = formData.get("Programa") as string | null;
     const Proyectista = formData.get("Proyectista") as string | null;
     const Evaluador = formData.get("Evaluador") as string | null;
-    const PresupuestoBase = formData.get("PresupuestoBase") ? parseFloat(formData.get("PresupuestoBase") as string) : null;
-    const PresupuestoFinanciamiento = formData.get("PresupuestoFinanciamiento") ? parseFloat(formData.get("PresupuestoFinanciamiento") as string) : null;
-    const AporteBeneficiario = formData.get("AporteBeneficiario") ? parseFloat(formData.get("AporteBeneficiario") as string) : null;
-    const SimboloMonetario = formData.get("SimboloMonetario") as string | null;
-    const IGV = formData.get("IGV") ? parseFloat(formData.get("IGV") as string) : null;
-    const PlazoEjecucionMeses = formData.get("PlazoEjecucionMeses") ? parseInt(formData.get("PlazoEjecucionMeses") as string) : null;
-    const PlazoEjecucionDias = formData.get("PlazoEjecucionDias") ? parseInt(formData.get("PlazoEjecucionDias") as string) : null;
-    const NumeroBeneficiarios = formData.get("NumeroBeneficiarios") ? parseInt(formData.get("NumeroBeneficiarios") as string) : null;
+    const PRESUPUESTO_BASE = formData.get("PRESUPUESTO_BASE") ? parseFloat(formData.get("PRESUPUESTO_BASE") as string) : null;
+    const PRESUPUESTO_FINANCIAMIENTO = formData.get("PRESUPUESTO_FINANCIAMIENTO") ? parseFloat(formData.get("PRESUPUESTO_FINANCIAMIENTO") as string) : null;
+    const APORTE_BENEFICIARIO = formData.get("APORTE_BENEFICIARIO") ? parseFloat(formData.get("APORTE_BENEFICIARIO") as string) : null;
+    const PLAZO_EJECUCION_MESES = formData.get("PLAZO_EJECUCION_MESES") ? parseInt(formData.get("PLAZO_EJECUCION_MESES") as string) : null;
+    const PLAZO_EJECUCION_DIAS = formData.get("PLAZO_EJECUCION_DIAS") ? parseInt(formData.get("PLAZO_EJECUCION_DIAS") as string) : null;
+    const NUMERO_BENEFICIARIOS = formData.get("NUMERO_BENEFICIARIOS") ? parseInt(formData.get("NUMERO_BENEFICIARIOS") as string) : null;
 
     // Validate required fields
     if (!nombre_Convenio) {
@@ -248,8 +243,8 @@ export async function POST(request: NextRequest) {
 
     const requestQuery = pool.request();
     requestQuery
-      .input("cod_ugt", sql.NVarChar(50), cod_ugt)
-      .input("cod_Convenio", sql.NVarChar(50), cod_Convenio)
+      .input("CODIGO_UGT", sql.NVarChar(50), CODIGO_UGT)
+      .input("CODIGO_CONVENIO", sql.NVarChar(50), CODIGO_CONVENIO)
       .input("nombre_Convenio", sql.NVarChar(500), nombre_Convenio)
       .input("id_grupo", sql.Int, id_grupo)
       .input("id_tipo_intervencion", sql.Int, id_tipo_intervencion)
@@ -282,37 +277,34 @@ export async function POST(request: NextRequest) {
       .input("Programa", sql.NVarChar(255), Programa)
       .input("Proyectista", sql.NVarChar(255), Proyectista)
       .input("Evaluador", sql.NVarChar(255), Evaluador)
-      .input("PresupuestoBase", sql.Decimal(18, 2), PresupuestoBase)
-      .input("PresupuestoFinanciamiento", sql.Decimal(18, 2), PresupuestoFinanciamiento)
-      .input("AporteBeneficiario", sql.Decimal(18, 2), AporteBeneficiario)
-      .input("SimboloMonetario", sql.NVarChar(10), SimboloMonetario)
-      .input("IGV", sql.Decimal(5, 2), IGV)
-      .input("PlazoEjecucionMeses", sql.Int, PlazoEjecucionMeses)
-      .input("PlazoEjecucionDias", sql.Int, PlazoEjecucionDias)
-      .input("NumeroBeneficiarios", sql.Int, NumeroBeneficiarios)
+      .input("PRESUPUESTO_BASE", sql.Decimal(18, 2), PRESUPUESTO_BASE)
+      .input("PRESUPUESTO_FINANCIAMIENTO", sql.Decimal(18, 2), PRESUPUESTO_FINANCIAMIENTO)
+      .input("APORTE_BENEFICIARIO", sql.Decimal(18, 2), APORTE_BENEFICIARIO)
+      .input("PLAZO_EJECUCION_MESES", sql.Int, PLAZO_EJECUCION_MESES)
+      .input("PLAZO_EJECUCION_DIAS", sql.Int, PLAZO_EJECUCION_DIAS)
+      .input("NUMERO_BENEFICIARIOS", sql.Int, NUMERO_BENEFICIARIOS)
       .input("CreadoEn", sql.DateTime, currentDate)
-      .input("ActualizadoEn", sql.DateTime, currentDate);
 
     const result = await requestQuery.query(`
-      INSERT INTO [${envVars.DB_NAME}].[dbo].[Convenios] (
-        cod_ugt, cod_Convenio, nombre_Convenio, id_grupo, id_tipo_intervencion, id_programa_presupuestal,
+      INSERT INTO [${envVars.DB_NAME}].[dbo].[PNVR_Convenios] (
+        CODIGO_UGT, CODIGO_CONVENIO, nombre_Convenio, id_grupo, id_tipo_intervencion, id_programa_presupuestal,
         id_tipo_fenomeno, id_tipo_material, id_estado, id_sub_estado, id_priorizacion, id_tipo_meta,
         id_Localidad, id_Distrito, id_Provincia, id_Departamento, fecha_Convenios, fecha_transferencia,
         fecha_limite_inicio, fecha_inicio, plazo_ejecucion, dias_paralizados, dias_ampliacion,
         fecha_termino, fecha_acta_termino, motivo_atraso, accion_mitigacion, fecha_inicio_estimada,
         fecha_termino_estimada, anio_intervencion, Entidad, Programa, Proyectista, Evaluador,
-        PresupuestoBase, PresupuestoFinanciamiento, AporteBeneficiario, SimboloMonetario, IGV,
-        PlazoEjecucionMeses, PlazoEjecucionDias, NumeroBeneficiarios, CreadoEn, ActualizadoEn
+        PRESUPUESTO_BASE, PRESUPUESTO_FINANCIAMIENTO, APORTE_BENEFICIARIO, 
+        PLAZO_EJECUCION_MESES, PLAZO_EJECUCION_DIAS, NUMERO_BENEFICIARIOS, CreadoEn
       ) OUTPUT INSERTED.*
       VALUES (
-        @cod_ugt, @cod_Convenio, @nombre_Convenio, @id_grupo, @id_tipo_intervencion, @id_programa_presupuestal,
+        @CODIGO_UGT, @CODIGO_CONVENIO, @nombre_Convenio, @id_grupo, @id_tipo_intervencion, @id_programa_presupuestal,
         @id_tipo_fenomeno, @id_tipo_material, @id_estado, @id_sub_estado, @id_priorizacion, @id_tipo_meta,
         @id_Localidad, @id_Distrito, @id_Provincia, @id_Departamento, @fecha_Convenios, @fecha_transferencia,
         @fecha_limite_inicio, @fecha_inicio, @plazo_ejecucion, @dias_paralizados, @dias_ampliacion,
         @fecha_termino, @fecha_acta_termino, @motivo_atraso, @accion_mitigacion, @fecha_inicio_estimada,
         @fecha_termino_estimada, @anio_intervencion, @Entidad, @Programa, @Proyectista, @Evaluador,
-        @PresupuestoBase, @PresupuestoFinanciamiento, @AporteBeneficiario, @SimboloMonetario, @IGV,
-        @PlazoEjecucionMeses, @PlazoEjecucionDias, @NumeroBeneficiarios, @CreadoEn, @ActualizadoEn
+        @PRESUPUESTO_BASE, @PRESUPUESTO_FINANCIAMIENTO, @APORTE_BENEFICIARIO, 
+        @PLAZO_EJECUCION_MESES, @PLAZO_EJECUCION_DIAS, @NUMERO_BENEFICIARIOS, @CreadoEn
       )
     `);
 

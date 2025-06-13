@@ -78,16 +78,16 @@ export async function GET() {
         v.usuario_validador,
         v.fecha_validacion,
         v.comentarios AS validacion_comentarios
-      FROM [PNVR].[dbo].[Convocatoria] c 
-      INNER JOIN [PNVR].[dbo].[Estado_Convocatoria] ec 
+      FROM [PNVR].[dbo].[PNVR_Convocatoria] c 
+      INNER JOIN [PNVR].[dbo].[PNVR_Estado_Convocatoria] ec 
         ON c.id_estado = ec.id_estado
-      LEFT JOIN [PNVR].[dbo].[Item_Convocatoria] i 
+      LEFT JOIN [PNVR].[dbo].[PNVR_Item_Convocatoria] i 
         ON c.id_item_convocatoria = i.id_item_convocatoria
-      LEFT JOIN [PNVR].[dbo].[convocatoria_documento] cd 
+      LEFT JOIN [PNVR].[dbo].[PNVR_convocatoria_documento] cd 
         ON c.id_convocatoria_documento = cd.id_convocatoria_documento
-      LEFT JOIN [PNVR].[dbo].[documento] d 
+      LEFT JOIN [PNVR].[dbo].[PNVR_documento] d 
         ON d.id_documento = cd.id_documento
-      LEFT JOIN [PNVR].[dbo].[Validacion_Bases] v 
+      LEFT JOIN [PNVR].[dbo].[PNVR_Validacion_Bases] v 
         ON d.id_documento = v.id_documento
       WHERE d.tipo = 'Bases' OR d.tipo IS NULL
     `);
@@ -307,7 +307,7 @@ export async function POST(request: Request) {
     const convenioResult = await pool
       .request()
       .input("id_convenio", sql.VarChar(50), id_convenio)
-      .query("SELECT 1 FROM [PNVR].[dbo].[Convenio] WHERE id_convenio = @id_convenio");
+      .query("SELECT 1 FROM [PNVR].[dbo].[PNVR_Convenio] WHERE id_convenio = @id_convenio");
     if (convenioResult.recordset.length === 0) {
       return NextResponse.json({ error: "El ID Convenio proporcionado no existe" }, { status: 400 });
     }
@@ -315,7 +315,7 @@ export async function POST(request: Request) {
     const tipoResult = await pool
       .request()
       .input("id_tipo", sql.Int, id_tipo)
-      .query("SELECT 1 FROM [PNVR].[dbo].[Tipo_Convocatoria] WHERE id_tipo = @id_tipo");
+      .query("SELECT 1 FROM [PNVR].[dbo].[PNVR_Tipo_Convocatoria] WHERE id_tipo = @id_tipo");
     if (tipoResult.recordset.length === 0) {
       return NextResponse.json({ error: "El ID Tipo proporcionado no existe" }, { status: 400 });
     }
@@ -323,7 +323,7 @@ export async function POST(request: Request) {
     const estadoResult = await pool
       .request()
       .input("id_estado", sql.Int, id_estado)
-      .query("SELECT 1 FROM [PNVR].[dbo].[Estado_Convocatoria] WHERE id_estado = @id_estado");
+      .query("SELECT 1 FROM [PNVR].[dbo].[PNVR_Estado_Convocatoria] WHERE id_estado = @id_estado");
     if (estadoResult.recordset.length === 0) {
       return NextResponse.json({ error: "El ID Estado proporcionado no existe" }, { status: 400 });
     }
@@ -332,7 +332,7 @@ export async function POST(request: Request) {
       const itemResult = await pool
         .request()
         .input("id_item_convocatoria", sql.Int, id_item_convocatoria)
-        .query("SELECT 1 FROM [PNVR].[dbo].[Item_Convocatoria] WHERE id_item_convocatoria = @id_item_convocatoria");
+        .query("SELECT 1 FROM [PNVR].[dbo].[PNVR_Item_Convocatoria] WHERE id_item_convocatoria = @id_item_convocatoria");
       if (itemResult.recordset.length === 0) {
         return NextResponse.json({ error: "El ID Ítem de Convocatoria proporcionado no existe" }, { status: 400 });
       }
@@ -342,7 +342,7 @@ export async function POST(request: Request) {
       const tipoItemResult = await pool
         .request()
         .input("id_tipo_item_convocatoria", sql.Int, id_tipo_item_convocatoria)
-        .query("SELECT 1 FROM [PNVR].[dbo].[Tipo_Item_Convocatoria] WHERE id_tipo_item_convocatoria = @id_tipo_item_convocatoria");
+        .query("SELECT 1 FROM [PNVR].[dbo].[PNVR_Tipo_Item_Convocatoria] WHERE id_tipo_item_convocatoria = @id_tipo_item_convocatoria");
       if (tipoItemResult.recordset.length === 0) {
         return NextResponse.json({ error: "El ID Tipo de Ítem de Convocatoria proporcionado no existe" }, { status: 400 });
       }
@@ -413,7 +413,7 @@ export async function POST(request: Request) {
       .input("QR_PATH", sql.VarChar(500), QR_PATH || null)
       .input("id_convocatoria_documento", sql.Int, id_convocatoria_documento || null)
       .query(`
-        INSERT INTO [PNVR].[dbo].[Convocatoria]
+        INSERT INTO [PNVR].[dbo].[PNVR_Convocatoria]
           ([id_convenio], [id_tipo], [codigo_seace], [titulo], [descripcion], [presupuesto], 
            [fecha_publicacion], [fecha_limite_ofertas], [fecha_estimada_adjudicacion], 
            [duracion_contrato], [created_at], [vigencia], [pdf_file_path], [word_file_path], 
@@ -524,14 +524,14 @@ export async function GET() {
         v.usuario_validador,
         v.fecha_validacion,
         v.comentarios AS validacion_comentarios
-      FROM [PNVR].[dbo].[convocatoria] c 
-      INNER JOIN [PNVR].[dbo].[Estado_Convocatoria] ec 
+      FROM [PNVR].[dbo].[PNVR_convocatoria] c 
+      INNER JOIN [PNVR].[dbo].[PNVR_Estado_Convocatoria] ec 
         ON c.id_estado_convocatoria = ec.id_estado_convocatoria
-      LEFT JOIN [PNVR].[dbo].[Item_Convocatoria2] i 
+      LEFT JOIN [PNVR].[dbo].[PNVR_Item_Convocatoria2] i 
         ON c.id_convocatoria = i.id_item_convocatoria
-      LEFT JOIN [PNVR].[dbo].[Documento] d 
+      LEFT JOIN [PNVR].[dbo].[PNVR_Documento] d 
         ON c.id_convocatoria = d.id_convocatoria
-      LEFT JOIN [PNVR].[dbo].[Validacion_Bases] v 
+      LEFT JOIN [PNVR].[dbo].[PNVR_Validacion_Bases] v 
         ON d.id_documento = v.id_documento
       WHERE d.tipo = 'Bases' OR d.tipo IS NULL
     `);

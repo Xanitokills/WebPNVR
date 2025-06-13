@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
           CreadoEn,
           ActualizadoEn,
           Categoria
-        FROM [PNVR2].[dbo].[ExpedienteTecnico]
+        FROM [PNVR2].[dbo].[PNVR_ExpedienteTecnico]
         WHERE Id_Convenio = @Id_Convenio
         ORDER BY Categoria, NombreArchivo
       `);

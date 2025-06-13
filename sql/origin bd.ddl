@@ -48,7 +48,7 @@ CREATE TABLE Convenios(
 
 
 
-CREATE TABLE [dbo].[Estado_Conv](
+CREATE TABLE [dbo].[PNVR_PNVREstado_Conv](
 	[id_estado] [int] IDENTITY(1,1) NOT NULL,
 	[descripcion] [varchar](50) NOT NULL,
 PRIMARY KEY CLUSTERED 
@@ -84,7 +84,7 @@ CREATE TABLE [Departamento] (
     CONSTRAINT UQ_Departamento_Nombre UNIQUE (nombre_Departamento)
 );
 
-CREATE TABLE [dbo].[Provincia] (
+CREATE TABLE [dbo].[PNVR_PNVRProvincia] (
     id_Provincia INT IDENTITY(1,1) NOT NULL,
     nombre_Provincia NVARCHAR(100) NOT NULL,
     codigo_Provincia NVARCHAR(10) NULL, -- Optional code
@@ -127,7 +127,7 @@ CREATE TABLE [Localidad] (
 
 
 
-CREATE TABLE [dbo].[Convocatoria](
+CREATE TABLE [dbo].[PNVR_PNVRConvocatoria](
 	[id_convocatoria] [int] IDENTITY(1,1) NOT NULL,
 	[id_convenio] int NOT NULL,
 	[id_tipo] [int] NOT NULL,
@@ -165,7 +165,7 @@ UNIQUE NONCLUSTERED
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
 
-CREATE TABLE [dbo].[Adjudicacion](
+CREATE TABLE [dbo].[PNVR_PNVRAdjudicacion](
 	[id_adjudicacion] [int] IDENTITY(1,1) NOT NULL,
 	[id_convocatoria] [int] NOT NULL,
 	[id_postor] [int] NOT NULL,
@@ -180,7 +180,7 @@ PRIMARY KEY CLUSTERED
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
 
-CREATE TABLE [dbo].[Aprobaciones](
+CREATE TABLE [dbo].[PNVR_PNVRAprobaciones](
 	[id_aprobacion] [int] IDENTITY(1,1) NOT NULL,
 	[id_convenio] int NULL,
 	[rd_asignacion] [varchar](100) NULL,
@@ -199,7 +199,7 @@ PRIMARY KEY CLUSTERED
 ) ON [PRIMARY]
 GO
 
-CREATE TABLE [dbo].[Auditoria_Cambios](
+CREATE TABLE [dbo].[PNVR_PNVRAuditoria_Cambios](
 	[id_auditoria] [int] IDENTITY(1,1) NOT NULL,
 	[tabla_afectada] [nvarchar](50) NULL,
 	[id_registro] [int] NULL,
@@ -216,7 +216,7 @@ PRIMARY KEY CLUSTERED
 GO
 
 
-CREATE TABLE [dbo].[Autorizaciones](
+CREATE TABLE [dbo].[PNVR_PNVRAutorizaciones](
 	[AutorizacionID] [int] IDENTITY(1,1) NOT NULL,
 	[ItemPresupuestoID] [int] NULL,
 	[InsumoID] [int] NULL,
@@ -234,7 +234,7 @@ PRIMARY KEY CLUSTERED
 ) ON [PRIMARY]
 GO
 
-CREATE TABLE [dbo].[Autorizaciones_Devoluciones](
+CREATE TABLE [dbo].[PNVR_PNVRAutorizaciones_Devoluciones](
 	[id_autorizacion] [int] IDENTITY(1,1) NOT NULL,
 	[id_convenio] int NULL,
 	[numero] [int] NOT NULL,
@@ -253,14 +253,14 @@ PRIMARY KEY CLUSTERED
 GO
 
 
-CREATE TABLE [dbo].[Convocatoria_documento](
+CREATE TABLE [dbo].[PNVR_PNVRConvocatoria_documento](
 	[id_Convocatoria_documento] [int] NULL,
 	[id_convocatoria] [int] NULL,
 	[id_documento] [int] NULL
 ) ON [PRIMARY]
 GO
 
-CREATE TABLE [dbo].[CategoriasPresupuesto](
+CREATE TABLE [dbo].[PNVR_PNVRCategoriasPresupuesto](
 	[CategoriaID] [int] IDENTITY(1,1) NOT NULL,
 	[CodigoCategoria] [nvarchar](50) NULL,
 	[NombreCategoria] [nvarchar](255) NOT NULL,
@@ -274,7 +274,7 @@ PRIMARY KEY CLUSTERED
 GO
 
 
-CREATE TABLE [dbo].[Documento](
+CREATE TABLE [dbo].[PNVR_PNVRDocumento](
 	[id_documento] [int] IDENTITY(1,1) NOT NULL,
 	[nombre] [varchar](255) NOT NULL,
 	[tipo] [varchar](50) NOT NULL,
@@ -289,7 +289,7 @@ PRIMARY KEY CLUSTERED
 ) ON [PRIMARY]
 GO
 
-CREATE TABLE [dbo].[Equipos](
+CREATE TABLE [dbo].[PNVR_PNVREquipos](
 	[EquipoID] [int] IDENTITY(1,1) NOT NULL,
 	id_convenio [int] NULL,
 	[Codigo] [nvarchar](50) NULL,
@@ -309,7 +309,7 @@ PRIMARY KEY CLUSTERED
 GO
 
 
-CREATE TABLE [dbo].[Estado_Convocatoria](
+CREATE TABLE [dbo].[PNVR_PNVREstado_Convocatoria](
 	[id_estado] [int] IDENTITY(1,1) NOT NULL,
 	[estado] [varchar](50) NOT NULL,
 	[fecha_cambio] [datetime2](7) NOT NULL,
@@ -321,7 +321,7 @@ PRIMARY KEY CLUSTERED
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
 
-CREATE TABLE [dbo].[ExpedienteTecnico](
+CREATE TABLE [dbo].[PNVR_PNVRExpedienteTecnico](
 	[ExpedienteID] [int] IDENTITY(1,1) NOT NULL,
 	[id_convenio] [int] NULL,
 	[NombreArchivo] [nvarchar](255) NOT NULL,
@@ -341,7 +341,7 @@ PRIMARY KEY CLUSTERED
 GO
 
 
-CREATE TABLE [dbo].[Finanzas](
+CREATE TABLE [dbo].[PNVR_PNVRFinanzas](
 	[id_finanzas] [int] IDENTITY(1,1) NOT NULL,
 	[id_convenio] int NULL,
 	[id_actividad_operativa] [int] NULL,
@@ -385,7 +385,7 @@ PRIMARY KEY CLUSTERED
 GO
 
 
-CREATE TABLE [dbo].[Fletes](
+CREATE TABLE [dbo].[PNVR_PNVRFletes](
 	[FleteID] [int] IDENTITY(1,1) NOT NULL,
 	[id_convenio] [int] NULL,
 	[Codigo] [nvarchar](50) NULL,
@@ -407,7 +407,7 @@ GO
 
 
 
-CREATE TABLE [dbo].[Insumos](
+CREATE TABLE [dbo].[PNVR_PNVRInsumos](
 	[InsumoID] [int] IDENTITY(1,1) NOT NULL,
 	[id_convenio] [int] NULL,
 	[CodigoInsumo] [nvarchar](50) NULL,
@@ -426,7 +426,7 @@ PRIMARY KEY CLUSTERED
 GO
 
 
-CREATE TABLE [dbo].[Item_convocatoria](
+CREATE TABLE [dbo].[PNVR_PNVRItem_convocatoria](
 	[id_item_convocatoria] [int] IDENTITY(1,1) NOT NULL,
 	[descripcion] [varchar](255) NOT NULL,
 	[cantidad] [int] NOT NULL,
@@ -442,7 +442,7 @@ PRIMARY KEY CLUSTERED
 GO
 
 
-CREATE TABLE [dbo].[ItemsPresupuesto](
+CREATE TABLE [dbo].[PNVR_PNVRItemsPresupuesto](
 	[ItemPresupuestoID] [int] IDENTITY(1,1) NOT NULL,
 	id_convenio [int] NULL,
 	[CategoriaID] [int] NULL,
@@ -472,7 +472,7 @@ PRIMARY KEY CLUSTERED
 ) ON [PRIMARY]
 GO
 
-CREATE TABLE [dbo].[ManoObra](
+CREATE TABLE [dbo].[PNVR_PNVRManoObra](
 	[ManoObraID] [int] IDENTITY(1,1) NOT NULL,
 	id_convenio [int] NULL,
 	[Codigo] [nvarchar](50) NULL,
@@ -510,7 +510,7 @@ GO
 
 
 
-CREATE TABLE [dbo].[Oferta](
+CREATE TABLE [dbo].[PNVR_PNVROferta](
 	[id_oferta] [int] IDENTITY(1,1) NOT NULL,
 	[id_convocatoria] [int] NOT NULL,
 	[id_postor] [int] NOT NULL,
@@ -525,7 +525,7 @@ PRIMARY KEY CLUSTERED
 GO
 
 
-CREATE TABLE [dbo].[Persona](
+CREATE TABLE [dbo].[PNVR_PNVRPersona](
 	[id_persona] [int] IDENTITY(1,1) NOT NULL,
 	[id_vivienda] [int] NULL,
 	[nombre] [varchar](50) NOT NULL,
@@ -551,7 +551,7 @@ GO
 
 
 
-CREATE TABLE [dbo].[Personal](
+CREATE TABLE [dbo].[PNVR_PNVRPersonal](
 	[id_personal] [int] IDENTITY(1,1) NOT NULL,
 	[id_cargo] [int] NULL,
 	[nombre] [varchar](200) NOT NULL,
@@ -567,13 +567,13 @@ PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Personal_Cargo]    Script Date: 21/05/2025 00:19:23 ******/
+/****** Object:  Table [dbo].[PNVR_PNVRPersonal_Cargo]    Script Date: 21/05/2025 00:19:23 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE TABLE [dbo].[Cargo](
+CREATE TABLE [dbo].[PNVR_PNVRCargo](
 	[id_cargo] [int] IDENTITY(1,1) NOT NULL,
 	[descripcion] [nvarchar](1000) NOT NULL,
 	[estado] [int] NULL,
@@ -586,7 +586,7 @@ GO
 
 
 
-CREATE TABLE [dbo].[Personal_Cargo](
+CREATE TABLE [dbo].[PNVR_PNVRPersonal_Cargo](
 	[id_personal] [int] NOT NULL,
 	[id_cargo] [int] NOT NULL,
 PRIMARY KEY CLUSTERED 
@@ -596,12 +596,12 @@ PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Postor]    Script Date: 21/05/2025 00:19:23 ******/
+/****** Object:  Table [dbo].[PNVR_PNVRPostor]    Script Date: 21/05/2025 00:19:23 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE TABLE [dbo].[Postor](
+CREATE TABLE [dbo].[PNVR_PNVRPostor](
 	[id_postor] [int] IDENTITY(1,1) NOT NULL,
 	[ruc] [varchar](11) NOT NULL,
 	[razon_social] [varchar](255) NOT NULL,
@@ -619,12 +619,12 @@ UNIQUE NONCLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Priorizaciones]    Script Date: 21/05/2025 00:19:23 ******/
+/****** Object:  Table [dbo].[PNVR_PNVRPriorizaciones]    Script Date: 21/05/2025 00:19:23 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE TABLE [dbo].[Priorizaciones](
+CREATE TABLE [dbo].[PNVR_PNVRPriorizaciones](
 	[id_priorizacion] [int] IDENTITY(1,1) NOT NULL,
 	[agrupacion] [varchar](100) NULL,
 	[grupo_priorizacion] [varchar](100) NULL,
@@ -642,7 +642,7 @@ GO
 
 
 
-CREATE TABLE [dbo].[Grupo](
+CREATE TABLE [dbo].[PNVR_PNVRGrupo](
 	[id_grupo] [int] IDENTITY(1,1) NOT NULL,
 	[nombre] [varchar](100) NOT NULL,
 	[estado] [int] NULL,
@@ -659,12 +659,12 @@ GO
 
 
 
-/****** Object:  Table [dbo].[Programa_Presupuestal]    Script Date: 21/05/2025 00:19:23 ******/
+/****** Object:  Table [dbo].[PNVR_PNVRPrograma_Presupuestal]    Script Date: 21/05/2025 00:19:23 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE TABLE [dbo].[Programa_Presupuestal](
+CREATE TABLE [dbo].[PNVR_PNVRPrograma_Presupuestal](
 	[id_programa_presupuestal] [int] IDENTITY(1,1) NOT NULL,
 	[codigo] [varchar](50) NOT NULL,
 PRIMARY KEY CLUSTERED 
@@ -677,12 +677,12 @@ PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Progreso]    Script Date: 21/05/2025 00:19:23 ******/
+/****** Object:  Table [dbo].[PNVR_PNVRProgreso]    Script Date: 21/05/2025 00:19:23 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE TABLE [dbo].[Progreso](
+CREATE TABLE [dbo].[PNVR_PNVRProgreso](
 	[id_progreso] [int] IDENTITY(1,1) NOT NULL,
 	[id_convenio] int NULL,
 	[fecha] [date] NOT NULL,
@@ -698,12 +698,12 @@ PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Sub_Estado_Conv]    Script Date: 21/05/2025 00:19:23 ******/
+/****** Object:  Table [dbo].[PNVR_PNVRSub_Estado_Conv]    Script Date: 21/05/2025 00:19:23 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE TABLE [dbo].[Sub_Estado_Conv](
+CREATE TABLE [dbo].[PNVR_PNVRSub_Estado_Conv](
 	[id_sub_estado] [int] IDENTITY(1,1) NOT NULL,
 	[descripcion] [varchar](100) NOT NULL,
 PRIMARY KEY CLUSTERED 
@@ -716,12 +716,12 @@ PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Tipo_Convocatoria]    Script Date: 21/05/2025 00:19:23 ******/
+/****** Object:  Table [dbo].[PNVR_PNVRTipo_Convocatoria]    Script Date: 21/05/2025 00:19:23 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE TABLE [dbo].[Tipo_Convocatoria](
+CREATE TABLE [dbo].[PNVR_PNVRTipo_Convocatoria](
 	[id_tipo] [int] IDENTITY(1,1) NOT NULL,
 	[nombre] [varchar](50) NOT NULL,
 	[descripcion] [text] NULL,
@@ -732,12 +732,12 @@ PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Tipo_Fenomeno]    Script Date: 21/05/2025 00:19:23 ******/
+/****** Object:  Table [dbo].[PNVR_PNVRTipo_Fenomeno]    Script Date: 21/05/2025 00:19:23 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE TABLE [dbo].[Tipo_Fenomeno](
+CREATE TABLE [dbo].[PNVR_PNVRTipo_Fenomeno](
 	[id_tipo_fenomeno] [int] IDENTITY(1,1) NOT NULL,
 	[descripcion] [varchar](50) NOT NULL,
 	[estado] [int] NULL,
@@ -751,12 +751,12 @@ PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Tipo_Intervencion]    Script Date: 21/05/2025 00:19:23 ******/
+/****** Object:  Table [dbo].[PNVR_PNVRTipo_Intervencion]    Script Date: 21/05/2025 00:19:23 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE TABLE [dbo].[Tipo_Intervencion](
+CREATE TABLE [dbo].[PNVR_PNVRTipo_Intervencion](
 	[id_tipo_intervencion] [int] IDENTITY(1,1) NOT NULL,
 	[descripcion] [varchar](200) NOT NULL,
 	[estado] [int] NULL,
@@ -770,12 +770,12 @@ PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Tipo_Material]    Script Date: 21/05/2025 00:19:23 ******/
+/****** Object:  Table [dbo].[PNVR_PNVRTipo_Material]    Script Date: 21/05/2025 00:19:23 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE TABLE [dbo].[Tipo_Material](
+CREATE TABLE [dbo].[PNVR_PNVRTipo_Material](
 	[id_tipo_material] [int] IDENTITY(1,1) NOT NULL,
 	[descripcion] [varchar](50) NOT NULL,
 	[estado] [int] NULL,
@@ -789,12 +789,12 @@ PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Tipo_unidad_medida]    Script Date: 21/05/2025 00:19:23 ******/
+/****** Object:  Table [dbo].[PNVR_PNVRTipo_unidad_medida]    Script Date: 21/05/2025 00:19:23 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE TABLE [dbo].[Tipo_unidad_medida](
+CREATE TABLE [dbo].[PNVR_PNVRTipo_unidad_medida](
 	[id_tipo_unidad_medida] [int] IDENTITY(1,1) NOT NULL,
 	[nombre] [varchar](50) NOT NULL,
 	[abreviatura] [varchar](10) NOT NULL,
@@ -814,12 +814,12 @@ CREATE TABLE [dbo].[Tipo_unidad_medida](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Tipos_Meta]    Script Date: 21/05/2025 00:19:23 ******/
+/****** Object:  Table [dbo].[PNVR_PNVRTipos_Meta]    Script Date: 21/05/2025 00:19:23 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE TABLE [dbo].[Tipos_Meta](
+CREATE TABLE [dbo].[PNVR_PNVRTipos_Meta](
 	[id_tipo_meta] [int] IDENTITY(1,1) NOT NULL,
 	[descripcion] [varchar](50) NOT NULL,
 	[estado] [int] NULL,
@@ -835,7 +835,7 @@ PRIMARY KEY CLUSTERED
 GO
 
 
-CREATE TABLE [dbo].[Usuarios](
+CREATE TABLE [dbo].[PNVR_PNVRUsuarios](
 	[UsuarioID] [int] IDENTITY(1,1) NOT NULL,
 	[Nombre] [nvarchar](255) NULL,
 	[Rol] [nvarchar](50) NULL,
@@ -849,12 +849,12 @@ PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Validacion_Bases]    Script Date: 21/05/2025 00:19:23 ******/
+/****** Object:  Table [dbo].[PNVR_PNVRValidacion_Bases]    Script Date: 21/05/2025 00:19:23 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE TABLE [dbo].[Validacion_Bases](
+CREATE TABLE [dbo].[PNVR_PNVRValidacion_Bases](
 	[id_validacion] [int] IDENTITY(1,1) NOT NULL,
 	[id_documento] [int] NOT NULL,
 	[nivel_validacion] [varchar](20) NOT NULL,
@@ -868,12 +868,12 @@ PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Vivienda]    Script Date: 21/05/2025 00:19:23 ******/
+/****** Object:  Table [dbo].[PNVR_PNVRVivienda]    Script Date: 21/05/2025 00:19:23 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE TABLE [dbo].[Vivienda](
+CREATE TABLE [dbo].[PNVR_PNVRVivienda](
 	[id_vivienda] [int] IDENTITY(1,1) NOT NULL,
 	[cod] [varchar](20) NOT NULL,
 	[cuv] [varchar](20) NULL,
@@ -915,7 +915,7 @@ GO
 
 
  
-CREATE TABLE [dbo].[Actividades_Operativas](
+CREATE TABLE [dbo].[PNVR_PNVRActividades_Operativas](
 	[id_actividad_operativa] [int] IDENTITY(1,1) NOT NULL,
 	[descripcion] [varchar](50) NOT NULL,
 PRIMARY KEY CLUSTERED 
@@ -931,7 +931,7 @@ GO
 
 
 /****** Object:  Index [IX_Aprobaciones_id_convenio]    Script Date: 21/05/2025 00:19:23 ******/
-CREATE NONCLUSTERED INDEX [IX_Aprobaciones_id_convenio] ON [dbo].[Aprobaciones]
+CREATE NONCLUSTERED INDEX [IX_Aprobaciones_id_convenio] ON [dbo].[PNVR_PNVRAprobaciones]
 (
 	[id_convenio] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
@@ -939,7 +939,7 @@ GO
 SET ANSI_PADDING ON
 GO
 /****** Object:  Index [IX_Autorizaciones_id_convenio]    Script Date: 21/05/2025 00:19:23 ******/
-CREATE NONCLUSTERED INDEX [IX_Autorizaciones_id_convenio] ON [dbo].[Autorizaciones_Devoluciones]
+CREATE NONCLUSTERED INDEX [IX_Autorizaciones_id_convenio] ON [dbo].[PNVR_PNVRAutorizaciones_Devoluciones]
 (
 	[id_convenio] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
@@ -949,19 +949,19 @@ GO
 /****** Object:  Index [IX_Beneficiarios_Agregado_id_convenio]    Script Date: 21/05/2025 00:19:23 ******/
 
 /****** Object:  Index [idx_convocatoria_Convenios]    Script Date: 21/05/2025 00:19:23 ******/
-CREATE NONCLUSTERED INDEX [idx_convocatoria_Convenios] ON [dbo].[Convocatoria]
+CREATE NONCLUSTERED INDEX [idx_convocatoria_Convenios] ON [dbo].[PNVR_PNVRConvocatoria]
 (
 	[id_convenio] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 GO
 /****** Object:  Index [idx_convocatoria_fecha]    Script Date: 21/05/2025 00:19:23 ******/
-CREATE NONCLUSTERED INDEX [idx_convocatoria_fecha] ON [dbo].[Convocatoria]
+CREATE NONCLUSTERED INDEX [idx_convocatoria_fecha] ON [dbo].[PNVR_PNVRConvocatoria]
 (
 	[fecha_publicacion] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 GO
 /****** Object:  Index [IX_ExpedienteTecnico_ConveniosId]    Script Date: 21/05/2025 00:19:23 ******/
-CREATE NONCLUSTERED INDEX [IX_ExpedienteTecnico_ConveniosId] ON [dbo].[ExpedienteTecnico]
+CREATE NONCLUSTERED INDEX [IX_ExpedienteTecnico_ConveniosId] ON [dbo].[PNVR_PNVRExpedienteTecnico]
 (
 	id_convenio ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
@@ -969,13 +969,13 @@ GO
 SET ANSI_PADDING ON
 GO
 /****** Object:  Index [IX_Finanzas_id_convenio]    Script Date: 21/05/2025 00:19:23 ******/
-CREATE NONCLUSTERED INDEX [IX_Finanzas_id_convenio] ON [dbo].[Finanzas]
+CREATE NONCLUSTERED INDEX [IX_Finanzas_id_convenio] ON [dbo].[PNVR_PNVRFinanzas]
 (
 	[id_convenio] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 GO
 /****** Object:  Index [idx_oferta_convocatoria]    Script Date: 21/05/2025 00:19:23 ******/
-CREATE NONCLUSTERED INDEX [idx_oferta_convocatoria] ON [dbo].[Oferta]
+CREATE NONCLUSTERED INDEX [idx_oferta_convocatoria] ON [dbo].[PNVR_PNVROferta]
 (
 	[id_convocatoria] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
@@ -983,7 +983,7 @@ GO
 SET ANSI_PADDING ON
 GO
 /****** Object:  Index [IX_Persona_dni]    Script Date: 21/05/2025 00:19:23 ******/
-CREATE NONCLUSTERED INDEX [IX_Persona_dni] ON [dbo].[Persona]
+CREATE NONCLUSTERED INDEX [IX_Persona_dni] ON [dbo].[PNVR_PNVRPersona]
 (
 	[dni] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
@@ -991,7 +991,7 @@ GO
 SET ANSI_PADDING ON
 GO
 /****** Object:  Index [IX_Progreso_id_convenio_fecha]    Script Date: 21/05/2025 00:19:23 ******/
-CREATE NONCLUSTERED INDEX [IX_Progreso_id_convenio_fecha] ON [dbo].[Progreso]
+CREATE NONCLUSTERED INDEX [IX_Progreso_id_convenio_fecha] ON [dbo].[PNVR_PNVRProgreso]
 (
 	[id_convenio] ASC,
 	[fecha] ASC
@@ -1000,7 +1000,7 @@ GO
 SET ANSI_PADDING ON
 GO
 /****** Object:  Index [IX_Vivienda_cod]    Script Date: 21/05/2025 00:19:23 ******/
-CREATE NONCLUSTERED INDEX [IX_Vivienda_cod] ON [dbo].[Vivienda]
+CREATE NONCLUSTERED INDEX [IX_Vivienda_cod] ON [dbo].[PNVR_PNVRVivienda]
 (
 	[cod] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
@@ -1008,7 +1008,7 @@ GO
 SET ANSI_PADDING ON
 GO
 /****** Object:  Index [IX_Vivienda_cuv]    Script Date: 21/05/2025 00:19:23 ******/
-CREATE NONCLUSTERED INDEX [IX_Vivienda_cuv] ON [dbo].[Vivienda]
+CREATE NONCLUSTERED INDEX [IX_Vivienda_cuv] ON [dbo].[PNVR_PNVRVivienda]
 (
 	[cuv] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
@@ -1016,226 +1016,226 @@ GO
 
 
 
-ALTER TABLE [dbo].[Adjudicacion]  WITH CHECK ADD FOREIGN KEY([id_convocatoria])
-REFERENCES [dbo].[Convocatoria] ([id_convocatoria])
+ALTER TABLE [dbo].[PNVR_PNVRAdjudicacion]  WITH CHECK ADD FOREIGN KEY([id_convocatoria])
+REFERENCES [dbo].[PNVR_PNVRConvocatoria] ([id_convocatoria])
 GO
-ALTER TABLE [dbo].[Adjudicacion]  WITH CHECK ADD FOREIGN KEY([id_oferta])
-REFERENCES [dbo].[Oferta] ([id_oferta])
+ALTER TABLE [dbo].[PNVR_PNVRAdjudicacion]  WITH CHECK ADD FOREIGN KEY([id_oferta])
+REFERENCES [dbo].[PNVR_PNVROferta] ([id_oferta])
 GO
-ALTER TABLE [dbo].[Adjudicacion]  WITH CHECK ADD FOREIGN KEY([id_postor])
-REFERENCES [dbo].[Postor] ([id_postor])
+ALTER TABLE [dbo].[PNVR_PNVRAdjudicacion]  WITH CHECK ADD FOREIGN KEY([id_postor])
+REFERENCES [dbo].[PNVR_PNVRPostor] ([id_postor])
 GO
-ALTER TABLE [dbo].[Aprobaciones]  WITH CHECK ADD  CONSTRAINT [FK_Aprobaciones_convenios] FOREIGN KEY([id_convenio])
-REFERENCES [dbo].[convenios] ([id_convenio])
+ALTER TABLE [dbo].[PNVR_PNVRAprobaciones]  WITH CHECK ADD  CONSTRAINT [FK_Aprobaciones_convenios] FOREIGN KEY([id_convenio])
+REFERENCES [dbo].[PNVR_PNVRconvenios] ([id_convenio])
 GO
-ALTER TABLE [dbo].[Aprobaciones] CHECK CONSTRAINT [FK_Aprobaciones_convenios]
+ALTER TABLE [dbo].[PNVR_PNVRAprobaciones] CHECK CONSTRAINT [FK_Aprobaciones_convenios]
 GO
-ALTER TABLE [dbo].[Autorizaciones]  WITH CHECK ADD FOREIGN KEY([ExpedienteID])
-REFERENCES [dbo].[ExpedienteTecnico] ([ExpedienteID])
+ALTER TABLE [dbo].[PNVR_PNVRAutorizaciones]  WITH CHECK ADD FOREIGN KEY([ExpedienteID])
+REFERENCES [dbo].[PNVR_PNVRExpedienteTecnico] ([ExpedienteID])
 GO
-ALTER TABLE [dbo].[Autorizaciones]  WITH CHECK ADD FOREIGN KEY([InsumoID])
-REFERENCES [dbo].[Insumos] ([InsumoID])
+ALTER TABLE [dbo].[PNVR_PNVRAutorizaciones]  WITH CHECK ADD FOREIGN KEY([InsumoID])
+REFERENCES [dbo].[PNVR_PNVRInsumos] ([InsumoID])
 GO
-ALTER TABLE [dbo].[Autorizaciones]  WITH CHECK ADD FOREIGN KEY([ItemPresupuestoID])
-REFERENCES [dbo].[ItemsPresupuesto] ([ItemPresupuestoID])
+ALTER TABLE [dbo].[PNVR_PNVRAutorizaciones]  WITH CHECK ADD FOREIGN KEY([ItemPresupuestoID])
+REFERENCES [dbo].[PNVR_PNVRItemsPresupuesto] ([ItemPresupuestoID])
 GO
-ALTER TABLE [dbo].[Autorizaciones_Devoluciones]  WITH CHECK ADD  CONSTRAINT [FK_Autorizaciones_convenios] FOREIGN KEY([id_convenio])
-REFERENCES [dbo].[convenios] ([id_convenio])
+ALTER TABLE [dbo].[PNVR_PNVRAutorizaciones_Devoluciones]  WITH CHECK ADD  CONSTRAINT [FK_Autorizaciones_convenios] FOREIGN KEY([id_convenio])
+REFERENCES [dbo].[PNVR_PNVRconvenios] ([id_convenio])
 GO
-ALTER TABLE [dbo].[Autorizaciones_Devoluciones] CHECK CONSTRAINT [FK_Autorizaciones_convenios]
-GO
-
-
-ALTER TABLE [dbo].[convenios]  WITH CHECK ADD  CONSTRAINT [FK_convenios_Estado] FOREIGN KEY([id_estado])
-REFERENCES [dbo].[Estado_Conv] ([id_estado])
-GO
-ALTER TABLE [dbo].[convenios] CHECK CONSTRAINT [FK_convenios_Estado]
-GO
-ALTER TABLE [dbo].[convenios]  WITH CHECK ADD  CONSTRAINT [FK_convenios_Grupo] FOREIGN KEY([id_grupo])
-REFERENCES [dbo].[Grupo] ([id_grupo])
-GO
-ALTER TABLE [dbo].[convenios] CHECK CONSTRAINT [FK_convenios_Grupo]
+ALTER TABLE [dbo].[PNVR_PNVRAutorizaciones_Devoluciones] CHECK CONSTRAINT [FK_Autorizaciones_convenios]
 GO
 
 
-ALTER TABLE [dbo].[convenios]  WITH CHECK ADD  CONSTRAINT [FK_convenios_Programa_Presupuestal] FOREIGN KEY([id_programa_presupuestal])
-REFERENCES [dbo].[Programa_Presupuestal] ([id_programa_presupuestal])
+ALTER TABLE [dbo].[PNVR_PNVRconvenios]  WITH CHECK ADD  CONSTRAINT [FK_convenios_Estado] FOREIGN KEY([id_estado])
+REFERENCES [dbo].[PNVR_PNVREstado_Conv] ([id_estado])
 GO
-ALTER TABLE [dbo].[convenios] CHECK CONSTRAINT [FK_convenios_Programa_Presupuestal]
+ALTER TABLE [dbo].[PNVR_PNVRconvenios] CHECK CONSTRAINT [FK_convenios_Estado]
 GO
-ALTER TABLE [dbo].[convenios]  WITH CHECK ADD  CONSTRAINT [FK_convenios_Sub_Estado] FOREIGN KEY([id_sub_estado])
-REFERENCES [dbo].[Sub_Estado_Conv] ([id_sub_estado])
+ALTER TABLE [dbo].[PNVR_PNVRconvenios]  WITH CHECK ADD  CONSTRAINT [FK_convenios_Grupo] FOREIGN KEY([id_grupo])
+REFERENCES [dbo].[PNVR_PNVRGrupo] ([id_grupo])
 GO
-ALTER TABLE [dbo].[convenios] CHECK CONSTRAINT [FK_convenios_Sub_Estado]
-GO
-ALTER TABLE [dbo].[convenios]  WITH CHECK ADD  CONSTRAINT [FK_convenios_Tipo_Fenomeno] FOREIGN KEY([id_tipo_fenomeno])
-REFERENCES [dbo].[Tipo_Fenomeno] ([id_tipo_fenomeno])
-GO
-ALTER TABLE [dbo].[convenios] CHECK CONSTRAINT [FK_convenios_Tipo_Fenomeno]
-GO
-ALTER TABLE [dbo].[convenios]  WITH CHECK ADD  CONSTRAINT [FK_convenios_Tipo_Intervencion] FOREIGN KEY([id_tipo_intervencion])
-REFERENCES [dbo].[Tipo_Intervencion] ([id_tipo_intervencion])
-GO
-ALTER TABLE [dbo].[convenios] CHECK CONSTRAINT [FK_convenios_Tipo_Intervencion]
-GO
-ALTER TABLE [dbo].[convenios]  WITH CHECK ADD  CONSTRAINT [FK_convenios_Tipo_Material] FOREIGN KEY([id_tipo_material])
-REFERENCES [dbo].[Tipo_Material] ([id_tipo_material])
-GO
-ALTER TABLE [dbo].[convenios] CHECK CONSTRAINT [FK_convenios_Tipo_Material]
-GO
-ALTER TABLE [dbo].[convenios]  WITH CHECK ADD  CONSTRAINT [FK_convenios_Tipos_Meta] FOREIGN KEY([id_tipo_meta])
-REFERENCES [dbo].[Tipos_Meta] ([id_tipo_meta])
-GO
-ALTER TABLE [dbo].[convenios] CHECK CONSTRAINT [FK_convenios_Tipos_Meta]
+ALTER TABLE [dbo].[PNVR_PNVRconvenios] CHECK CONSTRAINT [FK_convenios_Grupo]
 GO
 
 
-ALTER TABLE [dbo].[Convocatoria]  WITH CHECK ADD FOREIGN KEY([id_convenio])
-REFERENCES [dbo].[convenios] ([id_convenio])
+ALTER TABLE [dbo].[PNVR_PNVRconvenios]  WITH CHECK ADD  CONSTRAINT [FK_convenios_Programa_Presupuestal] FOREIGN KEY([id_programa_presupuestal])
+REFERENCES [dbo].[PNVR_PNVRPrograma_Presupuestal] ([id_programa_presupuestal])
 GO
-ALTER TABLE [dbo].[Convocatoria]  WITH CHECK ADD FOREIGN KEY([id_estado])
-REFERENCES [dbo].[Estado_Convocatoria] ([id_estado])
+ALTER TABLE [dbo].[PNVR_PNVRconvenios] CHECK CONSTRAINT [FK_convenios_Programa_Presupuestal]
 GO
-ALTER TABLE [dbo].[Convocatoria]  WITH CHECK ADD FOREIGN KEY([id_tipo])
-REFERENCES [dbo].[Tipo_Convocatoria] ([id_tipo])
+ALTER TABLE [dbo].[PNVR_PNVRconvenios]  WITH CHECK ADD  CONSTRAINT [FK_convenios_Sub_Estado] FOREIGN KEY([id_sub_estado])
+REFERENCES [dbo].[PNVR_PNVRSub_Estado_Conv] ([id_sub_estado])
 GO
-ALTER TABLE [dbo].[Convocatoria_documento]  WITH CHECK ADD FOREIGN KEY([id_convocatoria])
-REFERENCES [dbo].[Convocatoria] ([id_convocatoria])
+ALTER TABLE [dbo].[PNVR_PNVRconvenios] CHECK CONSTRAINT [FK_convenios_Sub_Estado]
 GO
-ALTER TABLE [dbo].[Convocatoria_documento]  WITH CHECK ADD FOREIGN KEY([id_documento])
-REFERENCES [dbo].[Documento] ([id_documento])
+ALTER TABLE [dbo].[PNVR_PNVRconvenios]  WITH CHECK ADD  CONSTRAINT [FK_convenios_Tipo_Fenomeno] FOREIGN KEY([id_tipo_fenomeno])
+REFERENCES [dbo].[PNVR_PNVRTipo_Fenomeno] ([id_tipo_fenomeno])
 GO
-ALTER TABLE [dbo].[Equipos]  WITH CHECK ADD FOREIGN KEY(id_convenio)
-REFERENCES [dbo].[convenios] (id_convenio)
+ALTER TABLE [dbo].[PNVR_PNVRconvenios] CHECK CONSTRAINT [FK_convenios_Tipo_Fenomeno]
 GO
-ALTER TABLE [dbo].[ExpedienteTecnico]  WITH CHECK ADD FOREIGN KEY(id_convenio)
-REFERENCES [dbo].[convenios] (id_convenio)
+ALTER TABLE [dbo].[PNVR_PNVRconvenios]  WITH CHECK ADD  CONSTRAINT [FK_convenios_Tipo_Intervencion] FOREIGN KEY([id_tipo_intervencion])
+REFERENCES [dbo].[PNVR_PNVRTipo_Intervencion] ([id_tipo_intervencion])
 GO
-
-
-ALTER TABLE [dbo].[Finanzas]  WITH CHECK ADD  CONSTRAINT [FK_Finanzas_Actividades_Operativas] FOREIGN KEY([id_actividad_operativa])
-REFERENCES [dbo].[Actividades_Operativas] ([id_actividad_operativa])
+ALTER TABLE [dbo].[PNVR_PNVRconvenios] CHECK CONSTRAINT [FK_convenios_Tipo_Intervencion]
 GO
-
-ALTER TABLE [dbo].[Finanzas] CHECK CONSTRAINT [FK_Finanzas_Actividades_Operativas]
+ALTER TABLE [dbo].[PNVR_PNVRconvenios]  WITH CHECK ADD  CONSTRAINT [FK_convenios_Tipo_Material] FOREIGN KEY([id_tipo_material])
+REFERENCES [dbo].[PNVR_PNVRTipo_Material] ([id_tipo_material])
 GO
-ALTER TABLE [dbo].[Finanzas]  WITH CHECK ADD  CONSTRAINT [FK_Finanzas_convenios] FOREIGN KEY([id_convenio])
-REFERENCES [dbo].[convenios] ([id_convenio])
+ALTER TABLE [dbo].[PNVR_PNVRconvenios] CHECK CONSTRAINT [FK_convenios_Tipo_Material]
 GO
-ALTER TABLE [dbo].[Finanzas] CHECK CONSTRAINT [FK_Finanzas_convenios]
+ALTER TABLE [dbo].[PNVR_PNVRconvenios]  WITH CHECK ADD  CONSTRAINT [FK_convenios_Tipos_Meta] FOREIGN KEY([id_tipo_meta])
+REFERENCES [dbo].[PNVR_PNVRTipos_Meta] ([id_tipo_meta])
 GO
-ALTER TABLE [dbo].[Fletes]  WITH CHECK ADD FOREIGN KEY(id_convenio)
-REFERENCES [dbo].[Convenios] (id_convenio)
-GO
-ALTER TABLE [dbo].[Insumos]  WITH CHECK ADD FOREIGN KEY(id_convenio)
-REFERENCES [dbo].[Convenios] (id_convenio)
-GO
-ALTER TABLE [dbo].[item_convocatoria]  WITH CHECK ADD FOREIGN KEY([id_convocatoria])
-REFERENCES [dbo].[Convocatoria] ([id_convocatoria])
-GO
-ALTER TABLE [dbo].[item_convocatoria]  WITH CHECK ADD FOREIGN KEY([id_unidad_medida])
-REFERENCES [dbo].[Tipo_unidad_medida] ([id_tipo_unidad_medida])
-GO
-ALTER TABLE [dbo].[ItemsPresupuesto]  WITH CHECK ADD FOREIGN KEY([CategoriaID])
-REFERENCES [dbo].[CategoriasPresupuesto] ([CategoriaID])
-GO
-ALTER TABLE [dbo].[ItemsPresupuesto]  WITH CHECK ADD FOREIGN KEY(id_convenio)
-REFERENCES [dbo].[Convenios] (id_convenio)
-GO
-ALTER TABLE [dbo].[ManoObra]  WITH CHECK ADD FOREIGN KEY(id_convenio)
-REFERENCES [dbo].[Convenios] (id_convenio)
-GO
-ALTER TABLE [dbo].[Oferta]  WITH CHECK ADD FOREIGN KEY([id_convocatoria])
-REFERENCES [dbo].[Convocatoria] ([id_convocatoria])
-GO
-ALTER TABLE [dbo].[Oferta]  WITH CHECK ADD FOREIGN KEY([id_postor])
-REFERENCES [dbo].[Postor] ([id_postor])
+ALTER TABLE [dbo].[PNVR_PNVRconvenios] CHECK CONSTRAINT [FK_convenios_Tipos_Meta]
 GO
 
 
-ALTER TABLE [dbo].[Persona]  WITH CHECK ADD  CONSTRAINT [FK_Persona_Vivienda] FOREIGN KEY([id_vivienda])
-REFERENCES [dbo].[Vivienda] ([id_vivienda])
+ALTER TABLE [dbo].[PNVR_PNVRConvocatoria]  WITH CHECK ADD FOREIGN KEY([id_convenio])
+REFERENCES [dbo].[PNVR_PNVRconvenios] ([id_convenio])
 GO
-ALTER TABLE [dbo].[Persona] CHECK CONSTRAINT [FK_Persona_Vivienda]
+ALTER TABLE [dbo].[PNVR_PNVRConvocatoria]  WITH CHECK ADD FOREIGN KEY([id_estado])
+REFERENCES [dbo].[PNVR_PNVREstado_Convocatoria] ([id_estado])
 GO
-ALTER TABLE [dbo].[Personal]  WITH CHECK ADD  CONSTRAINT [FK_personal_cargo] FOREIGN KEY([id_cargo])
-REFERENCES [dbo].[Cargo] ([id_cargo])
+ALTER TABLE [dbo].[PNVR_PNVRConvocatoria]  WITH CHECK ADD FOREIGN KEY([id_tipo])
+REFERENCES [dbo].[PNVR_PNVRTipo_Convocatoria] ([id_tipo])
 GO
-ALTER TABLE [dbo].[Personal] CHECK CONSTRAINT [FK_personal_cargo]
+ALTER TABLE [dbo].[PNVR_PNVRConvocatoria_documento]  WITH CHECK ADD FOREIGN KEY([id_convocatoria])
+REFERENCES [dbo].[PNVR_PNVRConvocatoria] ([id_convocatoria])
 GO
-ALTER TABLE [dbo].[Personal_Cargo]  WITH CHECK ADD FOREIGN KEY([id_cargo])
-REFERENCES [dbo].[Cargo] ([id_cargo])
+ALTER TABLE [dbo].[PNVR_PNVRConvocatoria_documento]  WITH CHECK ADD FOREIGN KEY([id_documento])
+REFERENCES [dbo].[PNVR_PNVRDocumento] ([id_documento])
 GO
-ALTER TABLE [dbo].[Personal_Cargo]  WITH CHECK ADD FOREIGN KEY([id_personal])
-REFERENCES [dbo].[Personal] ([id_personal])
+ALTER TABLE [dbo].[PNVR_PNVREquipos]  WITH CHECK ADD FOREIGN KEY(id_convenio)
+REFERENCES [dbo].[PNVR_PNVRconvenios] (id_convenio)
 GO
-ALTER TABLE [dbo].[Progreso]  WITH CHECK ADD  CONSTRAINT [FK_Progreso_convenios] FOREIGN KEY([id_convenio])
-REFERENCES [dbo].[convenios] ([id_convenio])
-GO
-ALTER TABLE [dbo].[Progreso] CHECK CONSTRAINT [FK_Progreso_convenios]
-GO
-ALTER TABLE [dbo].[Validacion_Bases]  WITH CHECK ADD FOREIGN KEY([id_documento])
-REFERENCES [dbo].[Documento] ([id_documento])
-GO
-ALTER TABLE [dbo].[Vivienda]  WITH CHECK ADD  CONSTRAINT [FK_Vivienda_convenios] FOREIGN KEY([id_convenio])
-REFERENCES [dbo].[convenios] ([id_convenio])
-GO
-ALTER TABLE [dbo].[Vivienda] CHECK CONSTRAINT [FK_Vivienda_convenios]
+ALTER TABLE [dbo].[PNVR_PNVRExpedienteTecnico]  WITH CHECK ADD FOREIGN KEY(id_convenio)
+REFERENCES [dbo].[PNVR_PNVRconvenios] (id_convenio)
 GO
 
 
-ALTER TABLE [dbo].[Documento]  WITH CHECK ADD  CONSTRAINT [chk_formato] CHECK  (([formato]='xls' OR [formato]='xlsx' OR [formato]='pdf'))
+ALTER TABLE [dbo].[PNVR_PNVRFinanzas]  WITH CHECK ADD  CONSTRAINT [FK_Finanzas_Actividades_Operativas] FOREIGN KEY([id_actividad_operativa])
+REFERENCES [dbo].[PNVR_PNVRActividades_Operativas] ([id_actividad_operativa])
 GO
-ALTER TABLE [dbo].[Documento] CHECK CONSTRAINT [chk_formato]
+
+ALTER TABLE [dbo].[PNVR_PNVRFinanzas] CHECK CONSTRAINT [FK_Finanzas_Actividades_Operativas]
 GO
-ALTER TABLE [dbo].[Persona]  WITH CHECK ADD CHECK  (([beneficiario]='NO' OR [beneficiario]='SÍ'))
+ALTER TABLE [dbo].[PNVR_PNVRFinanzas]  WITH CHECK ADD  CONSTRAINT [FK_Finanzas_convenios] FOREIGN KEY([id_convenio])
+REFERENCES [dbo].[PNVR_PNVRconvenios] ([id_convenio])
 GO
-ALTER TABLE [dbo].[Persona]  WITH CHECK ADD CHECK  (([numero_miembros]>=(1)))
+ALTER TABLE [dbo].[PNVR_PNVRFinanzas] CHECK CONSTRAINT [FK_Finanzas_convenios]
 GO
-ALTER TABLE [dbo].[Persona]  WITH CHECK ADD CHECK  (([sexo]='FEMENINO' OR [sexo]='MASCULINO'))
+ALTER TABLE [dbo].[PNVR_PNVRFletes]  WITH CHECK ADD FOREIGN KEY(id_convenio)
+REFERENCES [dbo].[PNVR_PNVRConvenios] (id_convenio)
 GO
-ALTER TABLE [dbo].[Validacion_Bases]  WITH CHECK ADD  CONSTRAINT [chk_estado] CHECK  (([estado]='Rechazado' OR [estado]='Aprobado' OR [estado]='Pendiente'))
+ALTER TABLE [dbo].[PNVR_PNVRInsumos]  WITH CHECK ADD FOREIGN KEY(id_convenio)
+REFERENCES [dbo].[PNVR_PNVRConvenios] (id_convenio)
 GO
-ALTER TABLE [dbo].[Validacion_Bases] CHECK CONSTRAINT [chk_estado]
+ALTER TABLE [dbo].[PNVR_PNVRitem_convocatoria]  WITH CHECK ADD FOREIGN KEY([id_convocatoria])
+REFERENCES [dbo].[PNVR_PNVRConvocatoria] ([id_convocatoria])
 GO
-ALTER TABLE [dbo].[Validacion_Bases]  WITH CHECK ADD  CONSTRAINT [chk_nivel] CHECK  (([nivel_validacion]='Representante' OR [nivel_validacion]='Monitor' OR [nivel_validacion]='Supervisor' OR [nivel_validacion]='Residente'))
+ALTER TABLE [dbo].[PNVR_PNVRitem_convocatoria]  WITH CHECK ADD FOREIGN KEY([id_unidad_medida])
+REFERENCES [dbo].[PNVR_PNVRTipo_unidad_medida] ([id_tipo_unidad_medida])
 GO
-ALTER TABLE [dbo].[Validacion_Bases] CHECK CONSTRAINT [chk_nivel]
+ALTER TABLE [dbo].[PNVR_PNVRItemsPresupuesto]  WITH CHECK ADD FOREIGN KEY([CategoriaID])
+REFERENCES [dbo].[PNVR_PNVRCategoriasPresupuesto] ([CategoriaID])
+GO
+ALTER TABLE [dbo].[PNVR_PNVRItemsPresupuesto]  WITH CHECK ADD FOREIGN KEY(id_convenio)
+REFERENCES [dbo].[PNVR_PNVRConvenios] (id_convenio)
+GO
+ALTER TABLE [dbo].[PNVR_PNVRManoObra]  WITH CHECK ADD FOREIGN KEY(id_convenio)
+REFERENCES [dbo].[PNVR_PNVRConvenios] (id_convenio)
+GO
+ALTER TABLE [dbo].[PNVR_PNVROferta]  WITH CHECK ADD FOREIGN KEY([id_convocatoria])
+REFERENCES [dbo].[PNVR_PNVRConvocatoria] ([id_convocatoria])
+GO
+ALTER TABLE [dbo].[PNVR_PNVROferta]  WITH CHECK ADD FOREIGN KEY([id_postor])
+REFERENCES [dbo].[PNVR_PNVRPostor] ([id_postor])
+GO
+
+
+ALTER TABLE [dbo].[PNVR_PNVRPersona]  WITH CHECK ADD  CONSTRAINT [FK_Persona_Vivienda] FOREIGN KEY([id_vivienda])
+REFERENCES [dbo].[PNVR_PNVRVivienda] ([id_vivienda])
+GO
+ALTER TABLE [dbo].[PNVR_PNVRPersona] CHECK CONSTRAINT [FK_Persona_Vivienda]
+GO
+ALTER TABLE [dbo].[PNVR_PNVRPersonal]  WITH CHECK ADD  CONSTRAINT [FK_personal_cargo] FOREIGN KEY([id_cargo])
+REFERENCES [dbo].[PNVR_PNVRCargo] ([id_cargo])
+GO
+ALTER TABLE [dbo].[PNVR_PNVRPersonal] CHECK CONSTRAINT [FK_personal_cargo]
+GO
+ALTER TABLE [dbo].[PNVR_PNVRPersonal_Cargo]  WITH CHECK ADD FOREIGN KEY([id_cargo])
+REFERENCES [dbo].[PNVR_PNVRCargo] ([id_cargo])
+GO
+ALTER TABLE [dbo].[PNVR_PNVRPersonal_Cargo]  WITH CHECK ADD FOREIGN KEY([id_personal])
+REFERENCES [dbo].[PNVR_PNVRPersonal] ([id_personal])
+GO
+ALTER TABLE [dbo].[PNVR_PNVRProgreso]  WITH CHECK ADD  CONSTRAINT [FK_Progreso_convenios] FOREIGN KEY([id_convenio])
+REFERENCES [dbo].[PNVR_PNVRconvenios] ([id_convenio])
+GO
+ALTER TABLE [dbo].[PNVR_PNVRProgreso] CHECK CONSTRAINT [FK_Progreso_convenios]
+GO
+ALTER TABLE [dbo].[PNVR_PNVRValidacion_Bases]  WITH CHECK ADD FOREIGN KEY([id_documento])
+REFERENCES [dbo].[PNVR_PNVRDocumento] ([id_documento])
+GO
+ALTER TABLE [dbo].[PNVR_PNVRVivienda]  WITH CHECK ADD  CONSTRAINT [FK_Vivienda_convenios] FOREIGN KEY([id_convenio])
+REFERENCES [dbo].[PNVR_PNVRconvenios] ([id_convenio])
+GO
+ALTER TABLE [dbo].[PNVR_PNVRVivienda] CHECK CONSTRAINT [FK_Vivienda_convenios]
+GO
+
+
+ALTER TABLE [dbo].[PNVR_PNVRDocumento]  WITH CHECK ADD  CONSTRAINT [chk_formato] CHECK  (([formato]='xls' OR [formato]='xlsx' OR [formato]='pdf'))
+GO
+ALTER TABLE [dbo].[PNVR_PNVRDocumento] CHECK CONSTRAINT [chk_formato]
+GO
+ALTER TABLE [dbo].[PNVR_PNVRPersona]  WITH CHECK ADD CHECK  (([beneficiario]='NO' OR [beneficiario]='SÍ'))
+GO
+ALTER TABLE [dbo].[PNVR_PNVRPersona]  WITH CHECK ADD CHECK  (([numero_miembros]>=(1)))
+GO
+ALTER TABLE [dbo].[PNVR_PNVRPersona]  WITH CHECK ADD CHECK  (([sexo]='FEMENINO' OR [sexo]='MASCULINO'))
+GO
+ALTER TABLE [dbo].[PNVR_PNVRValidacion_Bases]  WITH CHECK ADD  CONSTRAINT [chk_estado] CHECK  (([estado]='Rechazado' OR [estado]='Aprobado' OR [estado]='Pendiente'))
+GO
+ALTER TABLE [dbo].[PNVR_PNVRValidacion_Bases] CHECK CONSTRAINT [chk_estado]
+GO
+ALTER TABLE [dbo].[PNVR_PNVRValidacion_Bases]  WITH CHECK ADD  CONSTRAINT [chk_nivel] CHECK  (([nivel_validacion]='Representante' OR [nivel_validacion]='Monitor' OR [nivel_validacion]='Supervisor' OR [nivel_validacion]='Residente'))
+GO
+ALTER TABLE [dbo].[PNVR_PNVRValidacion_Bases] CHECK CONSTRAINT [chk_nivel]
 GO
 
 
 
 
-ALTER TABLE [dbo].[convenios]  WITH CHECK ADD  CONSTRAINT [FK_convenios_Priorizaciones] FOREIGN KEY([id_priorizacion])
-REFERENCES [dbo].[Priorizaciones] ([id_priorizacion])
+ALTER TABLE [dbo].[PNVR_PNVRconvenios]  WITH CHECK ADD  CONSTRAINT [FK_convenios_Priorizaciones] FOREIGN KEY([id_priorizacion])
+REFERENCES [dbo].[PNVR_PNVRPriorizaciones] ([id_priorizacion])
 GO
 
-ALTER TABLE [dbo].[convenios] CHECK CONSTRAINT [FK_convenios_Priorizaciones]
-GO
-
-
-ALTER TABLE [dbo].[Autorizaciones]  WITH CHECK ADD FOREIGN KEY([ExpedienteID])
-REFERENCES [dbo].[ExpedienteTecnico] ([ExpedienteID])
-GO
-
-ALTER TABLE [dbo].[ExpedienteTecnico]  WITH CHECK ADD FOREIGN KEY([Id_convenio])
-REFERENCES [dbo].[Convenios] ([Id_Convenio])
+ALTER TABLE [dbo].[PNVR_PNVRconvenios] CHECK CONSTRAINT [FK_convenios_Priorizaciones]
 GO
 
 
-ALTER TABLE [dbo].[convenios]  WITH CHECK ADD  CONSTRAINT [FK_convenios_Departamento] FOREIGN KEY([id_Departamento])
-REFERENCES [dbo].[Departamento] ([id_departamento])
+ALTER TABLE [dbo].[PNVR_PNVRAutorizaciones]  WITH CHECK ADD FOREIGN KEY([ExpedienteID])
+REFERENCES [dbo].[PNVR_PNVRExpedienteTecnico] ([ExpedienteID])
+GO
+
+ALTER TABLE [dbo].[PNVR_PNVRExpedienteTecnico]  WITH CHECK ADD FOREIGN KEY([Id_convenio])
+REFERENCES [dbo].[PNVR_PNVRConvenios] ([Id_Convenio])
 GO
 
 
-ALTER TABLE [dbo].[convenios]  WITH CHECK ADD  CONSTRAINT [FK_convenios_Provincia] FOREIGN KEY([id_Provincia])
-REFERENCES [dbo].[Provincia] ([id_provincia])
+ALTER TABLE [dbo].[PNVR_PNVRconvenios]  WITH CHECK ADD  CONSTRAINT [FK_convenios_Departamento] FOREIGN KEY([id_Departamento])
+REFERENCES [dbo].[PNVR_PNVRDepartamento] ([id_departamento])
 GO
 
-ALTER TABLE [dbo].[convenios]  WITH CHECK ADD  CONSTRAINT [FK_convenios_Distrito] FOREIGN KEY([id_Distrito])
-REFERENCES [dbo].[Distrito] ([id_Distrito])
+
+ALTER TABLE [dbo].[PNVR_PNVRconvenios]  WITH CHECK ADD  CONSTRAINT [FK_convenios_Provincia] FOREIGN KEY([id_Provincia])
+REFERENCES [dbo].[PNVR_PNVRProvincia] ([id_provincia])
 GO
 
-ALTER TABLE [dbo].[convenios]  WITH CHECK ADD  CONSTRAINT [FK_convenios_Localidad] FOREIGN KEY([id_Localidad])
-REFERENCES [dbo].[localidad] ([id_localidad])
+ALTER TABLE [dbo].[PNVR_PNVRconvenios]  WITH CHECK ADD  CONSTRAINT [FK_convenios_Distrito] FOREIGN KEY([id_Distrito])
+REFERENCES [dbo].[PNVR_PNVRDistrito] ([id_Distrito])
+GO
+
+ALTER TABLE [dbo].[PNVR_PNVRconvenios]  WITH CHECK ADD  CONSTRAINT [FK_convenios_Localidad] FOREIGN KEY([id_Localidad])
+REFERENCES [dbo].[PNVR_PNVRlocalidad] ([id_localidad])
 GO

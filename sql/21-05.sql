@@ -231,7 +231,7 @@ INSERT INTO Estado_Convocatoria2 (
 
 
 	
-	CREATE TABLE [PNVR].[dbo].[Auditoria_Cambios] (
+	CREATE TABLE [PNVR].[dbo].[PNVR_PNVRAuditoria_Cambios] (
     id_auditoria INT IDENTITY(1,1) PRIMARY KEY,
     tabla_afectada NVARCHAR(50),
     id_registro INT,
@@ -243,7 +243,7 @@ INSERT INTO Estado_Convocatoria2 (
 );
 
 
-	CREATE TABLE [PNVR].[dbo].[Item_Convocatoria2] (
+	CREATE TABLE [PNVR].[dbo].[PNVR_PNVRItem_Convocatoria2] (
     id_item_convocatoria INT IDENTITY(1,1) PRIMARY KEY,
     descripcion NVARCHAR(50),
     id_tipo_item_convocatoria int,
@@ -257,13 +257,13 @@ FOREIGN KEY (id_tipo_Unidad_Medida) REFERENCES Tipo_Unidad_Medida(id_tipo_Unidad
 FOREIGN KEY (id_tipo_item_convocatoria) REFERENCES Tipo_Item_convocatoria(id_tipo_item_convoctoria),
 );
 
-	CREATE TABLE [PNVR].[dbo].[Tipo_Item_convocatoria] (
+	CREATE TABLE [PNVR].[dbo].[PNVR_PNVRTipo_Item_convocatoria] (
     id_tipo_item_convocatoria INT IDENTITY(1,1) PRIMARY KEY,
     descripcion NVARCHAR(50),
 	estado int
 );
 
-CREATE TABLE [PNVR].[dbo].[Tipo_Unidad_Medida] (
+CREATE TABLE [PNVR].[dbo].[PNVR_PNVRTipo_Unidad_Medida] (
     id_tipo_Unidad_Medida INT IDENTITY(1,1) PRIMARY KEY,
     descripcion NVARCHAR(50),
 );
@@ -841,11 +841,11 @@ SELECT Codigo, Descripcion, Unidad, Cantidad, PrecioUnitario, CostoTotal, 'Freig
 FROM Fletes WHERE ConvenioId = 1;
 
 
-SELECT RutaArchivo FROM [PNVR].[dbo].[ExpedienteTecnico]
+SELECT RutaArchivo FROM [PNVR].[dbo].[PNVR_PNVRExpedienteTecnico]
 WHERE ConvenioId = 1 AND Categoria = '3. METRADOS Y PRESUPUESTO' AND TipoArchivo = 'Excel';
 
 
-UPDATE [PNVR].[dbo].[ExpedienteTecnico]
+UPDATE [PNVR].[dbo].[PNVR_PNVRExpedienteTecnico]
 SET RutaArchivo = '/Expedientes/3__METRADOS_Y_PRESUPUESTO/NE_007.xlsx'
 WHERE ConvenioId = 1 AND Categoria = '3. METRADOS Y PRESUPUESTO';
 
@@ -855,7 +855,7 @@ select * from ExpedienteTecnico
 
 
 ```sql
-UPDATE [PNVR].[dbo].[ExpedienteTecnico]
+UPDATE [PNVR].[dbo].[PNVR_PNVRExpedienteTecnico]
 SET RutaArchivo = '/Expedientes/3__METRADOS_Y_PRESUPUESTO/NE_007.xlsx'
 WHERE ConvenioId = 1
   AND Categoria = '3. METRADOS Y PRESUPUESTO'
@@ -1218,7 +1218,7 @@ INSERT INTO Persona_Parentesco (codigo_parentesco, descripcion) VALUES
 ('00230211', 'OTROS NO PARIENTES'),
 ('00230200', 'SIN DATO');
 
-INSERT INTO [dbo].[Vivienda]([cod]           ,[cuv]           ,[id_convenio]           ,[id_ubicacion]           ,[id_estado]
+INSERT INTO [dbo].[PNVR_PNVRVivienda]([cod]           ,[cuv]           ,[id_convenio]           ,[id_ubicacion]           ,[id_estado]
            ,[id_sub_estado]           ,[fecha_inicio]           ,[fecha_termino]           ,[costo_total]
 		   ,[observaciones])
      VALUES
@@ -1342,12 +1342,12 @@ UPDATE PersonaL set ID_AREA = 9
 	ALTER TABLE persona
 	add  Discapacidad Varchar(2);
 
-	ALTER TABLE [dbo].[Persona]
+	ALTER TABLE [dbo].[PNVR_PNVRPersona]
 	ADD [id_tipo_discapacidad] [int] NULL;
 	--
 
 
-	CREATE TABLE [dbo].[Tipo_Discapacidad](
+	CREATE TABLE [dbo].[PNVR_PNVRTipo_Discapacidad](
     [id_tipo_discapacidad] [int] IDENTITY(1,1) NOT NULL,
     [nombre_discapacidad] [varchar](50) NOT NULL,
     [descripcion] [varchar](200) NULL,
@@ -1356,7 +1356,7 @@ UPDATE PersonaL set ID_AREA = 9
 );
 
 
-INSERT INTO [dbo].[Tipo_Discapacidad] ([nombre_discapacidad], [descripcion], [activo])
+INSERT INTO [dbo].[PNVR_PNVRTipo_Discapacidad] ([nombre_discapacidad], [descripcion], [activo])
 VALUES 
     ('Visual', 'Discapacidad relacionada con la pérdida total o parcial de la visión.', 1),
     ('Auditiva', 'Discapacidad relacionada con la pérdida total o parcial de la audición.', 1),
@@ -1365,13 +1365,13 @@ VALUES
     ('Psicosocial', 'Discapacidad relacionada con trastornos mentales o emocionales.', 1);
 
 
-	ALTER TABLE [dbo].[Persona]
+	ALTER TABLE [dbo].[PNVR_PNVRPersona]
 ADD CONSTRAINT [FK_Persona_Tipo_Discapacidad] 
 FOREIGN KEY ([id_tipo_discapacidad]) 
-REFERENCES [dbo].[Tipo_Discapacidad] ([id_tipo_discapacidad]);
+REFERENCES [dbo].[PNVR_PNVRTipo_Discapacidad] ([id_tipo_discapacidad]);
 
 	--
-	INSERT INTO [dbo].[Vivienda] (
+	INSERT INTO [dbo].[PNVR_PNVRVivienda] (
     [cod], [cuv], [id_convenio], [id_estado], [id_sub_estado], 
     [fecha_inicio], [fecha_termino], [costo_total], [observaciones], 
     [Ubigeo_Vivienda], [id_Departamento], [id_Provincia], [id_Distrito]
@@ -1397,13 +1397,13 @@ select * from db_accessadmin;
 
 truncate table persona
 SELECT * FROM PERSONA
-ALTER TABLE [dbo].[Persona]
+ALTER TABLE [dbo].[PNVR_PNVRPersona]
 DROP CONSTRAINT CK__Persona__benefic__58D1301D;
 
 
 
 --
-INSERT INTO [dbo].[Persona] (
+INSERT INTO [dbo].[PNVR_PNVRPersona] (
     [id_vivienda], [nombre], [apellido_paterno], [apellido_materno], [dni], [sexo], 
     [fecha_nacimiento], [id_Persona_Parentesco], [Vigencia_Hogar], [Discapacidad], 
     [Lengua_Originaria], [id_tipo_discapacidad]
@@ -1414,7 +1414,7 @@ VALUES
     (1,    'Luis',   'Torres',   'Vega',     '99887766', 'Masculino', '1980-12-01', 3,    'Sí', 'No', 'Español', NULL); -- 12 values
 
 	--
-	INSERT INTO [dbo].[Persona] (
+	INSERT INTO [dbo].[PNVR_PNVRPersona] (
     [id_vivienda], [nombre], [apellido_paterno], [apellido_materno], [dni], [sexo], 
     [fecha_nacimiento], [id_Persona_Parentesco], [Vigencia_Hogar], [Discapacidad], 
     [Lengua_Originaria], [id_tipo_discapacidad]
@@ -1431,7 +1431,7 @@ VALUES
 	SELECT * FROM Tipo_Fenomeno,
 	SELECT * FROM LOCALIDAD
 	---
-	INSERT INTO [dbo].[Convenios] (
+	INSERT INTO [dbo].[PNVR_PNVRConvenios] (
     [cod_ugt], [cod_Convenio], [nombre_Convenio], [id_grupo], [id_tipo_intervencion], 
     [id_programa_presupuestal], [id_tipo_fenomeno], [id_tipo_material], [id_estado], 
     [id_sub_estado], [id_priorizacion], [id_tipo_meta], [id_Localidad], [id_Distrito], 
@@ -1490,7 +1490,7 @@ VALUES (
     '2025-01-02 15:30:00'  -- ActualizadoEn
 );
 
-ALTER TABLE [dbo].[Persona]
+ALTER TABLE [dbo].[PNVR_PNVRPersona]
 DROP CONSTRAINT [UQ_Persona_dni];
 select * from persona
 
@@ -1499,7 +1499,7 @@ update persona set vigencia_hogar = 'No' where id_persona=2
 update persona set id_persona_parentesco = 1 where id_persona=4
 
 
-CREATE TABLE [dbo].[Comunidades_Nativas](
+CREATE TABLE [dbo].[PNVR_PNVRComunidades_Nativas](
     [id_comunidad] [int] IDENTITY(1,1) NOT NULL,
     [nombre_comunidad] [varchar](100) NOT NULL,
     [grupo_etnico] [varchar](50) NULL,
@@ -1516,7 +1516,7 @@ CREATE TABLE [dbo].[Comunidades_Nativas](
     CONSTRAINT [PK_Comunidades_Nativas] PRIMARY KEY CLUSTERED ([id_comunidad] ASC)
 );
 
-INSERT INTO [dbo].[Comunidades_Nativas] (
+INSERT INTO [dbo].[PNVR_PNVRComunidades_Nativas] (
     [nombre_comunidad], [grupo_etnico], [id_Departamento], [id_Provincia], [id_Distrito], 
     [ubigeo], [lengua_originaria], [titulo_propiedad], [fecha_titulacion], [activo], 
     [fecha_creacion], [fecha_actualizacion]
@@ -1666,7 +1666,7 @@ INSERT INTO Persona_Parentesco (codigo_parentesco, descripcion) VALUES
 ('00230211', 'OTROS NO PARIENTES'),
 ('00230200', 'SIN DATO');
 
-INSERT INTO [dbo].[Vivienda]([cod]           ,[cuv]           ,[id_convenio]           ,[id_ubicacion]           ,[id_estado]
+INSERT INTO [dbo].[PNVR_PNVRVivienda]([cod]           ,[cuv]           ,[id_convenio]           ,[id_ubicacion]           ,[id_estado]
            ,[id_sub_estado]           ,[fecha_inicio]           ,[fecha_termino]           ,[costo_total]
 		   ,[observaciones])
      VALUES
@@ -1812,7 +1812,7 @@ alter table convenios
 	ALTER TABLE persona
 	add  Discapacidad Varchar(2);
 
-	ALTER TABLE [dbo].[Persona]
+	ALTER TABLE [dbo].[PNVR_PNVRPersona]
 	ADD [id_tipo_discapacidad] [int] NULL;
 	--
 
@@ -1870,7 +1870,7 @@ alter table convenios
 	
 
 
-	CREATE TABLE [dbo].[Tipo_Discapacidad](
+	CREATE TABLE [dbo].[PNVR_PNVRTipo_Discapacidad](
     [id_tipo_discapacidad] [int] IDENTITY(1,1) NOT NULL,
     [nombre_discapacidad] [varchar](50) NOT NULL,
     [descripcion] [varchar](200) NULL,
@@ -1879,7 +1879,7 @@ alter table convenios
 );
 
 
-INSERT INTO [dbo].[Tipo_Discapacidad] ([nombre_discapacidad], [descripcion], [activo])
+INSERT INTO [dbo].[PNVR_PNVRTipo_Discapacidad] ([nombre_discapacidad], [descripcion], [activo])
 VALUES 
     ('Visual', 'Discapacidad relacionada con la pérdida total o parcial de la visión.', 1),
     ('Auditiva', 'Discapacidad relacionada con la pérdida total o parcial de la audición.', 1),
@@ -1888,13 +1888,13 @@ VALUES
     ('Psicosocial', 'Discapacidad relacionada con trastornos mentales o emocionales.', 1);
 
 
-	ALTER TABLE [dbo].[Persona]
+	ALTER TABLE [dbo].[PNVR_PNVRPersona]
 ADD CONSTRAINT [FK_Persona_Tipo_Discapacidad] 
 FOREIGN KEY ([id_tipo_discapacidad]) 
-REFERENCES [dbo].[Tipo_Discapacidad] ([id_tipo_discapacidad]);
+REFERENCES [dbo].[PNVR_PNVRTipo_Discapacidad] ([id_tipo_discapacidad]);
 
 	--
-	INSERT INTO [dbo].[Vivienda] (
+	INSERT INTO [dbo].[PNVR_PNVRVivienda] (
     [cod], [cuv], [id_convenio], [id_estado], [id_sub_estado], 
     [fecha_inicio], [fecha_termino], [costo_total], [observaciones], 
     [Ubigeo_Vivienda], [id_Departamento], [id_Provincia], [id_Distrito]
@@ -1920,13 +1920,13 @@ select * from db_accessadmin;
 
 truncate table persona
 SELECT * FROM PERSONA
-ALTER TABLE [dbo].[Persona]
+ALTER TABLE [dbo].[PNVR_PNVRPersona]
 DROP CONSTRAINT CK__Persona__benefic__58D1301D;
 
 select * from tipos_meta
 
 --
-INSERT INTO [dbo].[Persona] (
+INSERT INTO [dbo].[PNVR_PNVRPersona] (
     [id_vivienda], [nombre], [apellido_paterno], [apellido_materno], [dni], [sexo], 
     [fecha_nacimiento], [id_Persona_Parentesco], [Vigencia_Hogar], [Discapacidad], 
     [Lengua_Originaria], [id_tipo_discapacidad]
@@ -1937,7 +1937,7 @@ VALUES
     (1,    'Luis',   'Torres',   'Vega',     '99887766', 'Masculino', '1980-12-01', 3,    'Sí', 'No', 'Español', NULL); -- 12 values
 
 	--
-	INSERT INTO [dbo].[Persona] (
+	INSERT INTO [dbo].[PNVR_PNVRPersona] (
     [id_vivienda], [nombre], [apellido_paterno], [apellido_materno], [dni], [sexo], 
     [fecha_nacimiento], [id_Persona_Parentesco], [Vigencia_Hogar], [Discapacidad], 
     [Lengua_Originaria], [id_tipo_discapacidad]
@@ -1954,7 +1954,7 @@ VALUES
 	SELECT * FROM Tipo_Fenomeno,
 	SELECT * FROM LOCALIDAD
 	---
-	INSERT INTO [dbo].[Convenios] (
+	INSERT INTO [dbo].[PNVR_PNVRConvenios] (
     [cod_ugt], [cod_Convenio], [nombre_Convenio], [id_grupo], [id_tipo_intervencion], 
     [id_programa_presupuestal], [id_tipo_fenomeno], [id_tipo_material], [id_estado], 
     [id_sub_estado], [id_priorizacion], [id_tipo_meta], [id_Localidad], [id_Distrito], 
@@ -2013,7 +2013,7 @@ VALUES (
     '2025-01-02 15:30:00'  -- ActualizadoEn
 );
 
-ALTER TABLE [dbo].[Persona]
+ALTER TABLE [dbo].[PNVR_PNVRPersona]
 DROP CONSTRAINT [UQ_Persona_dni];
 select * from persona
 
@@ -2022,7 +2022,7 @@ update persona set vigencia_hogar = 'NO' where id_persona=2
 update persona set id_persona_parentesco = 1 where id_persona=4
 
 
-CREATE TABLE [dbo].[Comunidades_Nativas](
+CREATE TABLE [dbo].[PNVR_PNVRComunidades_Nativas](
     [id_comunidad] [int] IDENTITY(1,1) NOT NULL,
     [nombre_comunidad] [varchar](100) NOT NULL,
     [grupo_etnico] [varchar](50) NULL,
@@ -2039,7 +2039,7 @@ CREATE TABLE [dbo].[Comunidades_Nativas](
     CONSTRAINT [PK_Comunidades_Nativas] PRIMARY KEY CLUSTERED ([id_comunidad] ASC)
 );
 
-INSERT INTO [dbo].[Comunidades_Nativas] (
+INSERT INTO [dbo].[PNVR_PNVRComunidades_Nativas] (
     [nombre_comunidad], [grupo_etnico], [id_Departamento], [id_Provincia], [id_Distrito], 
     [ubigeo], [lengua_originaria], [titulo_propiedad], [fecha_titulacion], [activo], 
     [fecha_creacion], [fecha_actualizacion]

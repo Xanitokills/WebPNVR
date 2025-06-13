@@ -56,7 +56,7 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
       .input("id", sql.Int, id)
       .input("descripcion", sql.NVarChar(255), body.descripcion)
       .query(
-        "UPDATE [dbo].[Tipos_Meta] SET descripcion = @descripcion  WHERE id_Tipo_Meta = @id"
+        "UPDATE [dbo].[PNVR_Tipos_Meta] SET descripcion = @descripcion  WHERE id_Tipo_Meta = @id"
  
       );
 
@@ -90,7 +90,7 @@ export async function DELETE(request: NextRequest, context: { params: Promise<{ 
     const result = await pool
       .request()
       .input("id", sql.Int, id)
-      .query("DELETE FROM [dbo].[Tipos_Meta] WHERE id_Tipo_Meta = @id");
+      .query("DELETE FROM [dbo].[PNVR_Tipos_Meta] WHERE id_Tipo_Meta = @id");
 
     if (result.rowsAffected[0] === 0) {
       return NextResponse.json({ error: "Tipo de meta no encontrado" }, { status: 404 });
