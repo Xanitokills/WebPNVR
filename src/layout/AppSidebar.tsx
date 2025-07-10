@@ -4,9 +4,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "../context/SidebarContext";
-import { ChevronDownIcon, TableIcon, HorizontaLDots, BoltIcon, DocsIcon, ChevronLeftIcon, CopyIcon } from "../icons/index";
+import { ChevronDownIcon, TableIcon, HorizontaLDots, DocsIcon, CopyIcon } from "../icons/index";
 import SidebarWidget from "./SidebarWidget";
-import { FaPlusSquare, FaTools } from "react-icons/fa";
+import { FaTools } from "react-icons/fa";
 
 type NavItem = {
   name: string;
@@ -58,6 +58,7 @@ const navItems: NavItem[] = [
           { name: "Ver Expediente", path: "/UGT/expediente/ver-expediente", pro: false },
           { name: "Administrar Parámetros", path: "/UGT/expediente/administrar-parametros", pro: false },
           { name: "Presupuesto", path: "/UGT/expediente/presupuesto", pro: false },
+          { name: "Reportes y Automatización", path: "/UGT/Herramientas_IA", pro: false },
         ],
       },
         {
@@ -68,6 +69,7 @@ const navItems: NavItem[] = [
           { name: "Ver Expediente", path: "/UGT/expediente/ver-expediente", pro: false },
           { name: "Administrar Parámetros", path: "/UGT/expediente/administrar-parametros", pro: false },
           { name: "Presupuesto", path: "/UGT/expediente/presupuesto", pro: false },
+            { name: "Inspeccion de Terreno", path: "/UGT/expediente/inspeccion-terreno", pro: false },
         ],
       },
 

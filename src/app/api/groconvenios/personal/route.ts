@@ -66,8 +66,8 @@ export async function GET() {
     const resultado = await pool.request().query(`
       SELECT p.id_personal, c.id_cargo, c.descripcion, p.nombre, p.Apellido_Paterno, 
              p.Apellido_Materno, p.dni, p.celular, p.correo, p.profesion 
-      FROM Personal p 
-      LEFT JOIN Cargo c ON p.id_cargo = c.id_cargo
+      FROM PNVR_Personal p 
+      LEFT JOIN PNVR_Cargo c ON p.id_cargo = c.id_cargo
     `);
     return NextResponse.json(resultado.recordset as Personal[]);
   } catch (error) {

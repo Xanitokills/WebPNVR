@@ -41,7 +41,7 @@ export async function GET() {
     const pool = await sql.connect(configuracion);
     const result = await pool
       .request()
-      .query("SELECT id_cargo, descripcion FROM Cargo");
+      .query("SELECT id_cargo, descripcion FROM PNVR_Cargo");
     return NextResponse.json(result.recordset);
   } catch (error: any) {
     console.error("Error en la consulta GET:", error);
